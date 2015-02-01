@@ -1,4 +1,9 @@
+package uk.ac.cam.cl.retailcategorymapper.entities;
 
-public interface Response {
-	
+public abstract class Response {
+    private Taxonomy taxonomy;
+
+    public Taxonomy getTaxonomy() {
+        return taxonomy;
+    }
 }
