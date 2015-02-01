@@ -1,8 +1,10 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
-import java.util.Collections;
 import java.util.Map;
 
+/**
+ * An immutable class to store a details about a product.
+ */
 public class Product {
     private String id;
     private String name;
@@ -41,7 +43,7 @@ public class Product {
         return originalCategory;
     }
 
-    public Map<String, String> getAttributes() {
-        return Collections.unmodifiableMap(attributes);
+    public String getAttribute(String key) {
+        return attributes.get(key);
     }
 }

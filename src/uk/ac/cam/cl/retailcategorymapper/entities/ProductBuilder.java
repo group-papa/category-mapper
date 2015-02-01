@@ -3,13 +3,16 @@ package uk.ac.cam.cl.retailcategorymapper.entities;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A builder class which produces an immutable Product.
+ */
 public class ProductBuilder {
     private String id;
-    private String name;
+    private String name = "";
     private String description = "";
     private Integer price = null;
     private Category originalCategory;
-    private Map<String, String> attributes = new HashMap<String, String>();
+    private Map<String, String> attributes = new HashMap<>();
 
     public ProductBuilder setId(String id) {
         this.id = id;
