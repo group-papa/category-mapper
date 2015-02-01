@@ -1,4 +1,10 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
-public class TrainResponse implements Response {
+/**
+ * An class to store a response after training the system.
+ */
+public class TrainResponse extends Response {
+    public TrainResponse(Taxonomy taxonomy) {
+        super(taxonomy);
+    }
 }

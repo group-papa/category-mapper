@@ -1,16 +1,23 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class TrainRequest implements Request {
+/**
+ * An class to store a request to train the system.
+ */
+public class TrainRequest extends Request {
     private boolean addToManualMappings;
     private boolean addToTrainingSet;
     private List<Mapping> mappings;
 
-    public TrainRequest(boolean addToManualMappings, boolean addToTrainingSet, List<Mapping> mappings) {
+    public TrainRequest(Taxonomy taxonomy, boolean addToManualMappings,
+                        boolean addToTrainingSet, List<Mapping> mappings) {
+        super(taxonomy);
         this.addToManualMappings = addToManualMappings;
         this.addToTrainingSet = addToTrainingSet;
-        this.mappings = mappings;
+        this.mappings = new ArrayList<>(mappings);
     }
 
     public boolean getAddToManualMappings() {
@@ -22,6 +29,6 @@ public class TrainRequest implements Request {
     }
 
     public List<Mapping> getMappings() {
-        return this.mappings;
+        return Collections.unmodifiableList(this.mappings);
     }
 }

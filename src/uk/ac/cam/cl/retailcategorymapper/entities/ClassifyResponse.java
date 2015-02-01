@@ -1,15 +1,21 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class ClassifyResponse implements Response {
-    private List<Mapping> mappingsMade;
+/**
+ * An class to store a response after requesting classifications.
+ */
+public class ClassifyResponse extends Response {
+    private List<Mapping> products;
 
-    public ClassifyResponse(List<Mapping> mappingsMade) {
-        this.mappingsMade = mappingsMade;
+    public ClassifyResponse(Taxonomy taxonomy, List<Mapping> products) {
+        super(taxonomy);
+        this.products = new ArrayList<>(products);
     }
 
-    public List<Mapping> getMappingsMade() {
-        return this.mappingsMade();
+    public List<Mapping> getProducts() {
+        return Collections.unmodifiableList(this.products);
     }
 }
