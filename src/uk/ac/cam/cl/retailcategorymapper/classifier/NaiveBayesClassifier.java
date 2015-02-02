@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * A Naive Bayes classifier implementation.
+ */
 public class NaiveBayesClassifier<F, C> implements Classifier {
     private Set<F> featureSet;
     private Set<C> categorySet;
