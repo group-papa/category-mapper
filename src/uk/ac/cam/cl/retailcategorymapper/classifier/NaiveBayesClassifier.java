@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-//comment to test git (by Charlie)
 
 public class NaiveBayesClassifier<F, C> {
 	
