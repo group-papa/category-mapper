@@ -71,14 +71,14 @@ public class NaiveBayesClassifier<F, C> implements Classifier {
 		}
 	}
 	
-	public float getFeatureProbabilityGivenCategory(F feature, C category) {
+	public double getFeatureProbabilityGivenCategory(F feature, C category) {
 		//have never seen this category
 		if (!this.categoryCounts.containsKey(category)) {
 			return 0;
 		}
 		//have seen this category: (# times seen feature in category)/(# times this category has come up = #total features in category)
 		else {
-			(float)this.getFeatureCountInCategory(feature, category) / (float)this.categoryCounts.get(category);
+			(double)this.getFeatureCountInCategory(feature, category) / (double)this.categoryCounts.get(category);
 		}
 	}
 	
@@ -95,14 +95,14 @@ public class NaiveBayesClassifier<F, C> implements Classifier {
 		return total;
 	}
 	
-	public float getCategoryProbability(C category) {
+	public double getCategoryProbability(C category) {
 		if (!this.categorySet.contains(category)) {
 			return 0;
 		}
 		else {
 			int timesSeen = this.categoryCounts.get(category);
 			int totalTimesAnyCategorySeen = this.getTotalCategoriesSeen();
-			return float(timesSeen) / ((float)totalTimesAnyCategorySeen);
+			return double(timesSeen) / ((double)totalTimesAnyCategorySeen);
 		}
 	}
 	
