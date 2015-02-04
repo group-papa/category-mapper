@@ -3,7 +3,7 @@ package uk.ac.cam.cl.retailcategorymapper.entities;
 import java.util.List;
 
 /**
- * An immutable class to store a details about a taxonomy.
+ * An immutable class to store details about a taxonomy.
  */
 public class Taxonomy {
     private String id;

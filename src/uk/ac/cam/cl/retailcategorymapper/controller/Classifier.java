@@ -9,16 +9,8 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
  */
 public interface Classifier {
 	
-	public void trainWithBagOfWords(Taxonomy taxonomy, Product product);
+	public Mapping classify(Taxonomy taxonomy, Product product);
 	
-	public void trainWithWeights(Taxonomy taxonomy, Product product, double originalCategoryWeight,
-    		double nameWeight, double descriptionWeight, double priceWeight,
-    		double destinationCategoryWeight);
-	
-    public Mapping classifyWithBagOfWords(Taxonomy taxonomy, Product product);
-    
-    public Mapping classifyWithWeights(Taxonomy taxonomy, Product product, double originalCategoryWeight,
-    		double nameWeight, double descriptionWeight, double priceWeight);
 }
 
 

@@ -50,7 +50,7 @@ public class Product {
         return originalCategory;
     }
     
-    public Map<String, String> getAttributes() {
+    public Map<String, String> getAttributesMap() {
     	return attributes;
     }
 
