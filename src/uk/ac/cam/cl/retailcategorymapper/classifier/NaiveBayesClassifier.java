@@ -170,9 +170,90 @@ public class NaiveBayesClassifier<F, C> implements Classifier {
 		}
 	}
 	
+	/**
+	 * Convert all details that a product object holds into separate features if not null
+	 * or equal to the empty value as described in the product constructor javadoc.
+	 * 
+	 * Categories are treated as "bag of words" and the various levels of a category are not
+	 * taken into consideration when mapping to features.
+	 */
+	public Set<Feature> changeProductToFeature(Product product) {
+		
+		Set<Feature> createdFeatures = new HashSet<Feature>();
+		
+		String id = product.getId();
+		if ((id != null) || !(id.equals(""))) {
+			FeatureType ft = FeatureType.ID;
+			Feature idFeature = new Feature(ft, id);
+			createdFeatures.add(idFeature);
+		}
+		
+		String name = product.getName();
+		if ((name != null) || !(name.equals(""))) {
+			FeatureType ft = FeatureType.NAME;
+			Feature nameFeature = new Feature(ft, name);
+			createdFeatures.add(nameFeature);
+		}
+		
+		String description = product.getDescription();
+		if ((description != null) || !(description.equals(""))) {
+			FeatureType ft = FeatureType.DESCRIPTION;
+			Feature descFeature = new Feature(ft, description);
+			createdFeatures.add(descFeature);
+		}
+		
+		Integer priceInteger = product.getPrice();
+		if ((priceInteger != null) || (priceInteger.intValue() != -1)) {
+			String price = Integer.toString(product.getPrice());
+			FeatureType ft = FeatureType.PRICE;
+			Feature priceFeature = new Feature(ft, price);
+			createdFeatures.add(priceFeature);
+		}
+		
+		Category originalCategory = product.getOriginalCategory();
+		String[] partsArray = originalCategory.getAllParts();
+		if ((!partsArray == null) || (!partsArray.length == 0)) {
+			FeatureType ft = FeatureType.ORIGINALCATEGORY;
+			for (int i=0; i < partsArray.length; i++) {
+				String categoryPart = partsArray[i];
+				Feature cpFeature = new Feature(ft, categoryPart);
+				createdFeatures.add(cpFeature);
+			}
+		}
+		
+		
+		Map<String, String> attributes = product.getAttributes();
+		
+		
+	}
+	
+	/**
+	 * Update the sets and maps held by the classifier which will be used for training
+	 */
+	@Override
+	public void trainWithBagOfWords(Taxonomy taxonomy, Product product) {
+		
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public void trainWithWeights(Taxonomy taxonomy, Product product, double originalCategoryWeight,
+    		double nameWeight, double descriptionWeight, double priceWeight,
+    		double destinationCategoryWeight) {
+		
+		throw new UnsupportedOperationException();
+		
+	}
+	
 
 	@Override
-	public Mapping classify(Taxonomy taxonomy, Product product) {
+	public Mapping classifyWithBagOfWords(Taxonomy taxonomy, Product product) {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public Mapping classifyWithWeights(Taxonomy taxonomy, Product product, double originalCategoryWeight,
+    		double nameWeight, double descriptionWeight, double priceWeight) {
 		throw new UnsupportedOperationException();
 	}
 }

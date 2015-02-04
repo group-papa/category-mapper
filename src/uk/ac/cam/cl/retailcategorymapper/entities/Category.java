@@ -8,7 +8,10 @@ import java.util.Arrays;
 public class Category {
     private String[] parts;
     private Taxonomy taxonomy;
-
+    
+    /**
+     * this.parts should not contain any null elements.
+     */
     protected Category(String[] parts, Taxonomy taxonomy) {
         this.parts = Arrays.copyOf(parts, parts.length);
         this.taxonomy = taxonomy;
@@ -18,7 +21,7 @@ public class Category {
         return parts[n];
     }
 
-    public String[] getAll() {
+    public String[] getAllParts() {
         return Arrays.copyOf(parts, parts.length);
     }
 
