@@ -30,6 +30,43 @@ public class Category {
     }
 
     public String toString() {
-        throw new UnsupportedOperationException();
+    	if(parts.length==0){
+    		return "the empty category";
+    	}
+    	String string = parts[0];
+    	for(int i=1;i<parts.length;i++){
+    		string = string.concat(" > "+parts[i]);
+    	}
+    	return string;
     }
+    
+    @Override
+    public boolean equals(Object o){    	
+    	if(o instanceof Category){    		
+    		Category c = (Category) o;    		
+    		if(c.parts.length==parts.length){
+    			for(int i=0;i<parts.length;i++){
+    				if(!parts[i].equals(c.parts[i])){
+    					return false;
+    				}
+    			}
+    			if((taxonomy==null)&&(c.taxonomy==null)){
+    				return true;
+    			}
+    			if((taxonomy==null)||(c.taxonomy==null)){
+    				return false;
+    			}    			
+    			return taxonomy.equals(c.taxonomy);
+    			//it would be possible to merge the two categories at this point to save RAM 
+    			//as its immutable but this is a nasty optimisation
+    		}    		
+    	}    	
+    	return false;
+    }
+    
+    @Override
+    public int hashCode(){
+    	return parts.hashCode()+taxonomy.hashCode();
+    }
+    
 }

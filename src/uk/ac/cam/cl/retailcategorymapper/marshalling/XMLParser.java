@@ -10,6 +10,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import uk.ac.cam.cl.retailcategorymapper.entities.CategoryBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.ProductBuilder;
 
@@ -33,17 +34,18 @@ public class XMLParser {
 	 * 
 	 * The XML format descriptor takes the form of lines with a single ':'
 	 * separating what we call the field internally from what it is called in the
-	 * XML file ie "our name:XML field" . so an example file is
+	 * XML file ie "our name:XML field;" . so an example file is
 	 *
 	 * XMLdescritor.txt
 	 * 
-	 * product:product
-   * price:productPrice
-   * id:productSku
-   * name:productName
-   * description:productDescription
-   * category:none
-   * attributes:none
+	 * product:product;
+   * price:productPrice;
+   * id:productSku;
+   * name:productName;
+   * description:productDescription;
+   * category1:none;
+   * attributes:none;
+   * category_split: > ;
 	 * 
 	 * all 7 of these fields must be provided - none after the colon indicated 
 	 * we don't what that field processed
@@ -115,6 +117,12 @@ public class XMLParser {
 			String s = descriptorReader.readLine();
 			while (s != null) {
 
+				if(!s.endsWith(";")){
+					descriptorReader.close();
+					throw new RuntimeException("malformed XMLdescriptor file in XML parser - did you forget a ;");
+				}				
+				s = s.substring(0,s.length()-1);
+				
 				String[] t = s.split(":");
 
 				if (t.length != 2) {
@@ -156,9 +164,14 @@ public class XMLParser {
 			productBuild.setDescription(element.getElementsByTagName(descriptorTags.get("description")).item(0).getTextContent());			
 		}
 							
-		if(!descriptorTags.get("category").equals("none")){
-			throw new RuntimeException("attempt to use read category data - currently unimplemented in XML Parser");
-			//TODO implement		
+		if(descriptorTags.get("category1")!="none"){
+			String catPath = element.getElementsByTagName(descriptorTags.get("category1")).item(0).getTextContent();	
+			String[] asList = catPath.split(descriptorTags.get("category_split"));
+			
+			CategoryBuilder catBuild = new CategoryBuilder();
+			catBuild.setParts(asList);
+			productBuild.setOriginalCategory(catBuild.createCategory());
+			
 		}
 		
 		if(!descriptorTags.get("attributes").equals("none")){
@@ -186,7 +199,7 @@ public class XMLParser {
 		if(!tagsToTest.containsKey("description")){
 			throw new RuntimeException("malformed XMLdescriptor file in XML parser - no \"description\" field");
 		}
-		if(!tagsToTest.containsKey("category")){
+		if(!tagsToTest.containsKey("category1")){
 			throw new RuntimeException("malformed XMLdescriptor file in XML parser - no \"category\" field");
 		}
 		if(!tagsToTest.containsKey("attributes")){
@@ -194,6 +207,9 @@ public class XMLParser {
 		}
 		if(!tagsToTest.containsKey("product")){
 			throw new RuntimeException("malformed XMLdescriptor file in XML parser - no \"product\" field");
+		}
+		if(!tagsToTest.containsKey("category_split")){
+			throw new RuntimeException("malformed XMLdescriptor file in XML parser - no \"category_split\" field");
 		}
 		return true;
 	}
@@ -212,9 +228,12 @@ public class XMLParser {
 			System.out.println("product ID "+p.getId());
 			System.out.println(p.getDescription());
 			System.out.println("price (GBp) "+p.getPrice());
+			System.out.println(p.getOriginalCategory().toString());
 			System.out.println("");
 		}
 		
+		
+		System.out.println("execution complete");
 
 	}
 
