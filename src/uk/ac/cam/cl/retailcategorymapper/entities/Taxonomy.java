@@ -25,4 +25,23 @@ public class Taxonomy {
     public List<Category> getCategories() {
         throw new UnsupportedOperationException();
     }
+    
+    @Override 
+    public boolean equals(Object o){
+    	//TODO change when getcategories becomes supported
+    	if(!(o instanceof Taxonomy)){
+    		return false;
+    	}
+    	Taxonomy t = (Taxonomy) o;
+    	return ((id.equals(t.id))&&(name.equals(t.name)));
+    }
+    
+    @Override 
+    public int hashCode(){
+    	//TODO change when getcategories becomes supported
+    	return id.hashCode()+name.hashCode();
+    }
+    
+    
+    
 }
