@@ -30,12 +30,16 @@ public class Category {
     }
 
     public String toString() {
+    	return toString(" > ");
+    } 
+    
+    public String toString(String split) {
     	if(parts.length==0){
     		return "the empty category";
     	}
     	String string = parts[0];
     	for(int i=1;i<parts.length;i++){
-    		string = string.concat(" > "+parts[i]);
+    		string = string.concat(split+parts[i]);
     	}
     	return string;
     }
