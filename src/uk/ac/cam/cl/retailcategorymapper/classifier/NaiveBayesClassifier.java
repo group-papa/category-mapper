@@ -2,6 +2,7 @@ package uk.ac.cam.cl.retailcategorymapper.classifier;
 
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
+import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
@@ -389,8 +390,13 @@ public class NaiveBayesClassifier implements Classifier {
 			probabilityToAllPossibleCategories.put(pCGivenF, category);
 		}
 		Category mostLikelyCategory = probabilityToAllPossibleCategories.lastEntry().getValue();
-		Mapping returnMapping = new Mapping(product, mostLikelyCategory, Method.CLASSIFIED, (float)probabilityToAllPossibleCategories.lastEntry().getKey().doubleValue());
-		return returnMapping;
+		MappingBuilder mb = new MappingBuilder();
+		mb.setCategory(mostLikelyCategory);
+		mb.setProduct(product);
+		mb.setMethod(Method.CLASSIFIED);
+		//mb.setConfidence()    STILL TO BE IMPLEMENTED
+		Mapping finalMapping = mb.createMapping();
+		return finalMapping;
 	}
 
 
