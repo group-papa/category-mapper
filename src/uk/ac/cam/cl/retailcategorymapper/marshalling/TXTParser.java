@@ -16,21 +16,29 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import uk.ac.cam.cl.retailcategorymapper.entities.TaxonomyBuilder;
 
 public class TXTParser{
-
+	
 	/*
-	 * we take the first line of the file to be the name of the taxonomy
+	 * Authored by Charlie Barton
+	 * 
+	 * this class provides several methods for parsing an XML file into our
+	 * internal representations which take 2 Files:
+	 * 1) .txt
+	 * 2) .txt
+	 * the second .txt describes the format of the first .txt file
+	 * 
+	 * XMLdescritor.txt
+	 * 
+	 * header_length:1;
+	 * category_split: > ;
+	 * 
+	 * the category_split must be provided
+	 * the header length gives the line number of the first proper line of category
 	 */
+	
 	public static Taxonomy parseTaxonomy(File fileData, File fileDescriptor) {
 
 		HashMap<String, String> descriptorTags = DescriptorParse.parse(fileDescriptor);
 
-		/*
-		 * so I did implement a repeat catcher (beacuse I was interested) which
-		 * prevents several instance of the same string in memory but really this
-		 * kind of optimisation shouldn't exist at this point in a project
-		 * 
-		 * decreases the memory usage around 50% for negligible slow down
-		 */
 		HashMap<String, String> repeatCatcher = new HashMap<>();
 
 		testTagsOk(descriptorTags);

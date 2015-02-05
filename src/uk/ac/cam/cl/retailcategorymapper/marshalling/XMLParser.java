@@ -18,9 +18,7 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.ProductBuilder;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -31,31 +29,42 @@ public class XMLParser {
 	/*
 	 * Authored by Charlie Barton
 	 * 
-	 * this class provides a method for parsing an XML file into our internal
-	 * product description class it takes a file path to an XML file and also a
-	 * file path to a file describing the format of the XML file and parses it
-	 * appropriately
+	 * this class provides several methods for parsing an XML file into our
+	 * internal representations which take 2 Files:
+	 * 1) .xml
+	 * 2) .txt
+	 * the .txt describes the format of the XML file and parses it appropriately
 	 * 
 	 * The XML format descriptor takes the form of lines with a single ':'
 	 * separating what we call the field internally from what it is called in the
-	 * XML file ie "our name:XML field;" . so an example file is
-	 *
+	 * XML file so a sample line is "our name:XML field;"
+	 * 
+	 * an example descriptor file is
+	 * 
 	 * XMLdescritor.txt
 	 * 
 	 * product:product;
-   * price:productPrice;
-   * id:productSku;
-   * name:productName;
-   * description:productDescription;
-   * category1:none;
-   * attributes:none;
-   * category_split: > ;
+	 * price:productPrice;
+	 * id:productSku;
+	 * name:productName;
+	 * description:productDescription;
+	 * category1:none;
+	 * attributes:none;
+	 * category_split: > ;
 	 * 
-	 * all 7 of these fields must be provided - none after the colon indicated 
-	 * we don't what that field processed
+	 * all 7 of these fields must be provided for parsing a product list
 	 * 
-	 * Most of the code was copied from some web-site so I don't really understand
-	 * what it is doing but it seems to work.
+	 * additionally for parsing a mapping we need to provide a mapped_category 
+	 * 
+	 * none after the colon indicates we don't what that field processed for
+	 * example it is not in the XML
+	 * 
+	 * Most of the parsing code was copied from:
+	 * http://stackoverflow.com/questions
+	 * /13786607/normalization-in-dom-parsing-with-java-how-does-it-work
+	 * 
+	 * (under an open-source licence) so I don't really understand what it is doing but it
+	 * seems to work :)
 	 */
 
 
