@@ -390,6 +390,7 @@ public class NaiveBayesClassifier implements Classifier {
 		}
 		Category mostLikelyCategory = probabilityToAllPossibleCategories.lastEntry().getValue();
 		Mapping returnMapping = new Mapping(product, mostLikelyCategory, Method.CLASSIFIED, (float)probabilityToAllPossibleCategories.lastEntry().getKey().doubleValue());
+		return returnMapping;
 	}
 
 
