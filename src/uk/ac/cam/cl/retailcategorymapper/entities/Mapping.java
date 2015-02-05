@@ -9,7 +9,7 @@ public class Mapping {
     private Method method;
     private float confidence;
 
-    protected Mapping(Product product, Category category, Method method, float
+    public Mapping(Product product, Category category, Method method, float
                       confidence) {
         this.product = product;
         this.category = category;

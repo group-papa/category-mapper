@@ -7,10 +7,10 @@ package uk.ac.cam.cl.retailcategorymapper.classifier;
  */
 public class Feature {
 	
-	private final Type type;
+	private final FeatureType type;
 	private final String featureString;
 	
-	public Feature(Type type, String featureString) {
+	public Feature(FeatureType type, String featureString) {
 		this.type = type;
 		this.featureString = featureString;
 	}
