@@ -25,7 +25,7 @@ import java.util.List;
 public class XMLParser {
 
 	/*
-	 * Authored by Charlie
+	 * Authored by Charlie Barton
 	 * 
 	 * this class provides a method for parsing an XML file into our internal
 	 * product description class it takes a file path to an XML file and also a
@@ -58,7 +58,7 @@ public class XMLParser {
 		
 		try {			
 
-			HashMap<String,String> descriptorTags = parseXMLDescriptor(fileXMLFormat);
+			HashMap<String,String> descriptorTags = DescriptorParse.parse(fileXMLFormat);
 			
 			testTagsOk(descriptorTags);
 			
@@ -97,47 +97,9 @@ public class XMLParser {
 		} catch (ParserConfigurationException e) {
 			System.err.println("SAX Exceptionin XML Parser");
 			throw new RuntimeException("ParserConfigurationException in XML Parser");
-		}
-		
+		}		
 	}
 	
-	
-	/*
-	 * this method produces a hashMap which means that general XML formats can be
-	 * used to read in product data - it produces a hashmap converting what we
-	 * internally name the fields to what they are named in the XML
-	 */	
-	static HashMap<String, String> parseXMLDescriptor(File f) {
-
-		try {
-			HashMap<String, String> tags = new HashMap<>();
-
-			BufferedReader descriptorReader = new BufferedReader(new FileReader(f));
-
-			String s = descriptorReader.readLine();
-			while (s != null) {
-
-				if(!s.endsWith(";")){
-					descriptorReader.close();
-					throw new RuntimeException("malformed XMLdescriptor file in XML parser - did you forget a ;");
-				}				
-				s = s.substring(0,s.length()-1);
-				
-				String[] t = s.split(":");
-
-				if (t.length != 2) {
-					descriptorReader.close();
-					throw new RuntimeException("malformed XMLdescriptor file in XML parser - not 2 arguments per line");
-				}
-				tags.put(t[0], t[1]);
-				s = descriptorReader.readLine();
-			}
-			descriptorReader.close();
-			return tags;
-		} catch (IOException e) {
-			throw new RuntimeException("IO exception in XML file format description parser");
-		}
-	}
 	
 	/*
 	 * this method takes an element and a hashMap and extracts the relevant fields
@@ -216,9 +178,9 @@ public class XMLParser {
 	
 	
 	public static void main(String argv[]) {
-		
+				
 		//obviously file path is only hard coded as this is a main method for testing
-		String XMLPath = "C:\\Users\\Charlie\\SkyDrive\\Documents\\Cambridge Work\\IB\\Group Project\\2.xml";
+		String XMLPath = "C:\\Users\\Charlie\\SkyDrive\\Documents\\Cambridge Work\\IB\\Group Project\\151.xml";
 		String descriptionPath = "C:\\Users\\Charlie\\SkyDrive\\Documents\\Cambridge Work\\IB\\Group Project\\descriptor.txt";
 		List<Product> products = parseXML(new File(XMLPath),new File(descriptionPath));
 		
