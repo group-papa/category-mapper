@@ -1,8 +1,5 @@
 apply plugin: 'java'
 apply plugin: 'idea'
-apply plugin: 'application'
-
-mainClassName = 'uk.ac.cam.cl.retailcategorymapper.api.Router'
 
 repositories {
     mavenCentral()
@@ -14,4 +11,9 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
+}
+
+task execute(type:JavaExec, dependsOn:['build']) {
+    main = 'uk.ac.cam.cl.retailcategorymapper.api.Router'
+    classpath = sourceSets.main.runtimeClasspath
 }
