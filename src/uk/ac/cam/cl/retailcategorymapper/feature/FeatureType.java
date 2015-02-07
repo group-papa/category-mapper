@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.retailcategorymapper.classifier;
+package uk.ac.cam.cl.retailcategorymapper.feature;
 
 /**
  * This enum represents where the information came from. It will be used to distinguish a feature

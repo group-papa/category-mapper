@@ -1,4 +1,5 @@
-package uk.ac.cam.cl.retailcategorymapper.classifier;
+package uk.ac.cam.cl.retailcategorymapper.feature;
+
 
 /**
  * Class to represent the features that the classifier will use. 
@@ -30,6 +31,7 @@ public class Feature {
 	public int hashCode(){
 		return type.hashCode()*73+featureString.hashCode();
 	}
+	
 	
 	
 }

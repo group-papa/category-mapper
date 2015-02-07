@@ -7,6 +7,9 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
+import uk.ac.cam.cl.retailcategorymapper.feature.Feature;
+import uk.ac.cam.cl.retailcategorymapper.feature.FeatureConverter1;
+import uk.ac.cam.cl.retailcategorymapper.feature.FeatureType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -265,54 +268,7 @@ public class NaiveBayesClassifier implements Classifier {
 	 * @param product Product used to extract features from
 	 * @return list of features from the input product
 	 */
-	public List<Feature> changeProductToFeature(Product product) {
-		List<Feature> createdFeatures = new ArrayList<Feature>();
 
-		String id = product.getId();
-		if ((id != null) && !(id.equals(""))) {
-			FeatureType ft = FeatureType.ID;
-			Feature idFeature = new Feature(ft, id);
-			createdFeatures.add(idFeature);
-		}
-
-		String name = product.getName();
-		if ((name != null) && !(name.equals(""))) {
-			FeatureType ft = FeatureType.NAME;
-			Feature nameFeature = new Feature(ft, name);
-			createdFeatures.add(nameFeature);
-		}
-
-		String description = product.getDescription();
-		if ((description != null) && !(description.equals(""))) {
-			FeatureType ft = FeatureType.DESCRIPTION;
-			Feature descFeature = new Feature(ft, description);
-			createdFeatures.add(descFeature);
-		}
-
-		Integer priceInteger = product.getPrice();
-		if ((priceInteger != null) && (priceInteger.intValue() != -1)) {
-			String price = Integer.toString(product.getPrice());
-			FeatureType ft = FeatureType.PRICE;
-			Feature priceFeature = new Feature(ft, price);
-			createdFeatures.add(priceFeature);
-		}
-
-		Category originalCategory = product.getOriginalCategory();
-		String[] partsArray = originalCategory.getAllParts();
-		if ((!(partsArray == null)) && (!(partsArray.length == 0))) {
-			FeatureType ft = FeatureType.ORIGINALCATEGORY;
-			for (int i=0; i < partsArray.length; i++) {
-				String categoryPart = partsArray[i];
-				Feature cpFeature = new Feature(ft, categoryPart);
-				createdFeatures.add(cpFeature);
-			}
-		}
-
-		//not used right now!!!
-		Map<String, String> attributes = product.getAttributesMap();
-
-		return createdFeatures;
-	}
 
 	/**
 	 * Update the sets and maps held by the classifier which will be used for training with
@@ -322,7 +278,7 @@ public class NaiveBayesClassifier implements Classifier {
 	 * @param category Destination category that product has been mapped to
 	 */
 	public void trainWithBagOfWordsSingleProduct(Product product, Category category) {
-		List<Feature> featuresFromProduct = this.changeProductToFeature(product);
+		List<Feature> featuresFromProduct = FeatureConverter1.changeProductToFeature(product);
 
 		for (Feature f : featuresFromProduct) {
 			this.addSeenFeatureInSpecifiedCategory(f, category);
@@ -343,7 +299,7 @@ public class NaiveBayesClassifier implements Classifier {
 		//treemap sorts in increasing order
 		NavigableMap<Double, Category> probabilityToAllPossibleCategories = new TreeMap<Double,Category>();
 		
-		List<Feature> features = this.changeProductToFeature(product);
+		List<Feature> features = FeatureConverter1.changeProductToFeature(product);
 		List<Category> allDestinationCategories = taxonomy.getCategories();
 		
 		//take a single category
