@@ -20,7 +20,7 @@ public final class ApiConfig {
     /**
      * Routes.
      */
-    public static final List<RouteBinding> bindings = new ArrayList<>(
+    public static final List<RouteBinding> BINDINGS = new ArrayList<>(
             Arrays.asList(
                     new RouteBinding("/", Method.GET, new HomeRoute())
             ));

@@ -10,7 +10,7 @@ public class Router {
     public static void run() {
         Spark.port(ApiConfig.PORT);
 
-        for (RouteBinding b : ApiConfig.bindings) {
+        for (RouteBinding b : ApiConfig.BINDINGS) {
             switch (b.getMethod()) {
                 case GET:
                     Spark.get(b.getPath(), b.getRoute());
