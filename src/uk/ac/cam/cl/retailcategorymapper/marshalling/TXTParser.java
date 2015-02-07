@@ -90,7 +90,6 @@ public class TXTParser{
 		} catch (NumberFormatException e) {
 			throw new RuntimeException("malformed txt descriptor - invalid header_length");
 		}
-
 	}
 	
 
@@ -118,11 +117,15 @@ public class TXTParser{
 			System.out.println(c.toString(" -> "));
 		}
 
+		for(int i=0;i<4;i++){
+			//this loop is to ensure the garbage collector has run
+			System.gc();
+			MemoryUsage heapMemoryUsage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
+			double mem_usage = heapMemoryUsage.getUsed();
+			System.out.println((mem_usage/(1024*1024))+" MB used");
+		}
 		
-		System.gc();
-		MemoryUsage heapMemoryUsage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
-		double mem_usage = heapMemoryUsage.getUsed();
-		System.out.println((mem_usage/(1024*1024))+" MB used");
+		
 		System.out.println(endTime-startTime+" ms taken");
 		
 		System.out.println("execution complete");

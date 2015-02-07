@@ -17,9 +17,15 @@ import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.ProductBuilder;
+import uk.ac.cam.cl.retailcategorymapper.feature.Feature;
+import uk.ac.cam.cl.retailcategorymapper.feature.FeatureConverter1;
+import uk.ac.cam.cl.retailcategorymapper.feature.FeatureConverter2;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryUsage;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -123,6 +129,8 @@ public class XMLParser {
 	}
 
 	
+	static private HashMap<String,Category> categoryDuplicateRemover = new HashMap<>();
+	
 	static public List<Product> parseProductList (File fileXML, File fileXMLFormat){
 		
 		try {			
@@ -197,8 +205,13 @@ public class XMLParser {
 							
 		if(descriptorTags.get("category")!="none"){
 			String catPath = element.getElementsByTagName(descriptorTags.get("category")).item(0).getTextContent();	
-			Category c = prepareCategory(catPath,descriptorTags.get("category_split"));
-			productBuild.setOriginalCategory(c);
+			if(categoryDuplicateRemover.containsKey(catPath)){
+				productBuild.setOriginalCategory(categoryDuplicateRemover.get(catPath));
+			} else {
+				Category c = prepareCategory(catPath,descriptorTags.get("category_split"));
+				productBuild.setOriginalCategory(c);
+				categoryDuplicateRemover.put(catPath,c);
+			}
 		}
 		
 		if(!descriptorTags.get("attributes").equals("none")){
@@ -262,9 +275,12 @@ public class XMLParser {
 		//obviously file path is only hard coded as this is a main method for testing
 		String XMLPath = "C:\\Users\\Charlie\\SkyDrive\\Documents\\Cambridge Work\\IB\\Group Project\\138.xml";
 		String descriptionPath = "C:\\Users\\Charlie\\SkyDrive\\Documents\\Cambridge Work\\IB\\Group Project\\descriptor.txt";
-		List<Mapping> map = parseMapping(new File(XMLPath),new File(descriptionPath));
+
+		long startTime = System.currentTimeMillis();
+		List<Product> products = parseProductList(new File(XMLPath),new File(descriptionPath));
+		long endTime = System.currentTimeMillis();
 		
-		
+		/*
 		for(Mapping m : map){
 			Product p = m.getProduct();
 			System.out.println("title           : "+p.getName());
@@ -275,6 +291,17 @@ public class XMLParser {
 			System.out.println("new     category: "+m.getCategory().toString(" -> "));
 			System.out.println("");
 			System.out.println(" - - - - - - - - - - - - - ");
+			System.out.println("");
+		}
+		*/
+	
+		for(Product p:products){
+			List<Feature> features = FeatureConverter2.changeProductToFeature(p);
+			for(Feature f:features){
+				System.out.println(f.toString());
+			}
+			System.out.println("");
+			System.out.println("- - - - - - - - - - - -");
 			System.out.println("");
 		}
 		

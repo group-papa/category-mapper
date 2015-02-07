@@ -61,8 +61,6 @@ public class Category {
     				return false;
     			}    			
     			return taxonomy.equals(c.taxonomy);
-    			//it would be possible to merge the two categories at this point to save RAM 
-    			//as its immutable but this is a nasty optimisation
     		}    		
     	}    	
     	return false;

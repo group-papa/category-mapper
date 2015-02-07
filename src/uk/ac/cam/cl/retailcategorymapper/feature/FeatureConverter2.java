@@ -45,12 +45,13 @@ public class FeatureConverter2 {
 		List<Feature> createdFeatures = new ArrayList<Feature>();
 
 		String name = product.getName();
-		if ((name != null) && !(name.equals(""))) {
-			String[] nameWords = name.split(" ");
-			for(String s:nameWords){
-				if(!blackList.contains(s)){
-					createdFeatures.add(new Feature(FeatureType.NAME,s));
-				}
+		name = Sanitizer1.sanitize(name);
+		String[] nameWords = name.split(" ");
+
+		for (String s : nameWords) {
+			if (s.equals("")) {continue;}
+			if (!blackList.contains(s)) {
+				createdFeatures.add(new Feature(FeatureType.NAME, s));
 			}
 		}
 

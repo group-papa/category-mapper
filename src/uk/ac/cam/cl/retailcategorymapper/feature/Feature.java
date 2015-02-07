@@ -32,6 +32,11 @@ public class Feature {
 		return type.hashCode()*73+featureString.hashCode();
 	}
 	
+	@Override
+	public String toString(){
+		return type.toString()+" "+featureString;
+	}
+	
 	
 	
 }
