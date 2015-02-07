@@ -1,5 +1,7 @@
 # Category Mapper
 
+[![Build Status](https://travis-ci.org/group-papa/category-mapper.svg)](https://travis-ci.org/group-papa/category-mapper)
+
 This repository holds the codebase for the backend Java mapping engine and API.
 
 ## Development Environment
