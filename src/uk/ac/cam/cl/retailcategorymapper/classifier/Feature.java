@@ -15,4 +15,21 @@ public class Feature {
 		this.featureString = featureString;
 	}
 	
+	@Override
+	public boolean equals(Object o){
+		if(o instanceof Feature){
+			Feature f = (Feature) o;
+			if(f.type==type){
+				return featureString.equals(f.featureString);
+			}
+		}
+		return false;
+	}
+	
+	@Override 
+	public int hashCode(){
+		return type.hashCode()*73+featureString.hashCode();
+	}
+	
+	
 }
