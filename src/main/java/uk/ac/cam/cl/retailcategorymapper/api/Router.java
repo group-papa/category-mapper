@@ -4,7 +4,7 @@ import spark.Spark;
 import uk.ac.cam.cl.retailcategorymapper.config.ApiConfig;
 
 /**
- * Router class which configures Spark with our routes.
+ * Router class which configures Spark with our settings and routes.
  */
 public class Router {
     public static void run() {
