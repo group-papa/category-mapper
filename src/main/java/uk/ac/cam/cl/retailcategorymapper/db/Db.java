@@ -4,7 +4,7 @@ import org.redisson.Config;
 import org.redisson.Redisson;
 import uk.ac.cam.cl.retailcategorymapper.config.DbConfig;
 
-public class DbController {
+public class Db {
     private static Redisson redisson;
 
     public static Redisson getInstance() {

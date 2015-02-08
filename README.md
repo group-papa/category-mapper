@@ -13,8 +13,8 @@ with using Git on the command line, the GitHub app is recommended.
 
 We are using Gradle to automate our building and testing. Gradle also handles
 dependencies for us. You will want to use the following Gradle tasks:
- - `execute`: This builds the project (which also involves running tests) and
-then runs it.
+ - `execute`: This compiles the project and then runs it.
+ - `build`: Build the project (this also runs the tests).
  - `test`: Run all tests.
  - `clean`: This cleans your working directory by deleting the project build
 directory.
