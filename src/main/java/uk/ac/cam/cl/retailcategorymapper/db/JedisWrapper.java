@@ -6,7 +6,7 @@ import uk.ac.cam.cl.retailcategorymapper.config.DbConfig;
 /**
  * Simple wrapper around Jedis which implements the singleton pattern.
  */
-public class JedisWrapper {
+class JedisWrapper {
     private static Jedis jedis;
 
     public static Jedis getInstance() {
