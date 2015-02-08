@@ -7,16 +7,22 @@ import java.util.Map;
  */
 public final class DbConfig {
     /**
-     * Redis server address.
+     * Redis host.
      */
-    public static final String ADDRESS;
+    public static final String HOST;
+
+    /**
+     * Redis port.
+     */
+    public static final int PORT;
 
     /**
      * Static initialiser.
      */
     static {
         Map<String, String> config = PropertiesLoader.getProperties("db");
-        ADDRESS = config.getOrDefault("address", "127.0.0.1:6379");
+        HOST = config.getOrDefault("host", "127.0.0.1");
+        PORT = Integer.parseInt(config.getOrDefault("port", "6379"));
     }
 
     /**
