@@ -13,7 +13,7 @@ dependencies {
     testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.19'
 }
 
-task execute(type:JavaExec, dependsOn:['build']) {
+task execute(type:JavaExec, dependsOn:['classes']) {
     main = 'uk.ac.cam.cl.retailcategorymapper.api.Router'
     classpath = sourceSets.main.runtimeClasspath
 }
