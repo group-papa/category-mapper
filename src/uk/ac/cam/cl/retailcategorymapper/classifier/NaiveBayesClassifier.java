@@ -304,11 +304,10 @@ public class NaiveBayesClassifier implements Classifier {
 		
 		//take a single category
 		for (Category category : allDestinationCategories) {
-			//calculate P(f_i | C)
-			double pProductGivenC = 1.0;
-			double pFeatureGivenC = 1.0;
 			
-			//category has been seen by classifier during training
+			//calculate P(f_i | C)
+			double pProductGivenC = 1.0;		
+				//category has been seen by classifier during training
 			if (this.categorySet.contains(category)) {
 				Map<Feature, Integer> featureOccurrencesInCategory = this.featureCountPerCategory.get(category);
 				for (Feature f : features) {
@@ -319,16 +318,16 @@ public class NaiveBayesClassifier implements Classifier {
 						count = featureOccurrencesInCategory.get(f);
 					}
 					//Laplace smoothing
-					pFeatureGivenC = ((double)(1 + count)) / ((double)(this.categoryCounts.get(category) + this.featureSet.size()));
+					double pFeatureGivenC = ((double)(1 + count)) / ((double)(featureOccurrencesInCategory.size() + this.featureSet.size()));
+					pProductGivenC *= pFeatureGivenC;
 				}
 			}
-			//category has not been seen by the classifier during training ?!?!
+				//category has not been seen by the classifier during training ?!?!
 			else {
-				
+				System.err.println("category has not been seen by the classifier during training");
 			}
-			pProductGivenC *= pFeatureGivenC;
-
 			
+			//calculate P(C)		
 			double pC = 1.0;
 			//category seen by classifier during training
 			if (this.categorySet.contains(category)) {
@@ -340,19 +339,15 @@ public class NaiveBayesClassifier implements Classifier {
 			}
 			//category NOT seen by classifier during training
 			else {
-				
+				System.err.println("category has not been seen by the classifier during training");
 			}
 			double pCGivenF = pProductGivenC * pC;
 			probabilityToAllPossibleCategories.put(pCGivenF, category);
 		}
+		
 		Category mostLikelyCategory = probabilityToAllPossibleCategories.lastEntry().getValue();
-		MappingBuilder mb = new MappingBuilder();
-		mb.setCategory(mostLikelyCategory);
-		mb.setProduct(product);
-		mb.setMethod(Method.CLASSIFIED);
-		//mb.setConfidence()    STILL TO BE IMPLEMENTED
-		Mapping finalMapping = mb.createMapping();
-		return finalMapping;
+		Mapping m = (new MappingBuilder()).setCategory(mostLikelyCategory).setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
+		return m;
 	}
 
 
