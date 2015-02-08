@@ -18,3 +18,8 @@ then runs it.
  - `test`: Run all tests.
  - `clean`: This cleans your working directory by deleting the project build
 directory.
+
+## Configuration
+`src/main/resources/config` contains example properties files for this
+project. To change any of the configuration options, copy the relevant
+example file and remove the `.example` from the name before making any changes.
