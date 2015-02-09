@@ -9,7 +9,8 @@ import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
  */
 public class ListTaxonomiesRoute extends JsonRoute {
     @Override
-    public Object handleRequest(Request request, Response response) throws Exception {
+    public Object handleRequest(Request request, Response response)
+            throws Exception {
         return TaxonomyDb.getTaxonomies();
     }
 }

@@ -2,7 +2,9 @@ package uk.ac.cam.cl.retailcategorymapper.db;
 
 import org.redisson.Redisson;
 import org.redisson.core.RBucket;
+import org.redisson.core.RList;
 import redis.clients.jedis.Jedis;
+import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 
 import java.util.ArrayList;
@@ -33,5 +35,38 @@ public class TaxonomyDb {
         }
 
         return result;
+    }
+
+    /**
+     * Get a taxonomy.
+     * @param taxonomyId The taxonomy ID to get.
+     * @return Fetched taxonomy.
+     */
+    public static Taxonomy getTaxonomy(String taxonomyId)  {
+        Redisson redisson = RedissonWrapper.getInstance();
+
+        String instanceKey = KeyBuilder.taxonomyInstance(taxonomyId);
+        RBucket<Taxonomy> taxonomyRBucket = redisson.getBucket(instanceKey);
+        return taxonomyRBucket.get();
+    }
+
+    /**
+     * Store a taxonomy; if one already exists, it will be overwritten.
+     * @param taxonomy The taxonomy to add.
+     * @param categories The taxonomy's categories.
+     */
+    public static void setTaxonomy(Taxonomy taxonomy,
+                                   List<Category> categories)  {
+        Redisson redisson = RedissonWrapper.getInstance();
+
+        String instanceKey = KeyBuilder.taxonomyInstance(taxonomy.getId());
+        RBucket<Taxonomy> taxonomyRBucket = redisson.getBucket(instanceKey);
+        taxonomyRBucket.set(taxonomy);
+
+        String categoriesKey = KeyBuilder.categoriesForTaxonomy(
+                taxonomy.getId());
+        RList<Category> rList = redisson.getList(categoriesKey);
+        rList.clear();
+        rList.addAll(categories);
     }
 }
