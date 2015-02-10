@@ -1,15 +1,10 @@
 package uk.ac.cam.cl.retailcategorymapper.marshalling;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.CategoryBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
@@ -17,18 +12,20 @@ import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.ProductBuilder;
-import uk.ac.cam.cl.retailcategorymapper.classifier.features.Feature;
-import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter2;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+// TODO: Rewrite to accept XML passed in as an argument rather than from a file on the disk.
 public class XMLParser {
     /*
-	 * Authored by Charlie Barton
+     * Authored by Charlie Barton
 	 *
 	 * this class provides several methods for parsing an XML file into our
 	 * internal representations which take 2 Files:
@@ -70,8 +67,7 @@ public class XMLParser {
 
     static public List<Mapping> parseMapping(File fileXML, File fileXMLFormat) {
         try {
-
-            HashMap<String, String> descriptorTags = DescriptorParse.parse(fileXMLFormat);
+            HashMap<String, String> descriptorTags = new HashMap<>();
 
             testMappingTagsOk(descriptorTags);
 
@@ -124,10 +120,8 @@ public class XMLParser {
     static private HashMap<String, Category> categoryDuplicateRemover = new HashMap<>();
 
     static public List<Product> parseProductList(File fileXML, File fileXMLFormat) {
-
         try {
-
-            HashMap<String, String> descriptorTags = DescriptorParse.parse(fileXMLFormat);
+            HashMap<String, String> descriptorTags = new HashMap<>();
 
             testProductListTagsOk(descriptorTags);
 
@@ -258,46 +252,5 @@ public class XMLParser {
             throw new RuntimeException("malformed XMLdescriptor file in XML parser - no \"mapped_category\" field");
         }
         return true;
-    }
-
-
-    public static void main(String argv[]) {
-
-        //obviously file path is only hard coded as this is a main method for testing
-        String XMLPath = "C:\\Users\\Charlie\\SkyDrive\\Documents\\Cambridge Work\\IB\\Group Project\\138.xml";
-        String descriptionPath = "C:\\Users\\Charlie\\SkyDrive\\Documents\\Cambridge Work\\IB\\Group Project\\descriptor.txt";
-
-        long startTime = System.currentTimeMillis();
-        List<Product> products = parseProductList(new File(XMLPath), new File(descriptionPath));
-        long endTime = System.currentTimeMillis();
-
-		/*
-		for(Mapping m : map){
-			Product p = m.getProduct();
-			System.out.println("title           : "+p.getName());
-			System.out.println("product ID      : "+p.getId());
-			System.out.println("description     : "+p.getDescription());
-			System.out.println("price (GBp)     : "+p.getPrice());
-			System.out.println("initial category: "+p.getOriginalCategory().toString(" -> "));
-			System.out.println("new     category: "+m.getCategory().toString(" -> "));
-			System.out.println("");
-			System.out.println(" - - - - - - - - - - - - - ");
-			System.out.println("");
-		}
-		*/
-
-        for (Product p : products) {
-            List<Feature> features = FeatureConverter2.changeProductToFeature(p);
-            for (Feature f : features) {
-                System.out.println(f.toString());
-            }
-            System.out.println("");
-            System.out.println("- - - - - - - - - - - -");
-            System.out.println("");
-        }
-
-
-        System.out.println("execution complete");
-
     }
 }

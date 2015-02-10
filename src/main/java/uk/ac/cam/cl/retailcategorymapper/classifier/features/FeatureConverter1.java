@@ -6,14 +6,10 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import java.util.ArrayList;
 import java.util.List;
 
-//import java.util.Map;
-
-/*
- * taken the code from tatsianaivonchyk's implmenetation in NaieveBayesClassifier
+/**
+ * taken the code from tatsianaivonchyk's implementation in NaiveBayesClassifier
  * feel free to get a better name
  */
-
-
 public class FeatureConverter1 {
 
     public static List<Feature> changeProductToFeature(Product product) {

@@ -22,6 +22,7 @@ import java.util.TreeMap;
 /**
  * A Naive Bayes classifier implementation.
  */
+// TODO: Integrate with the database (don't store values in RAM)
 public class NaiveBayesClassifier implements Classifier {
     private Set<Feature> featureSet;
     private Set<Category> categorySet;
