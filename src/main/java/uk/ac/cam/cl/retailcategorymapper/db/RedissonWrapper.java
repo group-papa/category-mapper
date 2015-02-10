@@ -2,6 +2,7 @@ package uk.ac.cam.cl.retailcategorymapper.db;
 
 import org.redisson.Config;
 import org.redisson.Redisson;
+import org.redisson.codec.JsonJacksonCodec;
 import uk.ac.cam.cl.retailcategorymapper.config.DbConfig;
 
 /**
@@ -13,6 +14,7 @@ class RedissonWrapper {
     public static Redisson getInstance() {
         if (redisson == null) {
             Config config = new Config();
+            config.setCodec(new JsonJacksonCodec());
             String address = DbConfig.HOST + ":" + DbConfig.PORT;
             config.useSingleServer().setAddress(address);
             redisson = Redisson.create(config);
