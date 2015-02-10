@@ -8,9 +8,9 @@ import java.util.Map;
  */
 public class ProductBuilder {
     private String id;
-    private String name = "";
-    private String description = "";
-    private Integer price = null;
+    private String name;
+    private String description;
+    private Integer price;
     private Category originalCategory;
     private Map<String, String> attributes = new HashMap<>();
 

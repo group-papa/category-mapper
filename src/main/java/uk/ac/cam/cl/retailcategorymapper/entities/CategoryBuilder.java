@@ -20,5 +20,4 @@ public class CategoryBuilder {
     public Category createCategory() {
         return new Category(parts, taxonomy);
     }
-        
 }

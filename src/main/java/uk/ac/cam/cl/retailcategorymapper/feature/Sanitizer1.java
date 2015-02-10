@@ -8,7 +8,7 @@ public class Sanitizer1 {
 		s = removeCapitals(s);
 		return s;
 	}
-	
+
 	public static String removeCapitals(String s){
 		return s.toLowerCase();
 	}
@@ -22,20 +22,20 @@ public class Sanitizer1 {
 		s = s.replace("{","");
 		s = s.replace("}","");
 		s = s.replace("[","");
-		s = s.replace("]","");		
+		s = s.replace("]","");
 		s = s.replace(".","");
 		s = s.replace(",","");
 		s = s.replace("-","");
-		s = s.replace("!","");			
+		s = s.replace("!","");
 		s = s.replace(";","");
 		s = s.replace(":","");
 		s = s.replace("?","");
 		s = s.replace("|","");
 		s = s.replace("&","");
-		s = s.replace("£","");
+		s = s.replace("Â£","");
 		s = s.replace("$","");
 		return s;
 	}
-	
-	
+
+
 }

@@ -8,9 +8,5 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
  * An interface for all classifiers used by the category mapper.
  */
 public interface Classifier {
-	
-	public Mapping classify(Taxonomy taxonomy, Product product);
-	
+    public Mapping classify(Taxonomy taxonomy, Product product);
 }
-
-
