@@ -19,8 +19,8 @@ public class AddTaxonomyRoute extends JsonRoute {
             throws Exception {
         String taxonomyName = request.queryParams("taxonomyName");
         if (taxonomyName == null) {
-            throw new IllegalArgumentException("taxonomyName must be " +
-                    "provided.");
+            throw new IllegalArgumentException(
+                    "taxonomyName must be provided.");
         }
 
         Taxonomy taxonomy = new TaxonomyBuilder()
@@ -28,17 +28,18 @@ public class AddTaxonomyRoute extends JsonRoute {
                 .setName(taxonomyName)
                 .setDateCreated(DateTime.getCurrentTimeIso8601())
                 .createTaxonomy();
+
         // TODO: Store categories as well.
         TaxonomyDb.setTaxonomy(taxonomy, new ArrayList<>());
 
-        return new AddTaxonomyReply(taxonomy.getId());
+        return new AddTaxonomyReply(taxonomy);
     }
 
     class AddTaxonomyReply {
-        String taxonomyId;
+        Taxonomy taxonomy;
 
-        public AddTaxonomyReply(String taxonomyId) {
-            this.taxonomyId = taxonomyId;
+        public AddTaxonomyReply(Taxonomy taxonomy) {
+            this.taxonomy = taxonomy;
         }
     }
 }
