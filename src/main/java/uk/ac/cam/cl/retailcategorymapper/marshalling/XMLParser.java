@@ -37,14 +37,14 @@ import java.util.List;
 
 public class XMLParser {
 
-    static final String nameXML = "productName";
-    static final String productXML = "product";
-    static final String idXML = "productSku";
-    static final String descriptionXML = "productDescription";
-    static final String splitXML = " > ";
-    static final String mappedCategoryXML = "productGoogleCategory";
-    static final String priceXML = "productPrice";
-    static final String categoryXML = "productCategory";
+    static final String NAMEXML = "productName";
+    static final String PRODUCTXML = "product";
+    static final String IDXML = "productSku";
+    static final String DESCRIPTIONXML = "productDescription";
+    static final String SPLITXML = " > ";
+    static final String MAPPEDCATEGORYXML = "productGoogleCategory";
+    static final String PRICEXML = "productPrice";
+    static final String CATEGORYXML = "productCategory";
 
 
     static public List<Mapping> parseMapping(String stringXML) {
@@ -57,7 +57,7 @@ public class XMLParser {
             doc = dBuilder.parse(inputSource);
             doc.getDocumentElement().normalize();
 
-            NodeList nList = doc.getElementsByTagName(productXML);
+            NodeList nList = doc.getElementsByTagName(PRODUCTXML);
 
             for (int temp = 0; temp < nList.getLength(); temp++) {
 
@@ -71,7 +71,7 @@ public class XMLParser {
                     mapBuild.setProduct(p);
 
                     String s;
-                    s = element.getElementsByTagName(mappedCategoryXML).item(0).getTextContent();
+                    s = element.getElementsByTagName(MAPPEDCATEGORYXML).item(0).getTextContent();
                     mapBuild.setCategory(prepareCategory(s));
                     mapBuild.setMethod(Method.UPLOAD);
 
@@ -103,7 +103,7 @@ public class XMLParser {
             doc = dBuilder.parse(inputSource);
             doc.getDocumentElement().normalize();
 
-            NodeList nList = doc.getElementsByTagName(productXML);
+            NodeList nList = doc.getElementsByTagName(PRODUCTXML);
 
             for (int temp = 0; temp < nList.getLength(); temp++) {
                 Node nNode = nList.item(temp);
@@ -136,16 +136,16 @@ public class XMLParser {
 
         ProductBuilder productBuild = new ProductBuilder();
 
-        String price = element.getElementsByTagName(priceXML).item(0).getTextContent();
+        String price = element.getElementsByTagName(PRICEXML).item(0).getTextContent();
         productBuild.setPrice((int) (Double.valueOf(price) * 100));
 
-        productBuild.setId(element.getElementsByTagName(idXML).item(0).getTextContent());
+        productBuild.setId(element.getElementsByTagName(IDXML).item(0).getTextContent());
 
-        productBuild.setName(element.getElementsByTagName(nameXML).item(0).getTextContent());
+        productBuild.setName(element.getElementsByTagName(NAMEXML).item(0).getTextContent());
 
-        productBuild.setDescription(element.getElementsByTagName(descriptionXML).item(0).getTextContent());
+        productBuild.setDescription(element.getElementsByTagName(DESCRIPTIONXML).item(0).getTextContent());
 
-        String catPath = element.getElementsByTagName(categoryXML).item(0).getTextContent();
+        String catPath = element.getElementsByTagName(CATEGORYXML).item(0).getTextContent();
         productBuild.setOriginalCategory (prepareCategory(catPath));
 
         //currently we ignore the attribute field of Product
@@ -154,7 +154,7 @@ public class XMLParser {
     }
 
     static Category prepareCategory(String catPath) {
-        String[] asList = catPath.split(splitXML);
+        String[] asList = catPath.split(SPLITXML);
         CategoryBuilder catBuild = new CategoryBuilder();
         catBuild.setParts(asList);
         return catBuild.createCategory();
