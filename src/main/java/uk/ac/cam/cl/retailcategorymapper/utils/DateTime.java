@@ -3,15 +3,16 @@ package uk.ac.cam.cl.retailcategorymapper.utils;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Utility class for dates and times.
  */
 public class DateTime {
-    private static final DateFormat ISO8601_UTC_FORMAT = new SimpleDateFormat
-            ("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
     public static String getCurrentTimeIso8601() {
-        return ISO8601_UTC_FORMAT.format(new Date());
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        df.setTimeZone(tz);
+        return df.format(new Date());
     }
 }
