@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * An immutable class to store a details about a product.
@@ -41,6 +42,10 @@ public class Product {
 
     public Category getOriginalCategory() {
         return originalCategory;
+    }
+
+    public Set<String> getAttributeNames() {
+        return attributes.keySet();
     }
 
     public String getAttribute(String key) {

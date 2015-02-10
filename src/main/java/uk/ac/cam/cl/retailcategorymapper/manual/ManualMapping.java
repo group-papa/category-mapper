@@ -13,4 +13,9 @@ public class ManualMapping implements Classifier {
     public Mapping classify(Taxonomy taxonomy, Product product) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void train(Mapping mapping) {
+        throw new UnsupportedOperationException();
+    }
 }

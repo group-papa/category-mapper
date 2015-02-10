@@ -6,6 +6,7 @@ package uk.ac.cam.cl.retailcategorymapper.entities;
 public class MappingBuilder {
     private Product product;
     private Category category;
+    private Taxonomy taxonomy;
     private Method method;
     private float confidence;
 
@@ -16,6 +17,11 @@ public class MappingBuilder {
 
     public MappingBuilder setCategory(Category category) {
         this.category = category;
+        return this;
+    }
+
+    public MappingBuilder setTaxonomy(Taxonomy taxonomy) {
+        this.taxonomy = taxonomy;
         return this;
     }
 
@@ -30,6 +36,6 @@ public class MappingBuilder {
     }
 
     public Mapping createMapping() {
-        return new Mapping(product, category, method, confidence);
+        return new Mapping(product, category, taxonomy, method, confidence);
     }
 }
