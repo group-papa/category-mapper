@@ -2,7 +2,9 @@ package uk.ac.cam.cl.retailcategorymapper.config;
 
 import uk.ac.cam.cl.retailcategorymapper.api.Method;
 import uk.ac.cam.cl.retailcategorymapper.api.RouteBinding;
+import uk.ac.cam.cl.retailcategorymapper.api.routes.AddTaxonomyRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.HomeRoute;
+import uk.ac.cam.cl.retailcategorymapper.api.routes.ListTaxonomiesRoute;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +33,11 @@ public final class ApiConfig {
      */
     public static final List<RouteBinding> BINDINGS = new ArrayList<>(
             Arrays.asList(
-                    new RouteBinding("/", Method.GET, new HomeRoute())
+                    new RouteBinding("/", Method.GET, new HomeRoute()),
+                    new RouteBinding("/taxonomies", Method.GET,
+                            new ListTaxonomiesRoute()),
+                    new RouteBinding("/taxonomies", Method.POST,
+                            new AddTaxonomyRoute())
             ));
 
     /**

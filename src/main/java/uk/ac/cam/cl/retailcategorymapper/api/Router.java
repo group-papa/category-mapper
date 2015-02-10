@@ -1,14 +1,20 @@
 package uk.ac.cam.cl.retailcategorymapper.api;
 
+import spark.ExceptionHandler;
+import spark.Request;
+import spark.Response;
 import spark.Spark;
 import uk.ac.cam.cl.retailcategorymapper.config.ApiConfig;
 
 /**
- * Router class which configures Spark with our routes.
+ * Router class which configures Spark with our settings and routes.
  */
 public class Router {
     public static void run() {
         Spark.port(ApiConfig.PORT);
+
+        Spark.exception(IllegalArgumentException.class,
+                new ExceptionJsonHandler());
 
         for (RouteBinding b : ApiConfig.BINDINGS) {
             switch (b.getMethod()) {
@@ -38,9 +44,5 @@ public class Router {
                     break;
             }
         }
-    }
-
-    public static void main(String[] args) {
-        run();
     }
 }
