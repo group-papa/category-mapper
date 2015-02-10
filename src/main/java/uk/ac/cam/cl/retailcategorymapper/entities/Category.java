@@ -8,14 +8,20 @@ import java.util.Arrays;
  * An immutable class to store a details about a category.
  */
 public class Category {
+    private String id;
     private String[] parts;
 
-    protected Category(String[] parts) {
+    protected Category(String id, String[] parts) {
+        this.id = id;
+
         if (parts.length == 0) {
             throw new IllegalArgumentException();
         }
-
         this.parts = Arrays.copyOf(parts, parts.length);
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getPart(int n) {

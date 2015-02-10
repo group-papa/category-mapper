@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 public class TaxonomyBuilder {
     private String id;
     private String name;
+    private String dateCreated;
 
     @JsonProperty("id")
     public TaxonomyBuilder setId(String id) {
@@ -23,7 +24,13 @@ public class TaxonomyBuilder {
         return this;
     }
 
+    @JsonProperty("dateCreated")
+    public TaxonomyBuilder setDateCreated(String dateCreated) {
+        this.dateCreated = dateCreated;
+        return this;
+    }
+
     public Taxonomy createTaxonomy() {
-        return new Taxonomy(id, name);
+        return new Taxonomy(id, name, dateCreated);
     }
 }
