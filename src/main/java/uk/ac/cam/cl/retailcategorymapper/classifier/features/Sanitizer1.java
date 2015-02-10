@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.retailcategorymapper.feature;
+package uk.ac.cam.cl.retailcategorymapper.classifier.features;
 
 public class Sanitizer1 {
 

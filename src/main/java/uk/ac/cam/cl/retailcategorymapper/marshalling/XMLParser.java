@@ -17,8 +17,8 @@ import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.ProductBuilder;
-import uk.ac.cam.cl.retailcategorymapper.feature.Feature;
-import uk.ac.cam.cl.retailcategorymapper.feature.FeatureConverter2;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.Feature;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter2;
 
 import java.io.File;
 import java.io.IOException;

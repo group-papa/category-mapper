@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.retailcategorymapper.feature;
+package uk.ac.cam.cl.retailcategorymapper.classifier.features;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,10 +37,10 @@ public class FeatureConverter2 {
 			throw new RuntimeException("FileNotFound exception in loading blacklist in FeatureConverter2");
 		} catch (IOException e) {
 			throw new RuntimeException("I/O exception in loading blacklist in FeatureConverter2");
-		} 
-		
+		}
+
 	}
-	
+
 	public static List<Feature> changeProductToFeature(Product product) {
 		List<Feature> createdFeatures = new ArrayList<Feature>();
 
@@ -51,14 +51,14 @@ public class FeatureConverter2 {
 		for (String s : nameWords) {
 			if (s.equals("")) {continue;}
 			if (!blackList.contains(s)) {
-				createdFeatures.add(new Feature(FeatureType.NAME, s));
+				createdFeatures.add(new Feature(FeatureSource.NAME, s));
 			}
 		}
 
 		Category originalCategory = product.getOriginalCategory();
 		String[] partsArray = originalCategory.getAllParts();
 		if ((!(partsArray == null)) && (!(partsArray.length == 0))) {
-			FeatureType ft = FeatureType.ORIGINALCATEGORY;
+			FeatureSource ft = FeatureSource.ORIGINALCATEGORY;
 			for (int i=0; i < partsArray.length; i++) {
 				String categoryPart = partsArray[i];
 				Feature cpFeature = new Feature(ft, categoryPart);
