@@ -125,9 +125,11 @@ public class NaiveBayesClassifier implements Classifier {
         if (!this.categorySet.contains(category)) {
             return 0;
         }
-        //have seen this category: (# times seen features in category)/(# times this category has come up = #total features in category)
+        //have seen this category: (# times seen features in category)/
+        // (# times this category has come up = #total features in category)
         else {
-            return ((double) this.getFeatureCountInCategory(feature, category)) / ((double) this.categoryCounts.get(category));
+            return ((double) this.getFeatureCountInCategory(feature, category)) /
+                    ((double) this.categoryCounts.get(category));
         }
     }
 
@@ -318,7 +320,8 @@ public class NaiveBayesClassifier implements Classifier {
                         count = featureOccurrencesInCategory.get(f);
                     }
                     //Laplace smoothing
-                    double pFeatureGivenC = ((double) (1 + count)) / ((double) (featureOccurrencesInCategory.size() + this.featureSet.size()));
+                    double pFeatureGivenC = ((double) (1 + count)) /
+                            ((double) (featureOccurrencesInCategory.size() + this.featureSet.size()));
                     pProductGivenC *= pFeatureGivenC;
                 }
             }
@@ -346,7 +349,8 @@ public class NaiveBayesClassifier implements Classifier {
         }
 
         Category mostLikelyCategory = probabilityToAllPossibleCategories.lastEntry().getValue();
-        Mapping m = (new MappingBuilder()).setCategory(mostLikelyCategory).setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
+        Mapping m = (new MappingBuilder()).setCategory(mostLikelyCategory)
+                .setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
         return m;
     }
 
