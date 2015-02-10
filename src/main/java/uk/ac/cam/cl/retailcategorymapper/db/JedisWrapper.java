@@ -9,6 +9,11 @@ import uk.ac.cam.cl.retailcategorymapper.config.DbConfig;
 class JedisWrapper {
     private static Jedis jedis;
 
+    /**
+     * Private constructor to prevent instantitation.
+     */
+    private JedisWrapper() {}
+
     public static Jedis getInstance() {
         if (jedis == null) {
             jedis = new Jedis(DbConfig.HOST, DbConfig.PORT);

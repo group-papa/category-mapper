@@ -11,6 +11,11 @@ import uk.ac.cam.cl.retailcategorymapper.config.DbConfig;
 class RedissonWrapper {
     private static Redisson redisson;
 
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private RedissonWrapper() {}
+
     public static Redisson getInstance() {
         if (redisson == null) {
             Config config = new Config();
