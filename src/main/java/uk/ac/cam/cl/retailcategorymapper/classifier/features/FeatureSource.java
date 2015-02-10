@@ -7,6 +7,6 @@ public enum FeatureSource {
     NAME,
     DESCRIPTION,
     PRICE,
-    ORIGINALCATEGORY,
+    ORIGINAL_CATEGORY,
     ATTRIBUTE
 }

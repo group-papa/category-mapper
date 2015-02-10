@@ -31,7 +31,6 @@ public class NaiveBayesClassifier implements Classifier {
     private Map<Category, Map<Feature, Integer>> featureCountPerCategory;
 
     public NaiveBayesClassifier() {
-
         this.featureSet = new HashSet<Feature>();
         this.categorySet = new HashSet<Category>();
         this.totalFeatureCounts = new HashMap<Feature, Integer>();
@@ -95,7 +94,6 @@ public class NaiveBayesClassifier implements Classifier {
      * multiple products inside the category
      */
     public int getFeatureCountInCategory(Feature feature, Category category) {
-
         if (this.featureCountPerCategory.containsKey(category)) {
             Map<Feature, Integer> featureCounts = this.featureCountPerCategory.get(category);
             //features seen associated with this category
@@ -363,9 +361,13 @@ public class NaiveBayesClassifier implements Classifier {
         throw new UnsupportedOperationException();
     }
 
-
     @Override
     public Mapping classify(Taxonomy taxonomy, Product product) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void train(Mapping mapping) {
         throw new UnsupportedOperationException();
     }
 }

@@ -27,11 +27,11 @@ public class ProductTest {
                 .setOriginalCategory(CATEGORY)
                 .createProduct();
 
-        Assert.assertEquals(product.getId(), ID);
-        Assert.assertEquals(product.getName(), NAME);
-        Assert.assertEquals(product.getDescription(), DESCRIPTION);
-        Assert.assertEquals(product.getPrice(), PRICE);
-        Assert.assertEquals(product.getOriginalCategory(), CATEGORY);
+        Assert.assertEquals(ID, product.getId());
+        Assert.assertEquals(NAME, product.getName());
+        Assert.assertEquals(DESCRIPTION, product.getDescription());
+        Assert.assertEquals(PRICE, product.getPrice());
+        Assert.assertEquals(CATEGORY, product.getOriginalCategory());
     }
 
     @Test
@@ -40,6 +40,6 @@ public class ProductTest {
                 .addAttribute(ATTR_KEY, ATTR_VALUE)
                 .createProduct();
 
-        Assert.assertEquals(product.getAttribute(ATTR_KEY), ATTR_VALUE);
+        Assert.assertEquals(ATTR_VALUE, product.getAttribute(ATTR_KEY));
     }
 }

@@ -9,4 +9,5 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
  */
 public interface Classifier {
     public Mapping classify(Taxonomy taxonomy, Product product);
+    public void train(Mapping mapping);
 }

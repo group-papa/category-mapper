@@ -9,15 +9,13 @@ import java.util.Arrays;
  */
 public class Category {
     private String[] parts;
-    private Taxonomy taxonomy;
 
-    protected Category(String[] parts, Taxonomy taxonomy) {
+    protected Category(String[] parts) {
         if (parts.length == 0) {
             throw new IllegalArgumentException();
         }
 
         this.parts = Arrays.copyOf(parts, parts.length);
-        this.taxonomy = taxonomy;
     }
 
     public String getPart(int n) {
@@ -26,10 +24,6 @@ public class Category {
 
     public String[] getAllParts() {
         return Arrays.copyOf(parts, parts.length);
-    }
-
-    public Taxonomy getTaxonomy() {
-        return taxonomy;
     }
 
     public String toString() {
@@ -44,15 +38,12 @@ public class Category {
         Category category = (Category) o;
 
         if (!Arrays.equals(parts, category.parts)) return false;
-        if (!taxonomy.equals(category.taxonomy)) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = Arrays.hashCode(parts);
-        result = 31 * result + taxonomy.hashCode();
-        return result;
+        return Arrays.hashCode(parts);
     }
 }

@@ -6,13 +6,15 @@ package uk.ac.cam.cl.retailcategorymapper.entities;
 public class Mapping {
     private Product product;
     private Category category;
+    private Taxonomy taxonomy;
     private Method method;
     private float confidence;
 
-    protected Mapping(Product product, Category category, Method method, float
-                      confidence) {
+    protected Mapping(Product product, Category category, Taxonomy taxonomy,
+                      Method method, float confidence) {
         this.product = product;
         this.category = category;
+        this.taxonomy = taxonomy;
         this.method = method;
         this.confidence = confidence;
     }
@@ -23,6 +25,10 @@ public class Mapping {
 
     public Category getCategory() {
         return category;
+    }
+
+    public Taxonomy getTaxonomy() {
+        return taxonomy;
     }
 
     public Method getMethod() {

@@ -58,7 +58,7 @@ public class FeatureConverter2 {
 		Category originalCategory = product.getOriginalCategory();
 		String[] partsArray = originalCategory.getAllParts();
 		if ((!(partsArray == null)) && (!(partsArray.length == 0))) {
-			FeatureSource ft = FeatureSource.ORIGINALCATEGORY;
+			FeatureSource ft = FeatureSource.ORIGINAL_CATEGORY;
 			for (int i=0; i < partsArray.length; i++) {
 				String categoryPart = partsArray[i];
 				Feature cpFeature = new Feature(ft, categoryPart);
