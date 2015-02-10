@@ -11,10 +11,12 @@ import java.util.List;
 public class Taxonomy {
     private String id;
     private String name;
+    private String dateCreated;
 
-    protected Taxonomy(String id, String name) {
+    protected Taxonomy(String id, String name, String dateCreated) {
         this.id = id;
         this.name = name;
+        this.dateCreated = dateCreated;
     }
 
     public String getId() {
@@ -27,6 +29,10 @@ public class Taxonomy {
 
     public List<Category> getCategories() {
         throw new UnsupportedOperationException();
+    }
+
+    public String getDateCreated() {
+        return dateCreated;
     }
 
     @Override

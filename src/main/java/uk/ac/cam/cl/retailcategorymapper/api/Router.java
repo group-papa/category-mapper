@@ -1,8 +1,5 @@
 package uk.ac.cam.cl.retailcategorymapper.api;
 
-import spark.ExceptionHandler;
-import spark.Request;
-import spark.Response;
 import spark.Spark;
 import uk.ac.cam.cl.retailcategorymapper.config.ApiConfig;
 

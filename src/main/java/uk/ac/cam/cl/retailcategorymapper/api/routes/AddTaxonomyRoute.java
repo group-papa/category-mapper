@@ -5,6 +5,7 @@ import spark.Response;
 import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import uk.ac.cam.cl.retailcategorymapper.entities.TaxonomyBuilder;
+import uk.ac.cam.cl.retailcategorymapper.utils.DateTime;
 import uk.ac.cam.cl.retailcategorymapper.utils.Uuid;
 
 import java.util.ArrayList;
@@ -18,23 +19,27 @@ public class AddTaxonomyRoute extends JsonRoute {
             throws Exception {
         String taxonomyName = request.queryParams("taxonomyName");
         if (taxonomyName == null) {
-            throw new IllegalArgumentException("taxonomyName must be " +
-                    "provided.");
+            throw new IllegalArgumentException(
+                    "taxonomyName must be provided.");
         }
 
-        Taxonomy taxonomy = new TaxonomyBuilder().setId(Uuid.generateUUID())
-                .setName(taxonomyName).createTaxonomy();
+        Taxonomy taxonomy = new TaxonomyBuilder()
+                .setId(Uuid.generateUUID())
+                .setName(taxonomyName)
+                .setDateCreated(DateTime.getCurrentTimeIso8601())
+                .createTaxonomy();
+
         // TODO: Store categories as well.
         TaxonomyDb.setTaxonomy(taxonomy, new ArrayList<>());
 
-        return new AddTaxonomyReply(taxonomy.getId());
+        return new AddTaxonomyReply(taxonomy);
     }
 
     class AddTaxonomyReply {
-        String taxonomyId;
+        Taxonomy taxonomy;
 
-        public AddTaxonomyReply(String taxonomyId) {
-            this.taxonomyId = taxonomyId;
+        public AddTaxonomyReply(Taxonomy taxonomy) {
+            this.taxonomy = taxonomy;
         }
     }
 }
