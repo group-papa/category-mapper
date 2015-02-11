@@ -2,6 +2,7 @@ package uk.ac.cam.cl.retailcategorymapper.api.routes;
 
 import spark.Request;
 import spark.Response;
+import uk.ac.cam.cl.retailcategorymapper.api.FormDataParser;
 import uk.ac.cam.cl.retailcategorymapper.api.exceptions.BadInputException;
 import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
@@ -20,7 +21,9 @@ public class AddTaxonomyRoute extends JsonRoute {
     @Override
     public Object handleRequest(Request request, Response response)
             throws Exception {
-        String taxonomyName = request.queryParams("name");
+        FormDataParser formDataParser = new FormDataParser(request.raw());
+
+        String taxonomyName = formDataParser.getField("name");
         if (taxonomyName == null) {
             throw new BadInputException(
                     "A name for the new taxonomy must be provided.");
@@ -32,8 +35,7 @@ public class AddTaxonomyRoute extends JsonRoute {
                 .setDateCreated(DateTime.getCurrentTimeIso8601())
                 .createTaxonomy();
 
-        // TODO: Get categories from request.
-        String categoryData = "";
+        String categoryData = formDataParser.getField("attachment");
         CategoryFileUnmarshaller unmarshaller = new CategoryFileUnmarshaller();
         List<Category> categories = unmarshaller.unmarshal(categoryData);
 
