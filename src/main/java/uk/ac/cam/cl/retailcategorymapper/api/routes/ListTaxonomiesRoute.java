@@ -8,7 +8,6 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * List taxonomies stored in the database.
@@ -24,8 +23,10 @@ public class ListTaxonomiesRoute extends JsonRoute {
             List<Category> categories = TaxonomyDb.getCategoriesForTaxonomy
                     (taxonomy.getId());
 
-            List<String> categoryIds = categories.stream()
-                    .map(Category::getId).collect(Collectors.toList());
+            List<String> categoryIds = new ArrayList<>();
+            for (Category category : categories) {
+                categoryIds.add(category.getId());
+            }
 
             results.add(new TaxonomyEntry(taxonomy.getId(),
                     taxonomy.getName(), taxonomy.getDateCreated(),
@@ -35,7 +36,7 @@ public class ListTaxonomiesRoute extends JsonRoute {
         return new ListTaxonomiesReply(results);
     }
 
-    class ListTaxonomiesReply {
+    static class ListTaxonomiesReply {
         List<TaxonomyEntry> taxonomies;
 
         public ListTaxonomiesReply(List<TaxonomyEntry> taxonomies) {
@@ -43,7 +44,7 @@ public class ListTaxonomiesRoute extends JsonRoute {
         }
     }
 
-    class TaxonomyEntry {
+    static class TaxonomyEntry {
         private String id;
         private String name;
         private String dateCreated;

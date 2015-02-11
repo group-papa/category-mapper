@@ -7,8 +7,8 @@ import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Get metadata for a specific taxonomy.
@@ -24,17 +24,23 @@ public class GetTaxonomyRoute extends JsonRoute {
             throw new NotFoundException("Unknown taxonomyId.");
         }
 
+        return generateGetTaxonomyReply(taxonomy);
+    }
+
+    static GetTaxonomyReply generateGetTaxonomyReply(Taxonomy taxonomy) {
         List<Category> categories = TaxonomyDb
-                .getCategoriesForTaxonomy(taxonomyId);
-        List<String> categoryIds = categories.stream()
-                .map(Category::getId).collect(Collectors.toList());
+                .getCategoriesForTaxonomy(taxonomy.getId());
+        List<String> categoryIds = new ArrayList<>();
+        for (Category category : categories) {
+            categoryIds.add(category.getId());
+        }
 
         return new GetTaxonomyReply(new TaxonomyEntry(taxonomy.getId(),
                 taxonomy.getName(), taxonomy.getDateCreated(), categoryIds),
                 categories);
     }
 
-    class GetTaxonomyReply {
+    static class GetTaxonomyReply {
         TaxonomyEntry taxonomy;
         List<Category> categories;
 
@@ -45,7 +51,7 @@ public class GetTaxonomyRoute extends JsonRoute {
         }
     }
 
-    class TaxonomyEntry {
+    static class TaxonomyEntry {
         private String id;
         private String name;
         private String dateCreated;
