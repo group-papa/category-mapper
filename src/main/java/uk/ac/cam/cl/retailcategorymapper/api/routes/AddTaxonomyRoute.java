@@ -20,9 +20,10 @@ public class AddTaxonomyRoute extends JsonRoute {
     @Override
     public Object handleRequest(Request request, Response response)
             throws Exception {
-        String taxonomyName = request.queryParams("taxonomyName");
+        String taxonomyName = request.queryParams("name");
         if (taxonomyName == null) {
-            throw new BadInputException("taxonomyName must be provided.");
+            throw new BadInputException(
+                    "A name for the new taxonomy must be provided.");
         }
 
         Taxonomy taxonomy = new TaxonomyBuilder()
