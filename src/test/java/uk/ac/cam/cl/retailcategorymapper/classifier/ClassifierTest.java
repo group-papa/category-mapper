@@ -17,11 +17,16 @@ import java.util.List;
 public class ClassifierTest {
     private static NaiveBayesClassifier nbc1 = new NaiveBayesClassifier();
     private static NaiveBayesClassifier nbc2 = new NaiveBayesClassifier();
+    private static NaiveBayesClassifier nbc3 = new NaiveBayesClassifier();
 
     private static String[] c1Array = {"cat", "subcat", "subsubcat"};
     private static Category c1 = (new CategoryBuilder()).setId("catID").setParts(c1Array).createCategory();
+    private static Category c2 = (new CategoryBuilder()).setId("catID2").setParts(c1Array).createCategory();
+
 
     private static Product p = (new ProductBuilder()).setId("prodID").setName("part1 part2").setDescription("description p").setPrice(100).setOriginalCategory(c1).createProduct();
+    private static Product p2 = (new ProductBuilder()).setId("prodID2").setName("product two").setDescription("p2").setPrice(200).createProduct();
+    private static Product p3 = (new ProductBuilder()).setId("prodID3").setName("part2 three").setDescription("p3").setPrice(300).setOriginalCategory(c1).createProduct();
 
     private static FeatureConverter1 fc1 = new FeatureConverter1();
 
@@ -80,7 +85,23 @@ public class ClassifierTest {
 
     @Test
     public void testTrainWithBagOfWordsSingleProductTwoProducts() {
-        throw new UnsupportedOperationException();
+        nbc3.trainWithBagOfWordsSingleProduct(p, c2);
+        nbc3.trainWithBagOfWordsSingleProduct(p3, c2);
+        Assert.assertEquals(nbc3.getFeatures().size(), 11, 0);
+        Assert.assertTrue(nbc3.getFeatures().contains(pCat1));
+        Assert.assertTrue(nbc3.getCategories().contains(c2));
+        Assert.assertEquals(nbc3.getCategories().size(), 1);
+        Assert.assertEquals(nbc3.getTotalFeatureCounts().size(), 11, 0);
+        Assert.assertTrue(nbc3.getTotalFeatureCounts().containsKey(pName1));
+        Assert.assertTrue(nbc3.getTotalFeatureCounts().get(pCat1) == 2);
+        Assert.assertTrue(nbc3.getCategoryCounts().containsKey(c2) && nbc3.getCategoryCounts().containsValue(15));
+        Assert.assertTrue(nbc3.getFeatureCountPerCategory().containsKey(c2));
+        Assert.assertTrue(nbc3.getFeatureCountPerCategory().get(c2).get(pName1) == 1);
+        Assert.assertTrue(nbc3.getFeatureCountPerCategory().get(c2).get(pCat1) == 2);
+        Assert.assertEquals(nbc3.getFeatureCountPerCategory().get(c2).size(), 11);
+        Assert.assertEquals(nbc3.getFeatureCountInCategory(pName1, c2), 1);
+        Assert.assertEquals(nbc3.getFeatureCountInCategory(pCat1, c2), 2);
     }
+
 }
 
