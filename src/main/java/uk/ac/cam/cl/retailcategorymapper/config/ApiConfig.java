@@ -3,6 +3,7 @@ package uk.ac.cam.cl.retailcategorymapper.config;
 import uk.ac.cam.cl.retailcategorymapper.api.Method;
 import uk.ac.cam.cl.retailcategorymapper.api.RouteBinding;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.AddTaxonomyRoute;
+import uk.ac.cam.cl.retailcategorymapper.api.routes.GetTaxonomyRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.HomeRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.ListTaxonomiesRoute;
 
@@ -37,7 +38,9 @@ public final class ApiConfig {
                     new RouteBinding("/taxonomies", Method.GET,
                             new ListTaxonomiesRoute()),
                     new RouteBinding("/taxonomies", Method.POST,
-                            new AddTaxonomyRoute())
+                            new AddTaxonomyRoute()),
+                    new RouteBinding("/taxonomies/:id", Method.GET,
+                            new GetTaxonomyRoute())
             ));
 
     /**

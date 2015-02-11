@@ -1,6 +1,9 @@
 package uk.ac.cam.cl.retailcategorymapper.api;
 
 import spark.Spark;
+import uk.ac.cam.cl.retailcategorymapper.api.exceptions.BadInputException;
+import uk.ac.cam.cl.retailcategorymapper.api.exceptions.ExceptionJsonHandler;
+import uk.ac.cam.cl.retailcategorymapper.api.exceptions.NotFoundException;
 import uk.ac.cam.cl.retailcategorymapper.config.ApiConfig;
 
 /**
@@ -10,8 +13,8 @@ public class Router {
     public static void run() {
         Spark.port(ApiConfig.PORT);
 
-        Spark.exception(IllegalArgumentException.class,
-                new ExceptionJsonHandler());
+        Spark.exception(BadInputException.class, new ExceptionJsonHandler());
+        Spark.exception(NotFoundException.class, new ExceptionJsonHandler());
 
         for (RouteBinding b : ApiConfig.BINDINGS) {
             switch (b.getMethod()) {

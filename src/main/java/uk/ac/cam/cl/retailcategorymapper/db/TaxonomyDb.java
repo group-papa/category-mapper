@@ -27,8 +27,8 @@ public class TaxonomyDb {
 
         List<Taxonomy> result = new ArrayList<>();
         for (String key : keys) {
-            RBucket<Taxonomy> bucket = redisson.getBucket(key);
-            Taxonomy taxonomy = bucket.get();
+            RBucket<Taxonomy> taxonomyRBucket = redisson.getBucket(key);
+            Taxonomy taxonomy = taxonomyRBucket.get();
             if (taxonomy != null) {
                 result.add(taxonomy);
             }
@@ -51,6 +51,19 @@ public class TaxonomyDb {
     }
 
     /**
+     * Get the categories for a taxonomy.
+     * @param taxonomyId The ID for the taxonomy.
+     * @return The taxonomy's categories.
+     */
+    public static List<Category> getCategoriesForTaxonomy(String taxonomyId) {
+        Redisson redisson = RedissonWrapper.getInstance();
+
+        String categoriesKey = KeyBuilder.categoriesForTaxonomy(taxonomyId);
+        RList<Category> categoryRList = redisson.getList(categoriesKey);
+        return new ArrayList<>(categoryRList);
+    }
+
+    /**
      * Store a taxonomy; if one already exists, it will be overwritten.
      * @param taxonomy The taxonomy to add.
      * @param categories The taxonomy's categories.
@@ -65,8 +78,8 @@ public class TaxonomyDb {
 
         String categoriesKey = KeyBuilder.categoriesForTaxonomy(
                 taxonomy.getId());
-        RList<Category> rList = redisson.getList(categoriesKey);
-        rList.clear();
-        rList.addAll(categories);
+        RList<Category> categoryRList = redisson.getList(categoriesKey);
+        categoryRList.clear();
+        categoryRList.addAll(categories);
     }
 }

@@ -2,6 +2,7 @@ package uk.ac.cam.cl.retailcategorymapper.api.routes;
 
 import spark.Request;
 import spark.Response;
+import uk.ac.cam.cl.retailcategorymapper.api.exceptions.BadInputException;
 import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import uk.ac.cam.cl.retailcategorymapper.entities.TaxonomyBuilder;
@@ -19,8 +20,7 @@ public class AddTaxonomyRoute extends JsonRoute {
             throws Exception {
         String taxonomyName = request.queryParams("taxonomyName");
         if (taxonomyName == null) {
-            throw new IllegalArgumentException(
-                    "taxonomyName must be provided.");
+            throw new BadInputException("taxonomyName must be provided.");
         }
 
         Taxonomy taxonomy = new TaxonomyBuilder()
