@@ -17,16 +17,22 @@ public class FeatureConverter1 {
 
         String name = product.getName();
         if ((name != null) && !(name.equals(""))) {
-            FeatureSource ft = FeatureSource.NAME;
-            Feature nameFeature = new Feature(ft, name);
-            createdFeatures.add(nameFeature);
+            String[] splitName = name.split(" ");
+            for (String s : splitName) {
+                FeatureSource ft = FeatureSource.NAME;
+                Feature nameFeature = new Feature(ft, s);
+                createdFeatures.add(nameFeature);
+            }
         }
 
         String description = product.getDescription();
         if ((description != null) && !(description.equals(""))) {
-            FeatureSource ft = FeatureSource.DESCRIPTION;
-            Feature descFeature = new Feature(ft, description);
-            createdFeatures.add(descFeature);
+            String[] splitDescription = description.split(" ");
+            for (String s : splitDescription) {
+                FeatureSource ft = FeatureSource.DESCRIPTION;
+                Feature descFeature = new Feature(ft, s);
+                createdFeatures.add(descFeature);
+            }
         }
 
         Integer priceInteger = product.getPrice();
@@ -41,8 +47,8 @@ public class FeatureConverter1 {
         String[] partsArray = originalCategory.getAllParts();
         if ((!(partsArray == null)) && (!(partsArray.length == 0))) {
             FeatureSource ft = FeatureSource.ORIGINAL_CATEGORY;
-            for (int i = 0; i < partsArray.length; i++) {
-                String categoryPart = partsArray[i];
+            for (String s : partsArray) {
+                String categoryPart = s;
                 Feature cpFeature = new Feature(ft, categoryPart);
                 createdFeatures.add(cpFeature);
             }

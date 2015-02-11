@@ -72,7 +72,7 @@ public class NaiveBayesClassifier implements Classifier {
      * @return map of categories to number of times a category was seen in training
      */
     public Map<Category, Integer> getCategoryCounts() {
-        return this.getCategoryCounts();
+        return this.categoryCounts;
     }
 
     /**
