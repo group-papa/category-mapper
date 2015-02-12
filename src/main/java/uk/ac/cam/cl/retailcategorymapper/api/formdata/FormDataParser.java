@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.retailcategorymapper.api;
+package uk.ac.cam.cl.retailcategorymapper.api.formdata;
 
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
@@ -8,6 +8,7 @@ import org.apache.commons.fileupload.util.Streams;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ import java.util.Map;
  * Parse requests encoded as multipart/form-data.
  */
 public class FormDataParser {
-    private Map<String, String> fieldData = new HashMap<>();
+    private Map<String, FormDataField> fieldData = new HashMap<>();
 
     public FormDataParser(HttpServletRequest request) {
         ServletFileUpload servletFileUpload = new ServletFileUpload();
@@ -27,14 +28,19 @@ public class FormDataParser {
             while (fileItemIterator.hasNext()) {
                 FileItemStream item = fileItemIterator.next();
                 String name = item.getFieldName();
-                fieldData.put(name, Streams.asString(item.openStream()));
+                fieldData.put(name, new FormDataField(item.getFieldName(),
+                        item.getName(), item.isFormField(), item.openStream()));
             }
         } catch (FileUploadException | IOException e) {
             e.printStackTrace();
         }
     }
 
-    public String getField(String name) {
+    public FormDataField getField(String name) {
         return fieldData.get(name);
+    }
+
+    public static boolean isMultipartContent(HttpServletRequest request) {
+        return ServletFileUpload.isMultipartContent(request);
     }
 }

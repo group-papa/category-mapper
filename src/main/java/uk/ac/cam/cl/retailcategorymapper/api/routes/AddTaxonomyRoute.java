@@ -2,7 +2,7 @@ package uk.ac.cam.cl.retailcategorymapper.api.routes;
 
 import spark.Request;
 import spark.Response;
-import uk.ac.cam.cl.retailcategorymapper.api.FormDataParser;
+import uk.ac.cam.cl.retailcategorymapper.api.formdata.FormDataParser;
 import uk.ac.cam.cl.retailcategorymapper.api.exceptions.BadInputException;
 import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
@@ -23,7 +23,8 @@ public class AddTaxonomyRoute extends BaseApiRoute {
             throws Exception {
         FormDataParser formDataParser = new FormDataParser(request.raw());
 
-        String taxonomyName = formDataParser.getField("name");
+        String taxonomyName = formDataParser.getField("name")
+                .getStreamAsString();
         if (taxonomyName == null) {
             throw new BadInputException(
                     "A name for the new taxonomy must be provided.");
@@ -35,7 +36,8 @@ public class AddTaxonomyRoute extends BaseApiRoute {
                 .setDateCreated(DateTime.getCurrentTimeIso8601())
                 .createTaxonomy();
 
-        String categoryData = formDataParser.getField("attachment");
+        String categoryData = formDataParser.getField("attachment")
+                .getStreamAsString();
         if (categoryData == null) {
             throw new BadInputException("A category file must be provided.");
         }
