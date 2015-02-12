@@ -38,6 +38,8 @@ public class Category {
         return StringUtils.join(parts, " > ");
     }
 
+    public String toString(String splitter) { return StringUtils.join(parts, splitter);}
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

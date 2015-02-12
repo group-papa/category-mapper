@@ -4,6 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.CategoryBuilder;
@@ -16,46 +17,13 @@ import uk.ac.cam.cl.retailcategorymapper.entities.ProductBuilder;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.List;
 
-// TODO: Rewrite to accept XML passed in as an argument rather than from a file on the disk.
-public class XMLParser {
     /*
      * Authored by Charlie Barton
-     *
-     * this class provides several methods for parsing an XML file into our
-     * internal representations which take 2 Files:
-     * 1) .xml
-     * 2) .txt
-     * the .txt describes the format of the XML file and parses it appropriately
-     *
-     * The XML format descriptor takes the form of lines with a single ':'
-     * separating what we call the field internally from what it is called in the
-     * XML file so a sample line is "our name:XML field;"
-     *
-     * an example descriptor file is
-     *
-     * XMLdescritor.txt
-     *
-     * product:product;
-     * price:productPrice;
-     * id:productSku;
-     * name:productName;
-     * description:productDescription;
-     * category1:none;
-     * attributes:none;
-     * category_split: > ;
-     *
-     * all 7 of these fields must be provided for parsing a product list
-     *
-     * additionally for parsing a mapping we need to provide a mapped_category
-     *
-     * none after the colon indicates we don't what that field processed for
-     * example it is not in the XML
      *
      * Most of the parsing code was copied from:
      * http://stackoverflow.com/questions
@@ -63,22 +31,77 @@ public class XMLParser {
      *
      * (under an open-source licence) so I don't really understand what it is doing but it
      * seems to work :)
+     *
+     * the constant strings at the top specify the format of the XML file
      */
 
-    static public List<Mapping> parseMapping(File fileXML, File fileXMLFormat) {
+public class XMLParser {
+
+    static final String NAMEXML = "productName";
+    static final String PRODUCTXML = "product";
+    static final String IDXML = "productSku";
+    static final String DESCRIPTIONXML = "productDescription";
+    static final String SPLITXML = " > ";
+    static final String MAPPEDCATEGORYXML = "productGoogleCategory";
+    static final String PRICEXML = "productPrice";
+    static final String CATEGORYXML = "productCategory";
+
+
+    static public String productListToXML(List<Product> products){
+
+        StringBuilder answerBuilder = new StringBuilder();
+
+        answerBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        answerBuilder.append("<products>");
+
+        for(Product p:products){
+            answerBuilder.append("<"+PRODUCTXML+">");
+
+            answerBuilder.append("<"+NAMEXML+">");
+            answerBuilder.append(p.getName());
+            answerBuilder.append("</"+NAMEXML+">");
+
+            answerBuilder.append("<"+IDXML+">");
+            answerBuilder.append(p.getId());
+            answerBuilder.append("</"+IDXML+">");
+
+            answerBuilder.append("<"+DESCRIPTIONXML+">");
+            answerBuilder.append(p.getDescription());
+            answerBuilder.append("</"+DESCRIPTIONXML+">");
+
+            answerBuilder.append("<"+PRICEXML+">");
+            answerBuilder.append((double)(p.getPrice())/100.0);
+            //probably need to format the price
+            answerBuilder.append("</"+PRICEXML+">");
+
+            answerBuilder.append("<"+DESCRIPTIONXML+">");
+            answerBuilder.append(p.getDescription());
+            answerBuilder.append("</"+DESCRIPTIONXML+">");
+
+            answerBuilder.append("<"+CATEGORYXML+">");
+            answerBuilder.append(p.getOriginalCategory().toString(SPLITXML));
+            answerBuilder.append("</"+CATEGORYXML+">");
+
+            answerBuilder.append("</"+PRODUCTXML+">");
+        }
+
+        answerBuilder.append("</products>");
+
+        return answerBuilder.toString();
+    }
+
+
+    static public List<Mapping> parseMapping(String stringXML) {
         try {
-            HashMap<String, String> descriptorTags = new HashMap<>();
-
-            testMappingTagsOk(descriptorTags);
-
+            InputSource inputSource = new InputSource(new StringReader(stringXML));
             List<Mapping> answer = new LinkedList<>();
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc;
-            doc = dBuilder.parse(fileXML);
+            doc = dBuilder.parse(inputSource);
             doc.getDocumentElement().normalize();
 
-            NodeList nList = doc.getElementsByTagName(descriptorTags.get("product"));
+            NodeList nList = doc.getElementsByTagName(PRODUCTXML);
 
             for (int temp = 0; temp < nList.getLength(); temp++) {
 
@@ -86,14 +109,14 @@ public class XMLParser {
 
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element element = (Element) nNode;
-                    ProductBuilder productBuild = prepareProductBuilder(element, descriptorTags);
+                    ProductBuilder productBuild = prepareProductBuilder(element);
                     Product p = productBuild.createProduct();
                     MappingBuilder mapBuild = new MappingBuilder();
                     mapBuild.setProduct(p);
 
-                    String s = element.getElementsByTagName(
-                            descriptorTags.get("mapped_category")).item(0).getTextContent();
-                    mapBuild.setCategory(prepareCategory(s, descriptorTags.get("category_split")));
+                    String s;
+                    s = element.getElementsByTagName(MAPPEDCATEGORYXML).item(0).getTextContent();
+                    mapBuild.setCategory(prepareCategory(s));
                     mapBuild.setMethod(Method.UPLOAD);
 
                     answer.add(mapBuild.createMapping());
@@ -101,11 +124,7 @@ public class XMLParser {
             }
             return answer;
         }
-
-        /*
-         * although I just re-throw the exception they are change to RuntimeException
-         * which I'm sure someone is going to thank me for
-         */
+        //re-throw as RuntimeExceptions
         catch (SAXException e) {
             System.err.println("SAX Exception in XML Parser");
             throw new RuntimeException("SAX Exception in XML Parser");
@@ -118,41 +137,29 @@ public class XMLParser {
         }
     }
 
-
-    static private HashMap<String, Category> categoryDuplicateRemover = new HashMap<>();
-
-    static public List<Product> parseProductList(File fileXML, File fileXMLFormat) {
+    static public List<Product> parseProductList(String stringXML) {
         try {
-            HashMap<String, String> descriptorTags = new HashMap<>();
-
-            testProductListTagsOk(descriptorTags);
-
+            InputSource inputSource = new InputSource(new StringReader(stringXML));
             List<Product> answer = new LinkedList<>();
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc;
-            doc = dBuilder.parse(fileXML);
+            doc = dBuilder.parse(inputSource);
             doc.getDocumentElement().normalize();
 
-            NodeList nList = doc.getElementsByTagName(descriptorTags.get("product"));
+            NodeList nList = doc.getElementsByTagName(PRODUCTXML);
 
             for (int temp = 0; temp < nList.getLength(); temp++) {
-
                 Node nNode = nList.item(temp);
 
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                    ProductBuilder productBuild = prepareProductBuilder((Element) nNode, descriptorTags);
+                    ProductBuilder productBuild = prepareProductBuilder((Element) nNode);
                     answer.add(productBuild.createProduct());
                 }
-
             }
             return answer;
         }
-
-        /*
-         * although I just re-throw the exception they are change to RuntimeException
-         * which I'm sure someone is going to thank me for
-         */
+        //re-throw as RuntimeExceptions
         catch (SAXException e) {
             System.err.println("SAX Exception in XML Parser");
             throw new RuntimeException("SAX Exception in XML Parser");
@@ -164,97 +171,38 @@ public class XMLParser {
             throw new RuntimeException("ParserConfigurationException in XML Parser");
         }
     }
-
 
     /*
      * this method takes an element and a hashMap and extracts the relevant fields
      * out of the element to build a product which it returns
      */
-    static ProductBuilder prepareProductBuilder(Element element, HashMap<String, String> descriptorTags) {
+    static ProductBuilder prepareProductBuilder(Element element) {
 
         ProductBuilder productBuild = new ProductBuilder();
 
-        if (descriptorTags.get("price") != "none") {
-            String price = element.getElementsByTagName(descriptorTags.get("price")).item(0).getTextContent();
-            productBuild.setPrice((int) (Double.valueOf(price) * 100));
-        }
+        String price = element.getElementsByTagName(PRICEXML).item(0).getTextContent();
 
-        if (descriptorTags.get("id") != "none") {
-            productBuild.setId(element.getElementsByTagName(descriptorTags.get("id")).item(0).getTextContent());
-        }
+        productBuild.setPrice((int)(Math.round(Double.valueOf(price) * 100.0)));
 
-        if (descriptorTags.get("name") != "none") {
-            productBuild.setName(element.getElementsByTagName(descriptorTags.get("name")).item(0).getTextContent());
-        }
+        productBuild.setId(element.getElementsByTagName(IDXML).item(0).getTextContent());
 
-        if (descriptorTags.get("name") != "none") {
-            productBuild.setDescription(element.getElementsByTagName(
-                    descriptorTags.get("description")).item(0).getTextContent());
-        }
+        productBuild.setName(element.getElementsByTagName(NAMEXML).item(0).getTextContent());
 
-        if (descriptorTags.get("category") != "none") {
-            String catPath = element.getElementsByTagName(descriptorTags.get("category")).item(0).getTextContent();
-            if (categoryDuplicateRemover.containsKey(catPath)) {
-                productBuild.setOriginalCategory(categoryDuplicateRemover.get(catPath));
-            } else {
-                Category c = prepareCategory(catPath, descriptorTags.get("category_split"));
-                productBuild.setOriginalCategory(c);
-                categoryDuplicateRemover.put(catPath, c);
-            }
-        }
+        productBuild.setDescription(element.getElementsByTagName(DESCRIPTIONXML).item(0).getTextContent());
 
-        if (!descriptorTags.get("attributes").equals("none")) {
-            throw new RuntimeException("attempt to use read attribute data - currently unimplemented in XML Parser");
-            //TODO implement
-        }
+        String catPath = element.getElementsByTagName(CATEGORYXML).item(0).getTextContent();
+        productBuild.setOriginalCategory (prepareCategory(catPath));
+
+        //currently we ignore the attribute field of Product
 
         return productBuild;
     }
 
-    static Category prepareCategory(String catPath, String split) {
-        String[] asList = catPath.split(split);
+    static Category prepareCategory(String catPath) {
+        String[] asList = catPath.split(SPLITXML);
         CategoryBuilder catBuild = new CategoryBuilder();
         catBuild.setParts(asList);
         return catBuild.createCategory();
     }
 
-    /*
-     * this method takes a hashMap (producted by the descriptor file) and checks it
-     * contains the necessary fields
-     */
-    static boolean testProductListTagsOk(HashMap<String, String> tagsToTest) {
-        if (!tagsToTest.containsKey("price")) {
-            throw new RuntimeException("malformed XMLdescriptor file in XML parser - no \"price\" field");
-        }
-        if (!tagsToTest.containsKey("id")) {
-            throw new RuntimeException("malformed XMLdescriptor file in XML parser - no \"id\" field");
-        }
-        if (!tagsToTest.containsKey("name")) {
-            throw new RuntimeException("malformed XMLdescriptor file in XML parser - no \"name\" field");
-        }
-        if (!tagsToTest.containsKey("description")) {
-            throw new RuntimeException("malformed XMLdescriptor file in XML parser - no \"description\" field");
-        }
-        if (!tagsToTest.containsKey("category")) {
-            throw new RuntimeException("malformed XMLdescriptor file in XML parser - no \"category\" field");
-        }
-        if (!tagsToTest.containsKey("attributes")) {
-            throw new RuntimeException("malformed XMLdescriptor file in XML parser - no \"attributes\" field");
-        }
-        if (!tagsToTest.containsKey("product")) {
-            throw new RuntimeException("malformed XMLdescriptor file in XML parser - no \"product\" field");
-        }
-        if (!tagsToTest.containsKey("category_split")) {
-            throw new RuntimeException("malformed XMLdescriptor file in XML parser - no \"category_split\" field");
-        }
-        return true;
-    }
-
-    static boolean testMappingTagsOk(HashMap<String, String> tagsToTest) {
-        testProductListTagsOk(tagsToTest);
-        if (!tagsToTest.containsKey("mapped_category")) {
-            throw new RuntimeException("malformed XMLdescriptor file in XML parser - no \"mapped_category\" field");
-        }
-        return true;
-    }
 }
