@@ -1,6 +1,6 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
-import uk.ac.cam.cl.retailcategorymapper.classifier.features.BasicFeatureConverter;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.NGramFeatureExtractor;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
@@ -279,7 +279,7 @@ public class NaiveBayesClassifier {
      * @param category Destination category that product has been mapped to
      */
     public void trainWithBagOfWordsSingleProduct(Product product, Category category) {
-        List<Feature> featuresFromProduct = BasicFeatureConverter.changeProductToFeature(product);
+        List<Feature> featuresFromProduct = NGramFeatureExtractor.changeProductToFeature(product);
 
         for (Feature f : featuresFromProduct) {
             this.addSeenFeatureInSpecifiedCategory(f, category);
@@ -300,7 +300,7 @@ public class NaiveBayesClassifier {
         //treemap sorts in increasing order
         NavigableMap<Double, Category> probabilityToAllPossibleCategories = new TreeMap<Double, Category>();
 
-        List<Feature> features = BasicFeatureConverter.changeProductToFeature(product);
+        List<Feature> features = NGramFeatureExtractor.changeProductToFeature(product);
         Set<Category> allDestinationCategories = taxonomy.getCategories();
 
         //take a single category
