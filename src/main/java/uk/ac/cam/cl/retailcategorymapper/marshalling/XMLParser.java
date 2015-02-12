@@ -4,6 +4,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
@@ -45,6 +48,50 @@ public class XMLParser {
     static final String MAPPEDCATEGORYXML = "productGoogleCategory";
     static final String PRICEXML = "productPrice";
     static final String CATEGORYXML = "productCategory";
+
+
+    static public String productListToXML(List<Product> products){
+
+        StringBuilder answerBuilder = new StringBuilder();
+
+        answerBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        answerBuilder.append("<products>");
+
+        for(Product p:products){
+            answerBuilder.append("<"+PRODUCTXML+">");
+
+            answerBuilder.append("<"+NAMEXML+">");
+            answerBuilder.append(p.getName());
+            answerBuilder.append("</"+NAMEXML+">");
+
+            answerBuilder.append("<"+IDXML+">");
+            answerBuilder.append(p.getId());
+            answerBuilder.append("</"+IDXML+">");
+
+            answerBuilder.append("<"+DESCRIPTIONXML+">");
+            answerBuilder.append(p.getDescription());
+            answerBuilder.append("</"+DESCRIPTIONXML+">");
+
+            answerBuilder.append("<"+PRICEXML+">");
+            answerBuilder.append((double)(p.getPrice())/100.0);
+            //probably need to format the price
+            answerBuilder.append("</"+PRICEXML+">");
+
+            answerBuilder.append("<"+DESCRIPTIONXML+">");
+            answerBuilder.append(p.getDescription());
+            answerBuilder.append("</"+DESCRIPTIONXML+">");
+
+            answerBuilder.append("<"+CATEGORYXML+">");
+            answerBuilder.append(p.getOriginalCategory().toString(SPLITXML));
+            answerBuilder.append("</"+CATEGORYXML+">");
+
+            answerBuilder.append("</"+PRODUCTXML+">");
+        }
+
+        answerBuilder.append("</products>");
+
+        return answerBuilder.toString();
+    }
 
 
     static public List<Mapping> parseMapping(String stringXML) {
@@ -137,7 +184,8 @@ public class XMLParser {
         ProductBuilder productBuild = new ProductBuilder();
 
         String price = element.getElementsByTagName(PRICEXML).item(0).getTextContent();
-        productBuild.setPrice((int) (Double.valueOf(price) * 100));
+
+        productBuild.setPrice((int)(Math.round(Double.valueOf(price) * 100.0)));
 
         productBuild.setId(element.getElementsByTagName(IDXML).item(0).getTextContent());
 

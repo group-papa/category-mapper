@@ -51,4 +51,38 @@ public class Product {
     public String getAttribute(String key) {
         return attributes.get(key);
     }
+
+    @Override
+    public boolean equals(Object o){
+        if(!(o instanceof Product)){return false;}
+        Product p = (Product) o;
+
+        if(!id.equals(p.id)){return false;}
+
+        if((!name.equals(p.name))||
+                (!description.equals(p.description))||
+                (!price.equals(p.price))||
+                (!originalCategory.equals(p.originalCategory))){
+
+            System.err.println(description);
+            System.err.println(p.description);
+            System.err.println(price);
+            System.err.println(p.price);
+
+            throw new RuntimeException("product ID violation");
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode(){
+        int answer = 0;
+        answer += id.hashCode();
+        answer *=17;
+        answer += name.hashCode();
+        answer *=17;
+        answer += price;
+        return answer;
+    }
 }
