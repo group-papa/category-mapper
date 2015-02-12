@@ -22,3 +22,7 @@ task execute(type:JavaExec, dependsOn:['classes']) {
     main = 'uk.ac.cam.cl.retailcategorymapper.RetailCategoryMapper'
     classpath = sourceSets.main.runtimeClasspath
 }
+
+checkstyle {
+    toolVersion = "6.3"
+}
