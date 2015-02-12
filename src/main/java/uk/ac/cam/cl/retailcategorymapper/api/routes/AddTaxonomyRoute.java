@@ -36,6 +36,10 @@ public class AddTaxonomyRoute extends BaseApiRoute {
                 .createTaxonomy();
 
         String categoryData = formDataParser.getField("attachment");
+        if (categoryData == null) {
+            throw new BadInputException("A category file must be provided.");
+        }
+
         CategoryFileUnmarshaller unmarshaller = new CategoryFileUnmarshaller();
         List<Category> categories = unmarshaller.unmarshal(categoryData);
 

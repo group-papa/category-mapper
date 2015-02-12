@@ -6,8 +6,7 @@ import spark.Response;
 import spark.Route;
 
 /**
- * Abstract route which transforms the output to JSON and sets the correct
- * response type.
+ * Abstract route which transforms the output to JSON and sets various headers.
  */
 public abstract class BaseApiRoute implements Route {
     private Gson gson = new Gson();

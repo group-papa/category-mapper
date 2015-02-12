@@ -23,6 +23,10 @@ public class CategoryFileUnmarshaller implements Unmarshaller<Category> {
         String delimiter = "\\s*" + ParsingConfig.CATEGORY_FILE_DELIMITER +
                 "\\s*";
         for (String line : lines) {
+            if (line.startsWith("#")) {
+                continue;
+            }
+
             String[] partsArray = line.trim().split(delimiter);
             List<String> parts = new ArrayList<>(Arrays.asList(partsArray));
 
