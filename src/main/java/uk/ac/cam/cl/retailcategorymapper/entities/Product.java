@@ -63,12 +63,6 @@ public class Product {
                 (!description.equals(p.description))||
                 (!price.equals(p.price))||
                 (!originalCategory.equals(p.originalCategory))){
-
-            System.err.println(description);
-            System.err.println(p.description);
-            System.err.println(price);
-            System.err.println(p.price);
-
             throw new RuntimeException("product ID violation");
         }
 
