@@ -5,7 +5,10 @@ import org.junit.Test;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.Feature;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureSource;
-import uk.ac.cam.cl.retailcategorymapper.entities.*;
+import uk.ac.cam.cl.retailcategorymapper.entities.Category;
+import uk.ac.cam.cl.retailcategorymapper.entities.CategoryBuilder;
+import uk.ac.cam.cl.retailcategorymapper.entities.Product;
+import uk.ac.cam.cl.retailcategorymapper.entities.ProductBuilder;
 
 import java.util.List;
 
