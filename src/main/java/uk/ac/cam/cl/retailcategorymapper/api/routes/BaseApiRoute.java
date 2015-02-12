@@ -6,10 +6,9 @@ import spark.Response;
 import spark.Route;
 
 /**
- * Abstract route which transforms the output to JSON and sets the correct
- * response type.
+ * Abstract route which transforms the output to JSON and sets various headers.
  */
-public abstract class JsonRoute implements Route {
+public abstract class BaseApiRoute implements Route {
     private Gson gson = new Gson();
 
     @Override
@@ -17,6 +16,7 @@ public abstract class JsonRoute implements Route {
             Exception {
         Object output = handleRequest(request, response);
         response.type("application/json");
+        response.header("Access-Control-Allow-Origin", "*");
         return gson.toJson(output);
     }
 

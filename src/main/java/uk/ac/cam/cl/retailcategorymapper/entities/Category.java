@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -7,6 +8,7 @@ import java.util.Arrays;
 /**
  * An immutable class to store a details about a category.
  */
+@JsonDeserialize(builder = CategoryBuilder.class)
 public class Category {
     private String id;
     private String[] parts;

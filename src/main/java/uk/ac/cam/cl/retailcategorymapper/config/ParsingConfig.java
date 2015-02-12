@@ -9,14 +9,14 @@ public final class ParsingConfig {
     /**
      * Category file delimiter.
      */
-    public static final String CATEGORYFILEDELIMITER;
+    public static final String CATEGORY_FILE_DELIMITER;
 
     /**
      * Static initialiser.
      */
     static {
         Map<String, String> config = PropertiesLoader.getProperties("parsing");
-        CATEGORYFILEDELIMITER = config.getOrDefault("categoryFileDelimiter", ">");
+        CATEGORY_FILE_DELIMITER = config.getOrDefault("categoryFileDelimiter", ">");
     }
 
     /**
