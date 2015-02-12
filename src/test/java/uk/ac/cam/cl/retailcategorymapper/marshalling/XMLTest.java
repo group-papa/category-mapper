@@ -2,7 +2,11 @@ package uk.ac.cam.cl.retailcategorymapper.marshalling;
 
 import org.junit.Test;
 import org.junit.Assert;
-import uk.ac.cam.cl.retailcategorymapper.entities.*;
+import uk.ac.cam.cl.retailcategorymapper.entities.Category;
+import uk.ac.cam.cl.retailcategorymapper.entities.CategoryBuilder;
+import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
+import uk.ac.cam.cl.retailcategorymapper.entities.Product;
+import uk.ac.cam.cl.retailcategorymapper.entities.ProductBuilder;
 
 import java.util.LinkedList;
 import java.util.List;
