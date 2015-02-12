@@ -82,4 +82,28 @@ public class TaxonomyDb {
         categoryRList.clear();
         categoryRList.addAll(categories);
     }
+
+    /**
+     * Delete a taxonomy, together with its categories, probabilities and
+     * manual mappings.
+     * @param taxonomyId The ID for the taxonomy to delete.
+     * @return Whether the taxonomy existed.
+     */
+    public static boolean deleteTaxonomy(String taxonomyId) {
+        Redisson redisson = RedissonWrapper.getInstance();
+
+        String instanceKey = KeyBuilder.taxonomyInstance(taxonomyId);
+        RBucket<Taxonomy> taxonomyRBucket = redisson.getBucket(instanceKey);
+        if (!taxonomyRBucket.exists()) {
+            return false;
+        }
+        taxonomyRBucket.delete();
+
+        String categoriesKey = KeyBuilder.categoriesForTaxonomy(taxonomyId);
+        RList<Category> categoryRList = redisson.getList(categoriesKey);
+        categoryRList.delete();
+
+        // TODO: Delete probabilities and manual mappings.
+        return true;
+    }
 }

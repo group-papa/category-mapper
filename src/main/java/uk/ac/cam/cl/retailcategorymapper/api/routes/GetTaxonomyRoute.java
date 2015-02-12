@@ -21,7 +21,7 @@ public class GetTaxonomyRoute extends BaseApiRoute {
 
         Taxonomy taxonomy = TaxonomyDb.getTaxonomy(taxonomyId);
         if (taxonomy == null) {
-            throw new NotFoundException("Unknown taxonomyId.");
+            throw new NotFoundException("Unknown taxonomy ID.");
         }
 
         return generateGetTaxonomyReply(taxonomy);
