@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * List taxonomies stored in the database.
  */
-public class ListTaxonomiesRoute extends JsonRoute {
+public class ListTaxonomiesRoute extends BaseApiRoute {
     @Override
     public Object handleRequest(Request request, Response response)
             throws Exception {

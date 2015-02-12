@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Add a new taxonomy to the database.
  */
-public class AddTaxonomyRoute extends JsonRoute {
+public class AddTaxonomyRoute extends BaseApiRoute {
     @Override
     public Object handleRequest(Request request, Response response)
             throws Exception {

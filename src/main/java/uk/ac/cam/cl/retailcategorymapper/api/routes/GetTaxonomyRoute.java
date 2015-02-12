@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Get metadata for a specific taxonomy.
  */
-public class GetTaxonomyRoute extends JsonRoute {
+public class GetTaxonomyRoute extends BaseApiRoute {
     @Override
     public Object handleRequest(Request request, Response response)
             throws Exception {
