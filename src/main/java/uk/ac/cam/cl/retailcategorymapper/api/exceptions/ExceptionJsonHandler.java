@@ -20,6 +20,7 @@ public class ExceptionJsonHandler implements ExceptionHandler {
             response.status(500);
         }
         response.type("application/json");
+        response.header("Access-Control-Allow-Origin", "*");
 
         ErrorResponse error = new ErrorResponse(exception.getMessage());
         response.body(gson.toJson(error));

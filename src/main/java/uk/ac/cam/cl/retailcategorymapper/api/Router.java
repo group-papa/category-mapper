@@ -6,6 +6,8 @@ import uk.ac.cam.cl.retailcategorymapper.api.exceptions.ExceptionJsonHandler;
 import uk.ac.cam.cl.retailcategorymapper.api.exceptions.NotFoundException;
 import uk.ac.cam.cl.retailcategorymapper.config.ApiConfig;
 
+import javax.swing.text.html.Option;
+
 /**
  * Router class which configures Spark with our settings and routes.
  */
@@ -15,6 +17,8 @@ public class Router {
 
         Spark.exception(BadInputException.class, new ExceptionJsonHandler());
         Spark.exception(NotFoundException.class, new ExceptionJsonHandler());
+
+        Spark.before(new OptionsFilter());
 
         for (RouteBinding b : ApiConfig.BINDINGS) {
             switch (b.getMethod()) {
