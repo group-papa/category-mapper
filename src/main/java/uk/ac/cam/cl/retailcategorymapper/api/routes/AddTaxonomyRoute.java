@@ -2,6 +2,7 @@ package uk.ac.cam.cl.retailcategorymapper.api.routes;
 
 import spark.Request;
 import spark.Response;
+import uk.ac.cam.cl.retailcategorymapper.api.formdata.FormDataField;
 import uk.ac.cam.cl.retailcategorymapper.api.formdata.FormDataParser;
 import uk.ac.cam.cl.retailcategorymapper.api.exceptions.BadInputException;
 import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
@@ -23,8 +24,7 @@ public class AddTaxonomyRoute extends BaseApiRoute {
             throws Exception {
         FormDataParser formDataParser = new FormDataParser(request.raw());
 
-        String taxonomyName = formDataParser.getField("name")
-                .getStreamAsString();
+        FormDataField taxonomyName = formDataParser.getField("name");
         if (taxonomyName == null) {
             throw new BadInputException(
                     "A name for the new taxonomy must be provided.");
@@ -32,18 +32,18 @@ public class AddTaxonomyRoute extends BaseApiRoute {
 
         Taxonomy taxonomy = new TaxonomyBuilder()
                 .setId(Uuid.generateUUID())
-                .setName(taxonomyName)
+                .setName(taxonomyName.getContents())
                 .setDateCreated(DateTime.getCurrentTimeIso8601())
                 .createTaxonomy();
 
-        String categoryData = formDataParser.getField("attachment")
-                .getStreamAsString();
+        FormDataField categoryData = formDataParser.getField("attachment");
         if (categoryData == null) {
             throw new BadInputException("A category file must be provided.");
         }
 
         CategoryFileUnmarshaller unmarshaller = new CategoryFileUnmarshaller();
-        List<Category> categories = unmarshaller.unmarshal(categoryData);
+        List<Category> categories = unmarshaller.unmarshal(
+                categoryData.getContents());
 
         TaxonomyDb.setTaxonomy(taxonomy, categories);
 

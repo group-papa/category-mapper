@@ -26,8 +26,7 @@ public class FormDataParser {
             while (fileItemIterator.hasNext()) {
                 FileItemStream item = fileItemIterator.next();
                 String name = item.getFieldName();
-                fieldData.put(name, new FormDataField(item.getFieldName(),
-                        item.getName(), item.isFormField(), item.openStream()));
+                fieldData.put(name, new FormDataField(item));
             }
         } catch (FileUploadException | IOException e) {
             e.printStackTrace();
