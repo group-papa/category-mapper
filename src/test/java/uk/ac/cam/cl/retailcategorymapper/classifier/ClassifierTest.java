@@ -24,9 +24,12 @@ public class ClassifierTest {
     private static Category c2 = (new CategoryBuilder()).setId("catID2").setParts(c1Array).createCategory();
 
 
-    private static Product p = (new ProductBuilder()).setId("prodID").setName("part1 part2").setDescription("description p").setPrice(100).setOriginalCategory(c1).createProduct();
-    private static Product p2 = (new ProductBuilder()).setId("prodID2").setName("product two").setDescription("p2").setPrice(200).createProduct();
-    private static Product p3 = (new ProductBuilder()).setId("prodID3").setName("part2 three").setDescription("p3").setPrice(300).setOriginalCategory(c1).createProduct();
+    private static Product p = (new ProductBuilder()).setId("prodID").setName("part1 part2")
+            .setDescription("description p").setPrice(100).setOriginalCategory(c1).createProduct();
+    private static Product p2 = (new ProductBuilder()).setId("prodID2")
+            .setName("product two").setDescription("p2").setPrice(200).createProduct();
+    private static Product p3 = (new ProductBuilder()).setId("prodID3").setName("part2 three")
+            .setDescription("p3").setPrice(300).setOriginalCategory(c1).createProduct();
 
     private static FeatureConverter1 fc1 = new FeatureConverter1();
 
@@ -50,7 +53,8 @@ public class ClassifierTest {
 
         Assert.assertTrue(featuresList.contains(pPrice));
 
-        Assert.assertTrue(featuresList.contains(pCat1) && featuresList.contains(pCat2) && featuresList.contains(pCat3));
+        Assert.assertTrue(featuresList.contains(pCat1) &&
+                featuresList.contains(pCat2) && featuresList.contains(pCat3));
     }
 
     @Test
@@ -58,8 +62,10 @@ public class ClassifierTest {
         nbc1.addSeenFeatureInSpecifiedCategory(pName1, c1);
         Assert.assertTrue(nbc1.getFeatures().contains(pName1));
         Assert.assertTrue(nbc1.getCategories().contains(c1));
-        Assert.assertTrue(nbc1.getTotalFeatureCounts().containsKey(pName1) && nbc1.getTotalFeatureCounts().containsValue(1));
-        Assert.assertTrue(nbc1.getCategoryCounts().containsKey(c1) && nbc1.getCategoryCounts().containsValue(1));
+        Assert.assertTrue(nbc1.getTotalFeatureCounts().containsKey(pName1)
+                && nbc1.getTotalFeatureCounts().containsValue(1));
+        Assert.assertTrue(nbc1.getCategoryCounts().containsKey(c1)
+                && nbc1.getCategoryCounts().containsValue(1));
         Assert.assertTrue(nbc1.getFeatureCountPerCategory().containsKey(c1));
         Assert.assertEquals(nbc1.getFeatureCountInCategory(pName1, c1), 1);
         Assert.assertEquals(nbc1.getFeatureProbabilityGivenCategory(pName2, c1), 0, 0);
@@ -76,8 +82,10 @@ public class ClassifierTest {
         Assert.assertTrue(nbc2.getFeatures().contains(pName1));
         Assert.assertTrue(nbc2.getCategories().contains(c1));
         Assert.assertEquals(nbc2.getTotalFeatureCounts().size(), 8, 0);
-        Assert.assertTrue(nbc2.getTotalFeatureCounts().containsKey(pName1) && nbc1.getTotalFeatureCounts().containsValue(1));
-        Assert.assertTrue(nbc2.getCategoryCounts().containsKey(c1) && nbc1.getCategoryCounts().containsValue(1));
+        Assert.assertTrue(nbc2.getTotalFeatureCounts().containsKey(pName1)
+                && nbc1.getTotalFeatureCounts().containsValue(1));
+        Assert.assertTrue(nbc2.getCategoryCounts().containsKey(c1)
+                && nbc1.getCategoryCounts().containsValue(1));
         Assert.assertTrue(nbc2.getFeatureCountPerCategory().containsKey(c1));
         Assert.assertEquals(nbc2.getFeatureCountPerCategory().get(c1).size(), 8);
         Assert.assertEquals(nbc2.getFeatureCountInCategory(pName1, c1), 1);
@@ -94,7 +102,8 @@ public class ClassifierTest {
         Assert.assertEquals(nbc3.getTotalFeatureCounts().size(), 11, 0);
         Assert.assertTrue(nbc3.getTotalFeatureCounts().containsKey(pName1));
         Assert.assertTrue(nbc3.getTotalFeatureCounts().get(pCat1) == 2);
-        Assert.assertTrue(nbc3.getCategoryCounts().containsKey(c2) && nbc3.getCategoryCounts().containsValue(15));
+        Assert.assertTrue(nbc3.getCategoryCounts().containsKey(c2
+        ) && nbc3.getCategoryCounts().containsValue(15));
         Assert.assertTrue(nbc3.getFeatureCountPerCategory().containsKey(c2));
         Assert.assertTrue(nbc3.getFeatureCountPerCategory().get(c2).get(pName1) == 1);
         Assert.assertTrue(nbc3.getFeatureCountPerCategory().get(c2).get(pCat1) == 2);
