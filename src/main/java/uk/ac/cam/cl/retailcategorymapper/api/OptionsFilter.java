@@ -13,6 +13,8 @@ public class OptionsFilter implements Filter {
     public void handle(Request request, Response response) throws Exception {
         if (request.requestMethod() == "OPTIONS") {
             response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Allow-Headers",
+                    request.headers("Access-Control-Allow-Headers"));
             Spark.halt(200);
         }
     }
