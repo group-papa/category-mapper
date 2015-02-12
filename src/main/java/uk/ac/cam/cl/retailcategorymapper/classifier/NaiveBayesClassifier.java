@@ -4,13 +4,10 @@ import uk.ac.cam.cl.retailcategorymapper.classifier.features.Feature;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.NGramFeatureExtractor;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
-import uk.ac.cam.cl.retailcategorymapper.entities.Category;
-import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
-import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
-import uk.ac.cam.cl.retailcategorymapper.entities.Method;
-import uk.ac.cam.cl.retailcategorymapper.entities.Product;
-import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
+import uk.ac.cam.cl.retailcategorymapper.entities.*;
+import uk.ac.cam.cl.retailcategorymapper.marshalling.XMLParser;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -375,5 +372,25 @@ public class NaiveBayesClassifier implements Classifier {
     @Override
     public void train(Mapping mapping) {
         throw new UnsupportedOperationException();
+    }
+
+    public static void main(String[] args) {
+        List<Product> trainProducts = XMLParser.parseProductList(new File(args[1]), new File
+                (args[0]));
+        NaiveBayesClassifier classifier = new NaiveBayesClassifier();
+        TaxonomyBuilder taxonomyBuilder = new TaxonomyBuilder();
+        taxonomyBuilder.setName("Test Taxonomy");
+        Taxonomy t = taxonomyBuilder.createTaxonomy();
+        for (Product p : trainProducts) {
+            classifier.trainWithBagOfWordsSingleProduct(p, p.getOriginalCategory());
+            t.getCategories().add(p.getOriginalCategory());
+        }
+        List<Product> testProducts = XMLParser.parseProductList(new File(args[2]), new File
+                (args[0]));
+        for (Product p : testProducts) {
+            Mapping m = classifier.classifyWithBagOfWords(t, p);
+            System.out.format("Classified as %s: %s - %s\n", String.join(" > ", m.getCategory()
+                    .getAllParts()), m.getProduct().getName(), m.getProduct().getDescription());
+        }
     }
 }
