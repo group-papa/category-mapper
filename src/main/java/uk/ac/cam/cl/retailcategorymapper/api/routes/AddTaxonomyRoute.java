@@ -24,7 +24,7 @@ public class AddTaxonomyRoute extends BaseApiRoute {
             throws Exception {
         FormDataParser formDataParser = new FormDataParser(request.raw());
 
-        FormDataField taxonomyName = formDataParser.getField("name");
+        FormDataField taxonomyName = formDataParser.getField("taxonomy[name]");
         if (taxonomyName == null) {
             throw new BadInputException(
                     "A name for the new taxonomy must be provided.");
@@ -36,7 +36,8 @@ public class AddTaxonomyRoute extends BaseApiRoute {
                 .setDateCreated(DateTime.getCurrentTimeIso8601())
                 .createTaxonomy();
 
-        FormDataField categoryData = formDataParser.getField("attachment");
+        FormDataField categoryData = formDataParser.getField
+                ("taxonomy[attachment]");
         if (categoryData == null) {
             throw new BadInputException("A category file must be provided.");
         }

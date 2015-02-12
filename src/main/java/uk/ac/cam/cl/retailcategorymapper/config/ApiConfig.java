@@ -39,7 +39,7 @@ public final class ApiConfig {
                             new ListTaxonomiesRoute()),
                     new RouteBinding("/taxonomies", Method.POST,
                             new AddTaxonomyRoute()),
-                    new RouteBinding("/taxonomies/:id", Method.GET,
+                    new RouteBinding("/taxonomies/:taxonomy[id]", Method.GET,
                             new GetTaxonomyRoute())
             ));
 

@@ -17,7 +17,7 @@ public class GetTaxonomyRoute extends BaseApiRoute {
     @Override
     public Object handleRequest(Request request, Response response)
             throws Exception {
-        String taxonomyId = request.params(":id");
+        String taxonomyId = request.params(":taxonomy[id]");
 
         Taxonomy taxonomy = TaxonomyDb.getTaxonomy(taxonomyId);
         if (taxonomy == null) {
