@@ -32,12 +32,12 @@ public class XMLTest {
         testBuilder.append("<productDescription>TestDescription0</productDescription>");
         testBuilder.append("<productPrice>40.00</productPrice>");
         testBuilder.append("<productCategory>Clothing &gt; Mens &gt; Retro Shirts &amp; Jackets</productCategory>");
-        testBuilder.append("<productGoogleCategory>Apparel &amp; Accessories &gt; Clothing &gt; Tops</productGoogleCategory>");
+        testBuilder.append("<productGoogleCategory>Apparel &amp; A &gt; Clothing &gt; Tops</productGoogleCategory>");
         testBuilder.append("</product>");
         testBuilder.append("<product>");
         testBuilder.append("<productName>LFC Mens White Heritage Track Top</productName>");
         testBuilder.append("<productSku>27014</productSku>");
-        testBuilder.append("<productDescription>Look stylish in this retro white Mens Heritage Track Top.</productDescription>");
+        testBuilder.append("<productDescription>Look stylish.</productDescription>");
         testBuilder.append("<productPrice>10.01</productPrice>");
         testBuilder.append("<productCategory>Souvenirs &gt; General &gt; Badges &amp; Keyrings</productCategory>");
         testBuilder.append("<productGoogleCategory>Apparel &amp; Accessories</productGoogleCategory>");
@@ -50,24 +50,39 @@ public class XMLTest {
 
         Assert.isTrue(products.size() == 2,"product list of incorrect length");
 
+
         Product firstProduct = products.get(0);
-        Assert.isTrue(firstProduct.getName().equals("TestName0"), "first product has incorrect title");
-        Assert.isTrue(firstProduct.getPrice()==4000, "first product has incorrect price");
-        Assert.isTrue(firstProduct.getDescription().equals("TestDescription0"), "first product has incorrect description");
-        Assert.isTrue(firstProduct.getId().equals("65014"),"first product has incorrect id");
-        Assert.isTrue(firstProduct.getOriginalCategory().getPart(0).equals("Clothing"),"first product has incorrect category");
-        Assert.isTrue(firstProduct.getOriginalCategory().getPart(1).equals("Mens"),"first product has incorrect category");
-        Assert.isTrue(firstProduct.getOriginalCategory().getPart(2).equals("Retro Shirts & Jackets"),"first product has incorrect category");
+        Assert.isTrue(firstProduct.getName().equals("TestName0"),
+                "first product has incorrect title");
+        Assert.isTrue(firstProduct.getPrice()==4000,
+                "first product has incorrect price");
+        Assert.isTrue(firstProduct.getDescription().equals("TestDescription0"),
+                "first product has incorrect description");
+        Assert.isTrue(firstProduct.getId().equals("65014"),
+                "first product has incorrect id");
+        Assert.isTrue(firstProduct.getOriginalCategory().getPart(0).equals("Clothing"),
+                "first product has incorrect category");
+        Assert.isTrue(firstProduct.getOriginalCategory().getPart(1).equals("Mens"),
+                "first product has incorrect category");
+        Assert.isTrue(firstProduct.getOriginalCategory().getPart(2).equals("Retro Shirts & Jackets"),
+                "first product has incorrect category");
+
         
         Product secondProduct = products.get(1);
-        Assert.isTrue(secondProduct.getName().equals("LFC Mens White Heritage Track Top"), "second product has incorrect title");
-        Assert.isTrue(secondProduct.getPrice()==1001, "second product has incorrect price");
-        Assert.isTrue(secondProduct.getDescription().equals("Look stylish in this retro white Mens Heritage Track Top."),
+        Assert.isTrue(secondProduct.getName().equals("LFC Mens White Heritage Track Top"),
+                "second product has incorrect title");
+        Assert.isTrue(secondProduct.getPrice()==1001,
+                "second product has incorrect price");
+        Assert.isTrue(secondProduct.getDescription().equals("Look stylish."),
                 "second product has incorrect description");
-        Assert.isTrue(secondProduct.getId().equals("27014"),"second product has incorrect id");
-        Assert.isTrue(secondProduct.getOriginalCategory().getPart(0).equals("Souvenirs"),"second product has incorrect category");
-        Assert.isTrue(secondProduct.getOriginalCategory().getPart(1).equals("General"),"second product has incorrect category");
-        Assert.isTrue(secondProduct.getOriginalCategory().getPart(2).equals("Badges & Keyrings"),"second product has incorrect category");
+        Assert.isTrue(secondProduct.getId().equals("27014"),
+                "second product has incorrect id");
+        Assert.isTrue(secondProduct.getOriginalCategory().getPart(0).equals("Souvenirs"),
+                "second product has incorrect category");
+        Assert.isTrue(secondProduct.getOriginalCategory().getPart(1).equals("General"),
+                "second product has incorrect category");
+        Assert.isTrue(secondProduct.getOriginalCategory().getPart(2).equals("Badges & Keyrings"),
+                "second product has incorrect category");
     }
 
     @Test
@@ -83,12 +98,12 @@ public class XMLTest {
         testBuilder.append("<productDescription>TestDescription0</productDescription>");
         testBuilder.append("<productPrice>40.00</productPrice>");
         testBuilder.append("<productCategory>Clothing &gt; Mens &gt; Retro Shirts &amp; Jackets</productCategory>");
-        testBuilder.append("<productGoogleCategory>Apparel &amp; Accessories &gt; Clothing &gt; Tops</productGoogleCategory>");
+        testBuilder.append("<productGoogleCategory>App &amp; Acc &gt; Clothing &gt; Tops</productGoogleCategory>");
         testBuilder.append("</product>");
         testBuilder.append("<product>");
         testBuilder.append("<productName>LFC Mens White Heritage Track Top</productName>");
         testBuilder.append("<productSku>27014</productSku>");
-        testBuilder.append("<productDescription>Look stylish in this retro white Mens Heritage Track Top.</productDescription>");
+        testBuilder.append("<productDescription>Look stylish.</productDescription>");
         testBuilder.append("<productPrice>10.01</productPrice>");
         testBuilder.append("<productCategory>Souvenirs &gt; General &gt; Badges &amp; Keyrings</productCategory>");
         testBuilder.append("<productGoogleCategory>Apparel &amp; Accessories</productGoogleCategory>");
@@ -103,28 +118,45 @@ public class XMLTest {
 
         Mapping firstMapping = mappings.get(0);
         Product firstProduct = firstMapping.getProduct();
-        Assert.isTrue(firstProduct.getName().equals("TestName0"), "first product has incorrect title");
-        Assert.isTrue(firstProduct.getPrice()==4000, "first product has incorrect price");
-        Assert.isTrue(firstProduct.getDescription().equals("TestDescription0"), "first product has incorrect description");
-        Assert.isTrue(firstProduct.getId().equals("65014"),"first product has incorrect id");
-        Assert.isTrue(firstProduct.getOriginalCategory().getPart(0).equals("Clothing"),"first product has incorrect category");
-        Assert.isTrue(firstProduct.getOriginalCategory().getPart(1).equals("Mens"),"first product has incorrect category");
-        Assert.isTrue(firstProduct.getOriginalCategory().getPart(2).equals("Retro Shirts & Jackets"),"first product has incorrect category");
-        Assert.isTrue(firstMapping.getCategory().getPart(0).equals("Apparel & Accessories"),"first mapping category incorrect");
-        Assert.isTrue(firstMapping.getCategory().getPart(1).equals("Clothing"),"first mapping category incorrect");
-        Assert.isTrue(firstMapping.getCategory().getPart(2).equals("Tops"),"first mapping category incorrect");
+        Assert.isTrue(firstProduct.getName().equals("TestName0"),
+                "first product has incorrect title");
+        Assert.isTrue(firstProduct.getPrice()==4000,
+                "first product has incorrect price");
+        Assert.isTrue(firstProduct.getDescription().equals("TestDescription0"),
+                "first product has incorrect description");
+        Assert.isTrue(firstProduct.getId().equals("65014"),
+                "first product has incorrect id");
+        Assert.isTrue(firstProduct.getOriginalCategory().getPart(0).equals("Clothing"),
+                "first product has incorrect category");
+        Assert.isTrue(firstProduct.getOriginalCategory().getPart(1).equals("Mens"),
+                "first product has incorrect category");
+        Assert.isTrue(firstProduct.getOriginalCategory().getPart(2).equals("Retro Shirts & Jackets"),
+                "first product has incorrect category");
+        Assert.isTrue(firstMapping.getCategory().getPart(0).equals("App & Acc"),
+                "first mapping category incorrect");
+        Assert.isTrue(firstMapping.getCategory().getPart(1).equals("Clothing"),
+                "first mapping category incorrect");
+        Assert.isTrue(firstMapping.getCategory().getPart(2).equals("Tops"),
+                "first mapping category incorrect");
 
         Mapping secondMapping = mappings.get(1);
         Product secondProduct = secondMapping.getProduct();
-        Assert.isTrue(secondProduct.getName().equals("LFC Mens White Heritage Track Top"), "second product has incorrect title");
-        Assert.isTrue(secondProduct.getPrice()==1001, "second product has incorrect price");
-        Assert.isTrue(secondProduct.getDescription().equals("Look stylish in this retro white Mens Heritage Track Top."),
+        Assert.isTrue(secondProduct.getName().equals("LFC Mens White Heritage Track Top"),
+                "second product has incorrect title");
+        Assert.isTrue(secondProduct.getPrice()==1001,
+                "second product has incorrect price");
+        Assert.isTrue(secondProduct.getDescription().equals("Look stylish."),
                 "second product has incorrect description");
-        Assert.isTrue(secondProduct.getId().equals("27014"),"second product has incorrect id");
-        Assert.isTrue(secondProduct.getOriginalCategory().getPart(0).equals("Souvenirs"),"second product has incorrect category");
-        Assert.isTrue(secondProduct.getOriginalCategory().getPart(1).equals("General"),"second product has incorrect category");
-        Assert.isTrue(secondProduct.getOriginalCategory().getPart(2).equals("Badges & Keyrings"),"second product has incorrect category");
-        Assert.isTrue(secondMapping.getCategory().getPart(0).equals("Apparel & Accessories"),"second mapping category incorrect");
+        Assert.isTrue(secondProduct.getId().equals("27014"),
+                "second product has incorrect id");
+        Assert.isTrue(secondProduct.getOriginalCategory().getPart(0).equals("Souvenirs"),
+                "second product has incorrect category");
+        Assert.isTrue(secondProduct.getOriginalCategory().getPart(1).equals("General"),
+                "second product has incorrect category");
+        Assert.isTrue(secondProduct.getOriginalCategory().getPart(2).equals("Badges & Keyrings"),
+                "second product has incorrect category");
+        Assert.isTrue(secondMapping.getCategory().getPart(0).equals("Apparel & Accessories"),
+                "second mapping category incorrect");
     }
 
 
