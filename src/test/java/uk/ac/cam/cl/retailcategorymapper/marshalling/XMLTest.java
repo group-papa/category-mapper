@@ -6,7 +6,6 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 
-import java.io.File;
 import java.util.List;
 
 
@@ -52,6 +51,7 @@ public class XMLTest {
 
 
         Product firstProduct = products.get(0);
+        checkCategory(firstProduct.getOriginalCategory());
         Assert.isTrue(firstProduct.getName().equals("TestName0"),
                 "first product has incorrect title");
         Assert.isTrue(firstProduct.getPrice()==4000,
@@ -69,6 +69,7 @@ public class XMLTest {
 
         
         Product secondProduct = products.get(1);
+        checkCategory(secondProduct.getOriginalCategory());
         Assert.isTrue(secondProduct.getName().equals("LFC Mens White Heritage Track Top"),
                 "second product has incorrect title");
         Assert.isTrue(secondProduct.getPrice()==1001,
@@ -118,6 +119,7 @@ public class XMLTest {
 
         Mapping firstMapping = mappings.get(0);
         Product firstProduct = firstMapping.getProduct();
+        checkCategory(firstProduct.getOriginalCategory());
         Assert.isTrue(firstProduct.getName().equals("TestName0"),
                 "first product has incorrect title");
         Assert.isTrue(firstProduct.getPrice()==4000,
@@ -141,6 +143,7 @@ public class XMLTest {
 
         Mapping secondMapping = mappings.get(1);
         Product secondProduct = secondMapping.getProduct();
+        checkCategory(secondProduct.getOriginalCategory());
         Assert.isTrue(secondProduct.getName().equals("LFC Mens White Heritage Track Top"),
                 "second product has incorrect title");
         Assert.isTrue(secondProduct.getPrice()==1001,
