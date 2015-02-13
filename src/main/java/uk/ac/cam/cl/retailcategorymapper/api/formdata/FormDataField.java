@@ -4,6 +4,7 @@ import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.util.Streams;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * A multipart/form-data field.
@@ -19,7 +20,9 @@ public class FormDataField {
         this.name = item.getName();
         this.formField = item.isFormField();
         try {
-            this.contents = Streams.asString(item.openStream());
+            InputStream stream = item.openStream();
+            this.contents = Streams.asString(stream);
+            stream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
