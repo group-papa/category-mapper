@@ -7,6 +7,6 @@ import spark.Route;
 public class HomeRoute implements Route {
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        return "Retail Category Mapper API";
+        return "Retail Category Mapper API\n";
     }
 }
