@@ -27,6 +27,10 @@ public class Category {
         return id;
     }
 
+    public int getDepth(){
+        return parts.length;
+    }
+
     public String getPart(int n) {
         return parts[n];
     }
