@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.retailcategorymapper.db;
 
 import org.apache.commons.lang3.StringUtils;
+import uk.ac.cam.cl.retailcategorymapper.entities.Upload;
 
 /**
  * Helper class for building Redis keys.
@@ -75,11 +76,11 @@ class KeyBuilder {
         return build(UPLOAD, "*", INSTANCE);
     }
 
-    public static String uploadProducts(String uploadId) {
-        return build(UPLOAD, uploadId, PRODUCTS);
+    public static String uploadProducts(Upload upload) {
+        return build(UPLOAD, upload.getId(), PRODUCTS);
     }
 
-    public static String uploadMappings(String uploadId) {
-        return build(UPLOAD, uploadId, MAPPINGS);
+    public static String uploadMappings(Upload upload) {
+        return build(UPLOAD, upload.getId(), MAPPINGS);
     }
 }
