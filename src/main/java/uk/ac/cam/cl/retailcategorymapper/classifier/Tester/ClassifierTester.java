@@ -44,11 +44,12 @@ public class ClassifierTester {
 
     public double[] Test(){
 
-        int[][] accuracyLevel = new int[depthConsidered][2];
+        int[] successes = new int[depthConsidered];
+        int[] trials = new int [depthConsidered];
 
         for(int i=0;i<depthConsidered;i++){
-            accuracyLevel[i][0]=0;
-            accuracyLevel[i][1]=0;
+            successes[i]=0;
+            trials[i]=0;
         }
 
         for(Mapping originalMapping:testData){
@@ -61,24 +62,21 @@ public class ClassifierTester {
             minDepth = Math.min(depthConsidered,minDepth);
 
             for(int i=0;i<minDepth;i++){
-                accuracyLevel[i][1]++;
+                trials[i]++;
                 if(originalCategory.getPart(i).equals(answerCategory.getPart(i))){
-                    accuracyLevel[i][0]++;
+                    successes[i]++;
                 }
             }
         }
 
         double[] accuracyPerLevel = new double[depthConsidered];
         for(int i=0;i<depthConsidered;i++){
-            if(accuracyLevel[i][0]==0){
+            if(trials[i]==0){
                 accuracyPerLevel[i]=0;
             } else {
-                accuracyPerLevel[i]=((double)accuracyLevel[i][0])/((double)accuracyLevel[i][1]);
+                accuracyPerLevel[i]=((double)successes[i])/((double)trials[i]);
             }
         }
         return accuracyPerLevel;
     }
-
-
-
 }
