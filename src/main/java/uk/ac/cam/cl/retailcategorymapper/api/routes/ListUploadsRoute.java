@@ -19,10 +19,10 @@ public class ListUploadsRoute extends BaseApiRoute {
     }
 
     static class ListUploadsReply {
-        List<Upload> taxonomies;
+        List<Upload> uploads;
 
-        public ListUploadsReply(List<Upload> taxonomies) {
-            this.taxonomies = taxonomies;
+        public ListUploadsReply(List<Upload> uploads) {
+            this.uploads = uploads;
         }
     }
 }

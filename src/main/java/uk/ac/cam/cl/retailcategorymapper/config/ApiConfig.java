@@ -5,6 +5,7 @@ import uk.ac.cam.cl.retailcategorymapper.api.RouteBinding;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.AddTaxonomyRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.DeleteTaxonomyRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.GetTaxonomyRoute;
+import uk.ac.cam.cl.retailcategorymapper.api.routes.GetUploadRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.HomeRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.ListTaxonomiesRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.ListUploadsRoute;
@@ -49,7 +50,9 @@ public final class ApiConfig {
                             new DeleteTaxonomyRoute()),
 
                     new RouteBinding("/uploads", Method.GET,
-                            new ListUploadsRoute())
+                            new ListUploadsRoute()),
+                    new RouteBinding("/uploads/:upload[id]", Method.GET,
+                            new GetUploadRoute())
             ));
 
     /**

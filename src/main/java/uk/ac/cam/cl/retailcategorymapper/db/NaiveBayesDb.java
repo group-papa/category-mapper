@@ -54,11 +54,11 @@ public class NaiveBayesDb {
     }
 
     /**
-     * Get a category product count map for a taxonomy.
+     * Get a category to product count map for a taxonomy.
      * @param taxonomy The taxonomy.
      * @return The category product count map.
      */
-    public static Map<Category, Integer> getCategoryProductCount(
+    public static Map<Category, Integer> getCategoryProductMap(
             Taxonomy taxonomy) {
         Redisson redisson = RedissonWrapper.getInstance();
 
@@ -68,7 +68,7 @@ public class NaiveBayesDb {
     }
 
     /**
-     * Get a category feature count map for a taxonomy.
+     * Get a category to feature count map for a taxonomy.
      * @param taxonomy The taxonomy.
      * @return The category feature count map.
      */
@@ -82,12 +82,12 @@ public class NaiveBayesDb {
     }
 
     /**
-     * Get a category feature observation count map for a taxonomy.
+     * Get a category's feature to observation count map for a taxonomy.
      * @param taxonomy The taxonomy.
      * @param category The category.
      * @return The category feature observation count map.
      */
-    public static Map<Category, Integer> getCategoryFeatureObservationMap(
+    public static Map<Feature, Integer> getCategoryFeatureObservationMap(
             Taxonomy taxonomy, Category category) {
         Redisson redisson = RedissonWrapper.getInstance();
 
