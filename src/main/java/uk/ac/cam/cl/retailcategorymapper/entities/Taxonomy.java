@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 
 import java.util.List;
 
@@ -27,12 +28,12 @@ public class Taxonomy {
         return name;
     }
 
-    public List<Category> getCategories() {
-        throw new UnsupportedOperationException();
-    }
-
     public String getDateCreated() {
         return dateCreated;
+    }
+
+    public List<Category> getCategories() {
+        return TaxonomyDb.getCategoriesForTaxonomy(getId());
     }
 
     @Override
