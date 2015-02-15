@@ -2,6 +2,7 @@ package uk.ac.cam.cl.retailcategorymapper.entities;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.commons.lang3.StringUtils;
+import uk.ac.cam.cl.retailcategorymapper.config.ParsingConfig;
 
 import java.util.Arrays;
 
@@ -35,10 +36,9 @@ public class Category {
     }
 
     public String toString() {
-        return StringUtils.join(parts, " > ");
+        return StringUtils.join(parts, " " + ParsingConfig
+                .CATEGORY_FILE_DELIMITER + " ");
     }
-
-    public String toString(String splitter) { return StringUtils.join(parts, splitter);}
 
     @Override
     public boolean equals(Object o) {

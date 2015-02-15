@@ -3,6 +3,7 @@ package uk.ac.cam.cl.retailcategorymapper.config;
 import uk.ac.cam.cl.retailcategorymapper.api.Method;
 import uk.ac.cam.cl.retailcategorymapper.api.RouteBinding;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.AddTaxonomyRoute;
+import uk.ac.cam.cl.retailcategorymapper.api.routes.AddUploadRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.DeleteTaxonomyRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.GetTaxonomyRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.GetUploadRoute;
@@ -51,6 +52,8 @@ public final class ApiConfig {
 
                     new RouteBinding("/uploads", Method.GET,
                             new ListUploadsRoute()),
+                    new RouteBinding("/uploads", Method.POST,
+                            new AddUploadRoute()),
                     new RouteBinding("/uploads/:upload[id]", Method.GET,
                             new GetUploadRoute())
             ));

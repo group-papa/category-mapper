@@ -66,7 +66,7 @@ public class TaxonomyDb {
 
     /**
      * Store a taxonomy; if one already exists, it will be overwritten.
-     * @param taxonomy The taxonomy to add.
+     * @param taxonomy The taxonomy to store.
      * @param categories The taxonomy's categories.
      */
     public static void setTaxonomy(Taxonomy taxonomy,
