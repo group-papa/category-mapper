@@ -33,7 +33,7 @@ public class Taxonomy {
     }
 
     public List<Category> getCategories() {
-        return TaxonomyDb.getCategoriesForTaxonomy(getId());
+        return TaxonomyDb.getCategoriesForTaxonomy(this);
     }
 
     @Override

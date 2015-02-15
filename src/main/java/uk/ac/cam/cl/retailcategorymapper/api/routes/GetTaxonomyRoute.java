@@ -29,7 +29,7 @@ public class GetTaxonomyRoute extends BaseApiRoute {
 
     static GetTaxonomyReply generateGetTaxonomyReply(Taxonomy taxonomy) {
         List<Category> categories = TaxonomyDb
-                .getCategoriesForTaxonomy(taxonomy.getId());
+                .getCategoriesForTaxonomy(taxonomy);
         List<String> categoryIds = new ArrayList<>();
         for (Category category : categories) {
             categoryIds.add(category.getId());
