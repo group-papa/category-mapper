@@ -1,7 +1,6 @@
 package uk.ac.cam.cl.retailcategorymapper.db;
 
 import org.apache.commons.lang3.StringUtils;
-import uk.ac.cam.cl.retailcategorymapper.entities.Upload;
 
 /**
  * Helper class for building Redis keys.
