@@ -20,8 +20,8 @@ public class ListTaxonomiesRoute extends BaseApiRoute {
 
         List<TaxonomyEntry> results = new ArrayList<>();
         for (Taxonomy taxonomy : taxonomies) {
-            List<Category> categories = TaxonomyDb.getCategoriesForTaxonomy
-                    (taxonomy.getId());
+            List<Category> categories = TaxonomyDb
+                    .getCategoriesForTaxonomy(taxonomy);
 
             List<String> categoryIds = new ArrayList<>();
             for (Category category : categories) {

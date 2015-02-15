@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.retailcategorymapper.classifier.features;
+package uk.ac.cam.cl.retailcategorymapper.entities;
 
 /**
  * This enum is used to tag a features with its source.

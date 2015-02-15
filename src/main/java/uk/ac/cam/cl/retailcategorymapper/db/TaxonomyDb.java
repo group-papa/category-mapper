@@ -51,14 +51,15 @@ public class TaxonomyDb {
     }
 
     /**
-     * Get the categories for a taxonomy.
-     * @param taxonomyId The ID for the taxonomy.
+     * Get the categories in a taxonomy.
+     * @param taxonomy The taxonomy.
      * @return The taxonomy's categories.
      */
-    public static List<Category> getCategoriesForTaxonomy(String taxonomyId) {
+    public static List<Category> getCategoriesForTaxonomy(Taxonomy taxonomy) {
         Redisson redisson = RedissonWrapper.getInstance();
 
-        String categoriesKey = KeyBuilder.categoriesForTaxonomy(taxonomyId);
+        String categoriesKey = KeyBuilder.categoriesForTaxonomy(
+                taxonomy.getId());
         RList<Category> categoryRList = redisson.getList(categoriesKey);
         return new ArrayList<>(categoryRList);
     }
