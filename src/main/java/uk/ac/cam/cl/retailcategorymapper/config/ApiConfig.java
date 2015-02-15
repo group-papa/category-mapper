@@ -38,6 +38,7 @@ public final class ApiConfig {
             Arrays.asList(
                     new RouteBinding("/", Method.GET,
                             new HomeRoute()),
+
                     new RouteBinding("/taxonomies", Method.GET,
                             new ListTaxonomiesRoute()),
                     new RouteBinding("/taxonomies", Method.POST,
@@ -46,6 +47,7 @@ public final class ApiConfig {
                             new GetTaxonomyRoute()),
                     new RouteBinding("/taxonomies/:taxonomy[id]", Method.DELETE,
                             new DeleteTaxonomyRoute()),
+
                     new RouteBinding("/uploads", Method.GET,
                             new ListUploadsRoute())
             ));
