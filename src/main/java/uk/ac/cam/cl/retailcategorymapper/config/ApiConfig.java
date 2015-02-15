@@ -5,6 +5,7 @@ import uk.ac.cam.cl.retailcategorymapper.api.RouteBinding;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.AddTaxonomyRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.AddUploadRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.DeleteTaxonomyRoute;
+import uk.ac.cam.cl.retailcategorymapper.api.routes.DeleteUploadRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.GetTaxonomyRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.GetUploadRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.HomeRoute;
@@ -55,7 +56,9 @@ public final class ApiConfig {
                     new RouteBinding("/uploads", Method.POST,
                             new AddUploadRoute()),
                     new RouteBinding("/uploads/:upload[id]", Method.GET,
-                            new GetUploadRoute())
+                            new GetUploadRoute()),
+                    new RouteBinding("/uploads/:upload[id]", Method.DELETE,
+                            new DeleteUploadRoute())
             ));
 
     /**

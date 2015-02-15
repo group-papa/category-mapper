@@ -65,14 +65,40 @@ public class UploadDb {
         RBucket<Upload> uploadRBucket = redisson.getBucket(instanceKey);
         uploadRBucket.set(upload);
 
-        String productsKey = KeyBuilder.uploadProducts(upload);
+        String productsKey = KeyBuilder.uploadProducts(upload.getId());
         RList<Product> productsRList = redisson.getList(productsKey);
         productsRList.clear();
         productsRList.addAll(products);
 
-        String mappingsKey = KeyBuilder.uploadProducts(upload);
+        String mappingsKey = KeyBuilder.uploadMappings(upload.getId());
         RList<Mapping> mappingsRList = redisson.getList(mappingsKey);
         mappingsRList.clear();
         mappingsRList.addAll(mappings);
+    }
+
+    /**
+     * Delete an upload along with its products and mappings.
+     * @param uploadId The ID for the upload to delete.
+     * @return Whether the upload existed.
+     */
+    public static boolean deleteUpload(String uploadId) {
+        Redisson redisson = RedissonWrapper.getInstance();
+
+        String instanceKey = KeyBuilder.uploadInstance(uploadId);
+        RBucket<Upload> uploadRBucket = redisson.getBucket(instanceKey);
+        if (!uploadRBucket.exists()) {
+            return false;
+        }
+        uploadRBucket.delete();
+
+        String productsKey = KeyBuilder.uploadProducts(uploadId);
+        RList<Product> productsRList = redisson.getList(productsKey);
+        productsRList.delete();
+
+        String mappingsKey = KeyBuilder.uploadMappings(uploadId);
+        RList<Mapping> mappingsRList = redisson.getList(mappingsKey);
+        mappingsRList.delete();
+
+        return true;
     }
 }

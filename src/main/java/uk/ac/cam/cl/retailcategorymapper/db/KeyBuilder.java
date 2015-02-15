@@ -76,11 +76,11 @@ class KeyBuilder {
         return build(UPLOAD, "*", INSTANCE);
     }
 
-    public static String uploadProducts(Upload upload) {
-        return build(UPLOAD, upload.getId(), PRODUCTS);
+    public static String uploadProducts(String uploadId) {
+        return build(UPLOAD, uploadId, PRODUCTS);
     }
 
-    public static String uploadMappings(Upload upload) {
-        return build(UPLOAD, upload.getId(), MAPPINGS);
+    public static String uploadMappings(String uploadId) {
+        return build(UPLOAD, uploadId, MAPPINGS);
     }
 }
