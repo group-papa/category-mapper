@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.retailcategorymapper.classifier.features;
+package uk.ac.cam.cl.retailcategorymapper.entities;
 
 /**
  * Class to represent the features that the classifier will use.

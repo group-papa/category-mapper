@@ -1,6 +1,8 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier.features;
 
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
+import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
+import uk.ac.cam.cl.retailcategorymapper.entities.FeatureSource;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 
 import java.io.BufferedReader;

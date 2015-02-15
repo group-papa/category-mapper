@@ -2,9 +2,9 @@ package uk.ac.cam.cl.retailcategorymapper.classifier;
 
 import org.junit.Assert;
 import org.junit.Test;
-import uk.ac.cam.cl.retailcategorymapper.classifier.features.Feature;
+import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
-import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureSource;
+import uk.ac.cam.cl.retailcategorymapper.entities.FeatureSource;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.CategoryBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;

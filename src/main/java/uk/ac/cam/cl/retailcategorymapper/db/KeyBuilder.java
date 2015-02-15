@@ -12,7 +12,12 @@ class KeyBuilder {
     private static final String CATEGORIES = "categories";
     private static final String MANUAL = "manual";
     private static final String NAIVE = "naive";
-    private static final String FEATURE = "naive";
+    private static final String PRODUCTS = "products";
+    private static final String CATPRODCOUNT = "catprodcount";
+    private static final String CATFEATCOUNT = "catfeatcount";
+    private static final String CATEGORY = "category";
+    private static final String FEATOBSCOUNT = "featobscount";
+    private static final String FEATURES = "features";
     private static final String UPLOAD = "upload";
 
     private static String build(String... parts) {
@@ -35,13 +40,26 @@ class KeyBuilder {
         return build(TAXONOMY, taxonomyId, MANUAL, productId);
     }
 
-    public static String naiveCategory(String taxonomyId, String category) {
-        return build(TAXONOMY, taxonomyId, NAIVE, category);
+    public static String naiveProductsCount(String taxonomyId) {
+        return build(TAXONOMY, taxonomyId, NAIVE, PRODUCTS);
     }
 
-    public static String naiveFeature(String taxonomyId, String category,
-                                      String feature) {
-        return build(TAXONOMY, taxonomyId, NAIVE, category, FEATURE, feature);
+    public static String naiveCategoryProductCount(String taxonomyId) {
+        return build(TAXONOMY, taxonomyId, NAIVE, CATPRODCOUNT);
+    }
+
+    public static String naiveCategoryFeatureCount(String taxonomyId) {
+        return build(TAXONOMY, taxonomyId, NAIVE, CATFEATCOUNT);
+    }
+
+    public static String naiveFeatureObservationCount(String taxonomyId,
+                                                      String categoryId) {
+        return build(TAXONOMY, taxonomyId, NAIVE, CATEGORY, categoryId,
+                FEATOBSCOUNT);
+    }
+
+    public static String naiveFeatureSet(String taxonomyId) {
+        return build(TAXONOMY, taxonomyId, NAIVE, FEATURES);
     }
 
     public static String upload(String uploadId) {
