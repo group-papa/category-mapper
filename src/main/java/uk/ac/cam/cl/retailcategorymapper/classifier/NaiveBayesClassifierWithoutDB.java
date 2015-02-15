@@ -1,7 +1,5 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
-import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
-import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
@@ -25,7 +23,7 @@ import java.util.TreeMap;
  * A Naive Bayes classifier implementation.
  */
 // TODO: Integrate with the database (don't store values in RAM)
-public class NaiveBayesClassifier implements Classifier {
+public class NaiveBayesClassifierWithoutDB implements Classifier {
     private Set<Feature> featureSet;
     private Set<Category> categorySet;
 
@@ -33,7 +31,7 @@ public class NaiveBayesClassifier implements Classifier {
     private Map<Category, Integer> categoryCounts; // how many times has classifier encountered a category
     private Map<Category, Map<Feature, Integer>> featureCountPerCategory;
 
-    public NaiveBayesClassifier() {
+    public NaiveBayesClassifierWithoutDB() {
         this.featureSet = new HashSet<Feature>();
         this.categorySet = new HashSet<Category>();
         this.totalFeatureCounts = new HashMap<Feature, Integer>();
@@ -97,11 +95,6 @@ public class NaiveBayesClassifier implements Classifier {
      * multiple products inside the category
      */
     public int getFeatureCountInCategory(Feature feature, Category category) {
-
-
-
-
-
         if (this.featureCountPerCategory.containsKey(category)) {
             Map<Feature, Integer> featureCounts = this.featureCountPerCategory.get(category);
             //features seen associated with this category
@@ -202,37 +195,56 @@ public class NaiveBayesClassifier implements Classifier {
      * @param featureSeen Feature from product in training set
      * @param category    Destination category that the product which features is derived from is put into
      */
-    public void addSeenFeatureInSpecifiedCategory(Feature featureSeen, Category category, Taxonomy taxonomy) {
-        //add to feature set
-        NaiveBayesDb.getFeatureSet(taxonomy).add(featureSeen);
+    public void addSeenFeatureInSpecifiedCategory(Feature featureSeen, Category category) {
+        this.featureSet.add(featureSeen);
+        this.categorySet.add(category);
 
-
-        //update categoryCounts based on features:
-
-        //have seen category before associated with a feature
-        if (NaiveBayesDb.getCategoryFeatureMap(taxonomy).containsKey(category)) {
-            int prevCount = NaiveBayesDb.getCategoryFeatureMap(taxonomy).get(category);
-            NaiveBayesDb.getCategoryFeatureMap(taxonomy).put(category, prevCount + 1);
+        //update categoryCounts
+        //have seen category before
+        if (this.categoryCounts.containsKey(category)) {
+            int prevCount = this.categoryCounts.get(category);
+            this.categoryCounts.put(category, prevCount + 1);
         }
         //have NOT seen category before
         else {
-            NaiveBayesDb.getCategoryFeatureMap(taxonomy).put(category, 1);
+            this.categoryCounts.put(category, 1);
         }
 
-
-        //update count of times specific features is seen in given category:
-
-        //have seen feature before in this category
-        if (NaiveBayesDb.getCategoryFeatureObservationMap(taxonomy, category).containsKey(featureSeen)) {
-            int prevCount = NaiveBayesDb.getCategoryFeatureObservationMap(taxonomy, category).get(featureSeen);
-            NaiveBayesDb.getCategoryFeatureObservationMap(taxonomy, category).put(featureSeen, prevCount + 1);
+        //update totalFeatureCounts
+        //have seen this features before
+        if (this.totalFeatureCounts.containsKey(featureSeen)) {
+            int prevCount = this.totalFeatureCounts.get(featureSeen);
+            this.totalFeatureCounts.put(featureSeen, prevCount + 1); //update count
         }
-        //have NOT seen this features before in this category
+        // have NOT seen this features before
         else {
-            NaiveBayesDb.getCategoryFeatureObservationMap(taxonomy, category).put(featureSeen, 1);
+            this.totalFeatureCounts.put(featureSeen, 1);
+        }
+
+        //update Category -> (Feature -> Integer) Map
+        //have previously seen this category associated with a features
+        if (this.featureCountPerCategory.containsKey(category)) {
+            Map<Feature, Integer> fCountInSpecifiedCategory = this.featureCountPerCategory.get(category);
+            //update count of times features is seen in given category (inner map)
+            //have seen features before in this category
+            if (fCountInSpecifiedCategory.containsKey(featureSeen)) {
+                int prevCount = fCountInSpecifiedCategory.get(featureSeen);
+                fCountInSpecifiedCategory.put(featureSeen, prevCount + 1);
+            }
+            //have NOT seen this features before in this category
+            else {
+                fCountInSpecifiedCategory.put(featureSeen, 1);
+            }
+            //update outer layer of map
+            this.featureCountPerCategory.put(category, fCountInSpecifiedCategory);
+        }
+        //have NOT see this category associated with a features before
+        else {
+            Map<Feature, Integer> featureCountsInCategory = new HashMap<Feature, Integer>();
+            featureCountsInCategory.put(featureSeen, 1);
+            this.featureCountPerCategory.put(category, featureCountsInCategory);
         }
     }
-
 
     /**
      * To be called on categories which are not in the set AFTER all calls to
@@ -249,27 +261,29 @@ public class NaiveBayesClassifier implements Classifier {
     }
 
     /**
+     * Convert all details that a product object holds into separate features if not null
+     * or equal to the empty value as described in the product constructor javadoc.
+     * Categories are treated as "bag of words" and the various levels of a category are not
+     * taken into consideration when mapping to features. Currently does nothing with the
+     * Attributes Map in a Product.
+     *
+     * @param product Product used to extract features from
+     * @return list of features from the input product
+     */
+
+
+    /**
      * Update the sets and maps held by the classifier which will be used for training with
      * information from a product.
      *
      * @param product  Product that has been classified
      * @param category Destination category that product has been mapped to
      */
-    public void trainWithBagOfWordsSingleProduct(Product product, Category category, Taxonomy taxonomy) {
+    public void trainWithBagOfWordsSingleProduct(Product product, Category category) {
         List<Feature> featuresFromProduct = FeatureConverter1.changeProductToFeature(product);
 
-        //have seen category before
-        if (NaiveBayesDb.getCategoryProductMap(taxonomy).containsKey(category)) {
-            int prevCount = NaiveBayesDb.getCategoryProductMap(taxonomy).get(category);
-            NaiveBayesDb.getCategoryProductMap(taxonomy).put(category, prevCount+1);
-        }
-        //have not seen category before in training
-        else {
-            NaiveBayesDb.getCategoryProductMap(taxonomy).put(category, 1);
-        }
-
         for (Feature f : featuresFromProduct) {
-            this.addSeenFeatureInSpecifiedCategory(f, category, taxonomy);
+            this.addSeenFeatureInSpecifiedCategory(f, category);
         }
     }
 
@@ -288,7 +302,7 @@ public class NaiveBayesClassifier implements Classifier {
         NavigableMap<Double, Category> probabilityToAllPossibleCategories = new TreeMap<Double, Category>();
 
         List<Feature> features = FeatureConverter1.changeProductToFeature(product);
-        Set<Category> allDestinationCategories = taxonomy.getCategories();
+        List<Category> allDestinationCategories = taxonomy.getCategories();
 
         //take a single category
         for (Category category : allDestinationCategories) {
@@ -353,7 +367,7 @@ public class NaiveBayesClassifier implements Classifier {
     }
 
     @Override
-    public List<Mapping> classify(Taxonomy taxonomy, Product product) {
+    public Mapping classify(Taxonomy taxonomy, Product product) {
         throw new UnsupportedOperationException();
     }
 
