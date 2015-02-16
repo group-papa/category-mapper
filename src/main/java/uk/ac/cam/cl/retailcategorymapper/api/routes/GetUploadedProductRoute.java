@@ -36,7 +36,7 @@ public class GetUploadedProductRoute extends BaseApiRoute {
                         product.getName(),
                         product.getDescription(),
                         product.getPrice(),
-                        product.getOriginalCategory().getId()
+                        product.getOriginalCategory().getAllParts()
                 ));
     }
 
@@ -53,11 +53,11 @@ public class GetUploadedProductRoute extends BaseApiRoute {
         private String name;
         private String description;
         private int price;
-        private String originalCategory;
+        private String[] originalCategory;
 
         public ProductEntry(String id, String name,
                             String description, int price,
-                            String originalCategory) {
+                            String[] originalCategory) {
             this.id = id;
             this.name = name;
             this.description = description;
