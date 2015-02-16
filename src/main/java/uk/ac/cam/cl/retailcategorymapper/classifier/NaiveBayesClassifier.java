@@ -302,7 +302,7 @@ public class NaiveBayesClassifier implements Classifier {
         NavigableMap<Double, Category> probabilityToAllPossibleCategories = new TreeMap<Double, Category>();
 
         List<Feature> features = FeatureConverter1.changeProductToFeature(product);
-        List<Category> allDestinationCategories = taxonomy.getCategories();
+        Set<Category> allDestinationCategories = taxonomy.getCategories();
 
         //take a single category
         for (Category category : allDestinationCategories) {
@@ -367,7 +367,7 @@ public class NaiveBayesClassifier implements Classifier {
     }
 
     @Override
-    public Mapping classify(Taxonomy taxonomy, Product product) {
+    public List<Mapping> classify(Taxonomy taxonomy, Product product) {
         throw new UnsupportedOperationException();
     }
 

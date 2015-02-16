@@ -11,39 +11,26 @@ import java.util.List;
  * Test the Category File Unmarshaller.
  */
 public class CategoryFileUnmarshallerTest {
-    public static final String INPUT_1 = " Cat A >  Cat B >  Cat C  ";
-    public static final Category OUTPUT_1 = new CategoryBuilder().setParts(new
+    public static final String INPUT = " Cat A >  Cat B >  Cat C  \n Cat A > " +
+            " Cat B >  Cat C ";
+    public static final Category OUTPUT = new CategoryBuilder().setParts(new
             String[] {"Cat A", "Cat B", "Cat C"}).createCategory();
-
-    public static final String INPUT_2 = " > Cat A >    >  Cat C  >  ";
-    public static final Category OUTPUT_2 = new CategoryBuilder().setParts(new
-            String[] {"Cat A", "Cat C"}).createCategory();
 
     @Test
     public void testCategoryFileUnmarshaller() {
         CategoryFileUnmarshaller unmarshaller = new CategoryFileUnmarshaller();
-        List<Category> categories = unmarshaller.unmarshal(INPUT_1);
+        List<Category> categories = unmarshaller.unmarshal(INPUT);
 
-        Assert.assertEquals(1, categories.size());
-        Category category = categories.get(0);
-        Assert.assertEquals(OUTPUT_1, category);
+        Assert.assertEquals(2, categories.size());
+        Assert.assertEquals(OUTPUT, categories.get(0));
+        Assert.assertEquals(OUTPUT, categories.get(1));
     }
 
     @Test
-    public void testCategoryFileUnmarshallerWithEmptyCategory() {
+    public void testCategoryFileUnmarshallerWithEmptyFile() {
         CategoryFileUnmarshaller unmarshaller = new CategoryFileUnmarshaller();
-        List<Category> categories = unmarshaller.unmarshal("  ");
+        List<Category> categories = unmarshaller.unmarshal("  \r\n ");
 
         Assert.assertEquals(0, categories.size());
-    }
-
-    @Test
-    public void testCategoryFileUnmarshallerWithEmptySubCategory() {
-        CategoryFileUnmarshaller unmarshaller = new CategoryFileUnmarshaller();
-        List<Category> categories = unmarshaller.unmarshal(INPUT_2);
-
-        Assert.assertEquals(1, categories.size());
-        Category category = categories.get(0);
-        Assert.assertEquals(OUTPUT_2, category);
     }
 }

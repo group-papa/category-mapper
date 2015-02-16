@@ -20,6 +20,10 @@ public class GetUploadRoute extends BaseApiRoute {
             throw new NotFoundException("Unknown upload ID.");
         }
 
+        return generateGetUploadReply(upload);
+    }
+
+    static GetUploadReply generateGetUploadReply(Upload upload) {
         return new GetUploadReply(upload);
     }
 

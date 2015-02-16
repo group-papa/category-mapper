@@ -13,6 +13,7 @@ import uk.ac.cam.cl.retailcategorymapper.marshalling.CategoryFileUnmarshaller;
 import uk.ac.cam.cl.retailcategorymapper.utils.DateTime;
 import uk.ac.cam.cl.retailcategorymapper.utils.Uuid;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -46,7 +47,7 @@ public class AddTaxonomyRoute extends BaseApiRoute {
         List<Category> categories = unmarshaller.unmarshal(
                 categoryData.getContents());
 
-        TaxonomyDb.setTaxonomy(taxonomy, categories);
+        TaxonomyDb.setTaxonomy(taxonomy, new HashSet<>(categories));
 
         return GetTaxonomyRoute.generateGetTaxonomyReply(taxonomy);
     }

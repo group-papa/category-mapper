@@ -3,7 +3,7 @@ package uk.ac.cam.cl.retailcategorymapper.entities;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * An immutable class to store details about a taxonomy.
@@ -32,7 +32,7 @@ public class Taxonomy {
         return dateCreated;
     }
 
-    public List<Category> getCategories() {
+    public Set<Category> getCategories() {
         return TaxonomyDb.getCategoriesForTaxonomy(this);
     }
 
