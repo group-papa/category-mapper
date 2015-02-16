@@ -7,8 +7,8 @@ import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Get metadata for a specific taxonomy.
@@ -28,12 +28,10 @@ public class GetTaxonomyRoute extends BaseApiRoute {
     }
 
     static GetTaxonomyReply generateGetTaxonomyReply(Taxonomy taxonomy) {
-        List<Category> categories = TaxonomyDb
+        Set<Category> categories = TaxonomyDb
                 .getCategoriesForTaxonomy(taxonomy);
-        List<String> categoryIds = new ArrayList<>();
-        for (Category category : categories) {
-            categoryIds.add(category.getId());
-        }
+        Set<String> categoryIds = categories.stream().map(Category::getId)
+                .collect(Collectors.toSet());
 
         return new GetTaxonomyReply(new TaxonomyEntry(taxonomy.getId(),
                 taxonomy.getName(), taxonomy.getDateCreated(), categoryIds),
@@ -42,10 +40,10 @@ public class GetTaxonomyRoute extends BaseApiRoute {
 
     static class GetTaxonomyReply {
         TaxonomyEntry taxonomy;
-        List<Category> categories;
+        Set<Category> categories;
 
         public GetTaxonomyReply(TaxonomyEntry taxonomy,
-                                List<Category> categories) {
+                                Set<Category> categories) {
             this.taxonomy = taxonomy;
             this.categories = categories;
         }
@@ -55,10 +53,10 @@ public class GetTaxonomyRoute extends BaseApiRoute {
         private String id;
         private String name;
         private String dateCreated;
-        private List<String> categories;
+        private Set<String> categories;
 
         public TaxonomyEntry(String id, String name, String dateCreated,
-                             List<String> categories) {
+                             Set<String> categories) {
             this.id = id;
             this.name = name;
             this.dateCreated = dateCreated;

@@ -2,12 +2,13 @@ package uk.ac.cam.cl.retailcategorymapper.db;
 
 import org.redisson.Redisson;
 import org.redisson.core.RBucket;
-import org.redisson.core.RList;
+import org.redisson.core.RSet;
 import redis.clients.jedis.Jedis;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -55,13 +56,13 @@ public class TaxonomyDb {
      * @param taxonomy The taxonomy.
      * @return The taxonomy's categories.
      */
-    public static List<Category> getCategoriesForTaxonomy(Taxonomy taxonomy) {
+    public static Set<Category> getCategoriesForTaxonomy(Taxonomy taxonomy) {
         Redisson redisson = RedissonWrapper.getInstance();
 
         String categoriesKey = KeyBuilder.categoriesForTaxonomy(
                 taxonomy.getId());
-        RList<Category> categoryRList = redisson.getList(categoriesKey);
-        return new ArrayList<>(categoryRList);
+        RSet<Category> categoryRSet = redisson.getSet(categoriesKey);
+        return new HashSet<>(categoryRSet);
     }
 
     /**
@@ -70,7 +71,7 @@ public class TaxonomyDb {
      * @param categories The taxonomy's categories.
      */
     public static void setTaxonomy(Taxonomy taxonomy,
-                                   List<Category> categories)  {
+                                   Set<Category> categories)  {
         Redisson redisson = RedissonWrapper.getInstance();
 
         String instanceKey = KeyBuilder.taxonomyInstance(taxonomy.getId());
@@ -79,9 +80,9 @@ public class TaxonomyDb {
 
         String categoriesKey = KeyBuilder.categoriesForTaxonomy(
                 taxonomy.getId());
-        RList<Category> categoryRList = redisson.getList(categoriesKey);
-        categoryRList.clear();
-        categoryRList.addAll(categories);
+        RSet<Category> categoryRSet = redisson.getSet(categoriesKey);
+        categoryRSet.clear();
+        categoryRSet.addAll(categories);
     }
 
     /**
@@ -101,8 +102,8 @@ public class TaxonomyDb {
         taxonomyRBucket.delete();
 
         String categoriesKey = KeyBuilder.categoriesForTaxonomy(taxonomyId);
-        RList<Category> categoryRList = redisson.getList(categoriesKey);
-        categoryRList.delete();
+        RSet<Category> categoryRSet = redisson.getSet(categoriesKey);
+        categoryRSet.delete();
 
         // TODO: Delete probabilities and manual mappings.
         return true;
