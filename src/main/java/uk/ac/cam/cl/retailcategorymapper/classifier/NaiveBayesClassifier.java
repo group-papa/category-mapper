@@ -367,7 +367,7 @@ public class NaiveBayesClassifier implements Classifier {
     }
 
     @Override
-    public Mapping classify(Taxonomy taxonomy, Product product) {
+    public List<Mapping> classify(Taxonomy taxonomy, Product product) {
         throw new UnsupportedOperationException();
     }
 
