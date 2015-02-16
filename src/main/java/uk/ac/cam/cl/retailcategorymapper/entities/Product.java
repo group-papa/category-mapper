@@ -1,11 +1,14 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import java.util.Map;
 import java.util.Set;
 
 /**
  * An immutable class to store a details about a product.
  */
+@JsonDeserialize(builder = ProductBuilder.class)
 public class Product {
     private String id;
     private String name;

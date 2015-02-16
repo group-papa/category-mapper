@@ -15,7 +15,9 @@ import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlProductUnmarshaller;
 import uk.ac.cam.cl.retailcategorymapper.utils.DateTime;
 import uk.ac.cam.cl.retailcategorymapper.utils.Uuid;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Add a new upload to the database.
@@ -41,6 +43,15 @@ public class AddUploadRoute extends BaseApiRoute {
         List<Mapping> mappings = mappingUnmarshaller.unmarshal(
                 attachment.getContents());
 
+        Map<String, Product> productsMap = new HashMap<>();
+        for (Product p : products) {
+            productsMap.put(p.getId(), p);
+        }
+        Map<String, Mapping> mappingsMap = new HashMap<>();
+        for (Mapping m : mappings) {
+            mappingsMap.put(m.getProduct().getId(), m);
+        }
+
         Upload upload = new UploadBuilder()
                 .setId(Uuid.generateUUID())
                 .setFilename(attachment.getName())
@@ -49,7 +60,7 @@ public class AddUploadRoute extends BaseApiRoute {
                 .setMappingCount(mappings.size())
                 .createUpload();
 
-        UploadDb.setUpload(upload, products, mappings);
+        UploadDb.setUpload(upload, productsMap, mappingsMap);
 
         return GetUploadRoute.generateGetUploadReply(upload);
     }
