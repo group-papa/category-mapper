@@ -8,12 +8,12 @@ import java.util.List;
  * Marshal a list of products into XML.
  */
 public class ProductXmlMarshaller implements Marshaller<List<Product>, String> {
-    private static final String NAME_XML = "productName";
-    private static final String PRODUCT_XML = "product";
-    private static final String ID_XML = "productSku";
-    private static final String DESCRIPTION_XML = "productDescription";
-    private static final String PRICE_XML = "productPrice";
-    private static final String CATEGORY_XML = "productCategory";
+    private static final String NAME_TAG = "productName";
+    private static final String PRODUCT_TAG = "product";
+    private static final String ID_TAG = "productSku";
+    private static final String DESCRIPTION_TAG = "productDescription";
+    private static final String PRICE_TAG = "productPrice";
+    private static final String CATEGORY_TAG = "productCategory";
 
     @Override
     public String marshal(List<Product> data) {
@@ -24,34 +24,34 @@ public class ProductXmlMarshaller implements Marshaller<List<Product>, String> {
         answerBuilder.append("<products>");
 
         for (Product product : data) {
-            answerBuilder.append("<" + PRODUCT_XML + ">");
+            answerBuilder.append("<" + PRODUCT_TAG + ">");
 
-            answerBuilder.append("<" + NAME_XML + ">");
+            answerBuilder.append("<" + NAME_TAG + ">");
             answerBuilder.append(product.getName());
-            answerBuilder.append("</" + NAME_XML + ">");
+            answerBuilder.append("</" + NAME_TAG + ">");
 
-            answerBuilder.append("<" + ID_XML + ">");
+            answerBuilder.append("<" + ID_TAG + ">");
             answerBuilder.append(product.getId());
-            answerBuilder.append("</" + ID_XML + ">");
+            answerBuilder.append("</" + ID_TAG + ">");
 
-            answerBuilder.append("<" + DESCRIPTION_XML + ">");
+            answerBuilder.append("<" + DESCRIPTION_TAG + ">");
             answerBuilder.append(product.getDescription());
-            answerBuilder.append("</" + DESCRIPTION_XML + ">");
+            answerBuilder.append("</" + DESCRIPTION_TAG + ">");
 
-            answerBuilder.append("<" + PRICE_XML + ">");
+            answerBuilder.append("<" + PRICE_TAG + ">");
             answerBuilder.append((double) (product.getPrice()) / 100.0);
             // TODO: Format the price
-            answerBuilder.append("</" + PRICE_XML + ">");
+            answerBuilder.append("</" + PRICE_TAG + ">");
 
-            answerBuilder.append("<" + DESCRIPTION_XML + ">");
+            answerBuilder.append("<" + DESCRIPTION_TAG + ">");
             answerBuilder.append(product.getDescription());
-            answerBuilder.append("</" + DESCRIPTION_XML + ">");
+            answerBuilder.append("</" + DESCRIPTION_TAG + ">");
 
-            answerBuilder.append("<" + CATEGORY_XML + ">");
+            answerBuilder.append("<" + CATEGORY_TAG + ">");
             answerBuilder.append(product.getOriginalCategory().toString());
-            answerBuilder.append("</" + CATEGORY_XML + ">");
+            answerBuilder.append("</" + CATEGORY_TAG + ">");
 
-            answerBuilder.append("</" + PRODUCT_XML + ">");
+            answerBuilder.append("</" + PRODUCT_TAG + ">");
         }
 
         answerBuilder.append("</products>");
