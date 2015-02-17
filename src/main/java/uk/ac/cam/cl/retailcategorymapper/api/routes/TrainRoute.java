@@ -3,7 +3,6 @@ package uk.ac.cam.cl.retailcategorymapper.api.routes;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.stream.MalformedJsonException;
 import spark.Request;
 import spark.Response;
 import uk.ac.cam.cl.retailcategorymapper.api.exceptions.BadInputException;
