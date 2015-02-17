@@ -6,6 +6,8 @@ import org.junit.Test;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.CategoryBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
+import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
+import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.ProductBuilder;
 
@@ -44,6 +46,48 @@ public class XmlUnmarshallingTest {
 
         for (int i = 0; i < 100; i++) {
             Assert.assertEquals("product " + i + " didn't match", products.get(i), testList.get(i));
+        }
+    }
+
+    @Test
+    public void testMappingListXMLOutput() {
+        Random randGen = new Random(System.currentTimeMillis());
+
+        List<Mapping> mappings = new LinkedList<>();
+
+        for (int i = 0; i < 100; i++) {
+            ProductBuilder productBuild = new ProductBuilder();
+            productBuild.setName(RandomStringUtils.randomAlphanumeric(10));
+            productBuild.setDescription(RandomStringUtils.randomAlphanumeric(20));
+            productBuild.setId(RandomStringUtils.randomAlphanumeric(10));
+            productBuild.setPrice(randGen.nextInt(10000));
+            CategoryBuilder catBuild = new CategoryBuilder();
+            catBuild.setId(RandomStringUtils.randomAlphanumeric(10));
+            String[] s = new String[]{
+                    RandomStringUtils.randomAlphanumeric(10),
+                    RandomStringUtils.randomAlphanumeric(10),
+                    RandomStringUtils.randomAlphanumeric(10)};
+            catBuild.setParts(s);
+            productBuild.setOriginalCategory(catBuild.createCategory());
+
+            MappingBuilder mapBuild = new MappingBuilder();
+            mapBuild.setProduct(productBuild.createProduct());
+            s = new String[]{
+                    RandomStringUtils.randomAlphanumeric(10),
+                    RandomStringUtils.randomAlphanumeric(10),
+                    RandomStringUtils.randomAlphanumeric(10)};
+            catBuild.setParts(s);
+            mapBuild.setCategory(catBuild.createCategory());
+            mapBuild.setConfidence(1).setMethod(Method.UPLOAD);
+            mappings.add(mapBuild.createMapping());
+        }
+
+        String XMLout = new MappingXmlMarshaller().marshal(mappings);
+
+        List<Mapping> testList = new XmlMappingUnmarshaller().unmarshal(XMLout);
+
+        for (int i = 0; i < 100; i++) {
+            Assert.assertEquals("mapping " + i + " didn't match", mappings.get(i), testList.get(i));
         }
     }
 
