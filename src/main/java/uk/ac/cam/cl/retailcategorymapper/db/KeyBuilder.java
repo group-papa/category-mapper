@@ -41,8 +41,8 @@ class KeyBuilder {
         return build(TAXONOMY, taxonomyId, CATEGORIES);
     }
 
-    public static String manualMapping(String taxonomyId, String productId) {
-        return build(TAXONOMY, taxonomyId, MANUAL, productId);
+    public static String manualMapping(String taxonomyId) {
+        return build(TAXONOMY, taxonomyId, MANUAL);
     }
 
     public static String naiveProductsCount(String taxonomyId) {
