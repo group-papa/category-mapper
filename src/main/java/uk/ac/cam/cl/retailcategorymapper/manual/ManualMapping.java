@@ -40,24 +40,26 @@ public class ManualMapping implements Classifier {
     }
 
     @Override
-    public void train(Mapping mapping) {
+    public boolean train(Mapping mapping) {
         Taxonomy taxonomy = mapping.getTaxonomy();
         Product product = mapping.getProduct();
         Category category = mapping.getCategory();
 
         if (taxonomy == null || product == null || category == null) {
-            return;
+            return false;
         }
 
         Set<Category> taxonomyCategories = TaxonomyDb
                 .getCategoriesForTaxonomy(taxonomy);
 
         if (!taxonomyCategories.contains(category)) {
-            return;
+            return false;
         }
 
         Map<String, Category> manualMappings = ManualMappingDb
                 .getManualMappings(taxonomy);
         manualMappings.put(product.getId(), category);
+
+        return true;
     }
 }

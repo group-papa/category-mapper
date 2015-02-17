@@ -1,5 +1,7 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
+import java.util.Comparator;
+
 /**
  * An immutable class to store a details about a mapping.
  */
@@ -64,5 +66,12 @@ public class Mapping {
         result = 31 * result + (method != null ? method.hashCode() : 0);
         result = 31 * result + (confidence != +0.0f ? Float.floatToIntBits(confidence) : 0);
         return result;
+    }
+
+    public static class ConfidenceSorter implements Comparator<Mapping> {
+        @Override
+        public int compare(Mapping o1, Mapping o2) {
+            return Float.compare(o1.getConfidence(), o2.getConfidence());
+        }
     }
 }

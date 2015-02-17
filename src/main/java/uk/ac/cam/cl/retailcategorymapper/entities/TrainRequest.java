@@ -8,9 +8,9 @@ import java.util.List;
  * An class to store a request to train the system.
  */
 public class TrainRequest extends Request {
-    private boolean addToManualMappings;
-    private boolean addToTrainingSet;
-    private List<Mapping> mappings;
+    private final boolean addToManualMappings;
+    private final boolean addToTrainingSet;
+    private final List<Mapping> mappings;
 
     public TrainRequest(Taxonomy taxonomy, boolean addToManualMappings,
                         boolean addToTrainingSet, List<Mapping> mappings) {

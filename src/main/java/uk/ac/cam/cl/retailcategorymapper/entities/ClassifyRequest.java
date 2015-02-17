@@ -8,7 +8,7 @@ import java.util.List;
  * An class to store a request to classify products.
  */
 public class ClassifyRequest extends Request {
-    private List<Product> products;
+    private final List<Product> products;
 
     public ClassifyRequest(Taxonomy taxonomy, List<Product> products) {
         super(taxonomy);

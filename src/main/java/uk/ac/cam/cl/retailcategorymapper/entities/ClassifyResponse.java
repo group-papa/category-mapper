@@ -1,21 +1,23 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An class to store a response after requesting classifications.
  */
 public class ClassifyResponse extends Response {
-    private List<Mapping> products;
+    private final Map<Product, List<Mapping>> mappings;
 
-    public ClassifyResponse(Taxonomy taxonomy, List<Mapping> products) {
+    public ClassifyResponse(Taxonomy taxonomy, Map<Product,
+            List<Mapping>> mappings) {
         super(taxonomy);
-        this.products = new ArrayList<>(products);
+        this.mappings = new HashMap<>(mappings);
     }
 
-    public List<Mapping> getProducts() {
-        return Collections.unmodifiableList(this.products);
+    public Map<Product, List<Mapping>> getMappings() {
+        return Collections.unmodifiableMap(this.mappings);
     }
 }

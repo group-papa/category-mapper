@@ -215,8 +215,9 @@ public class NaiveBayesDbClassifier implements Classifier {
     }
 
     @Override
-    public void train(Mapping mapping) {
+    public boolean train(Mapping mapping) {
         trainWithBagOfWordsSingleProduct(mapping.getProduct(), mapping
                 .getCategory(), mapping.getTaxonomy());
+        return true;
     }
 }
