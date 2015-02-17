@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.retailcategorymapper.db;
 
 import org.redisson.Redisson;
+import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 
 import java.util.Map;
@@ -14,7 +15,7 @@ public class ManualMappingDb {
      * @param taxonomy The taxonomy.
      * @return The manual mappings.
      */
-    public static Map<String, String> getManualMappings(Taxonomy taxonomy) {
+    public static Map<String, Category> getManualMappings(Taxonomy taxonomy) {
         Redisson redisson = RedissonWrapper.getInstance();
 
         String key = KeyBuilder.manualMapping(taxonomy.getId());
