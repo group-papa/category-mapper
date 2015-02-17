@@ -24,9 +24,12 @@ task execute(type:JavaExec, dependsOn:['classes']) {
 }
 
 task classifierTest(type:JavaExec, dependsOn:['classes']) {
-    main = 'uk.ac.cam.cl.retailcategorymapper.tester.ClassifierTester'
+    main = 'uk.ac.cam.cl.retailcategorymapper.classifier.tester.ClassifierTester'
     classpath = sourceSets.main.runtimeClasspath
-    //args(System.getProperty("exec.args").split())
+    if (project.hasProperty('execargs')) {
+        // Run with -Pexecargs="a,b,c"
+        args execargs.split(',')
+    }
 }
 
 checkstyle {

@@ -5,6 +5,7 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -80,6 +81,7 @@ public class ClassifierTester {
 
     public static void main(String[] args) {
         System.out.println("ClassifierTest Main Executed");
+        System.out.println(Arrays.toString(args));
         //TODO write
     }
 }
