@@ -41,6 +41,10 @@ class KeyBuilder {
         return build(TAXONOMY, taxonomyId, CATEGORIES);
     }
 
+    public static String taxonomyFamily(String taxonomyId) {
+        return build(TAXONOMY, taxonomyId, "*");
+    }
+
     public static String manualMapping(String taxonomyId) {
         return build(TAXONOMY, taxonomyId, MANUAL);
     }
@@ -81,5 +85,9 @@ class KeyBuilder {
 
     public static String uploadMappings(String uploadId) {
         return build(UPLOAD, uploadId, MAPPINGS);
+    }
+
+    public static String uploadFamily(String uploadId) {
+        return build(UPLOAD, uploadId, "*");
     }
 }
