@@ -20,8 +20,9 @@ public interface Classifier {
 
     /**
      * Use the given mapping to train the classifer.
+     * @param taxonomy The taxonomy to train with.
      * @param mapping The mapping to train on.
      * @return Whether the mapping was used to train the classifer.
      */
-    public boolean train(Mapping mapping);
+    public boolean train(Taxonomy taxonomy, Mapping mapping);
 }

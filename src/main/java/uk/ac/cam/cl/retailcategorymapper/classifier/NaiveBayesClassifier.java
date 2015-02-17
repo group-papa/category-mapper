@@ -372,7 +372,7 @@ public class NaiveBayesClassifier implements Classifier {
     }
 
     @Override
-    public boolean train(Mapping mapping) {
+    public boolean train(Taxonomy taxonomy, Mapping mapping) {
         throw new UnsupportedOperationException();
     }
 }

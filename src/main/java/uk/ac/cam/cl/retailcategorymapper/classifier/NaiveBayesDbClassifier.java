@@ -150,10 +150,6 @@ public class NaiveBayesDbClassifier implements Classifier {
                     pProductGivenC *= pFeatureGivenC;
                 }
             }
-            //category has not been seen by the classifier during training
-            else {
-                System.err.println("category has not been seen by the classifier during training");
-            }
 
             //calculate P(C)
             double pC = 1.0;
@@ -165,10 +161,6 @@ public class NaiveBayesDbClassifier implements Classifier {
                 //Laplace smoothing
                 pC *= ((double) (productsInCategory + 1)) /
                         ((double) (totalProducts + numDestinationCategories));
-            }
-            //category NOT seen by classifier during training
-            else {
-                System.err.println("category has not been seen by the classifier during training");
             }
 
             double pCGivenF = pProductGivenC * pC;
@@ -215,9 +207,9 @@ public class NaiveBayesDbClassifier implements Classifier {
     }
 
     @Override
-    public boolean train(Mapping mapping) {
+    public boolean train(Taxonomy taxonomy, Mapping mapping) {
         trainWithBagOfWordsSingleProduct(mapping.getProduct(), mapping
-                .getCategory(), mapping.getTaxonomy());
+                .getCategory(), taxonomy);
         return true;
     }
 }

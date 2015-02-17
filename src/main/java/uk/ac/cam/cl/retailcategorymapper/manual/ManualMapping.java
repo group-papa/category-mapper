@@ -40,8 +40,7 @@ public class ManualMapping implements Classifier {
     }
 
     @Override
-    public boolean train(Mapping mapping) {
-        Taxonomy taxonomy = mapping.getTaxonomy();
+    public boolean train(Taxonomy taxonomy, Mapping mapping) {
         Product product = mapping.getProduct();
         Category category = mapping.getCategory();
 

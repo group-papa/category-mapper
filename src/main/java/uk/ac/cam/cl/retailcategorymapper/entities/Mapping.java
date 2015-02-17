@@ -1,10 +1,13 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import java.util.Comparator;
 
 /**
  * An immutable class to store a details about a mapping.
  */
+@JsonDeserialize(builder = MappingBuilder.class)
 public class Mapping {
     private Product product;
     private Category category;

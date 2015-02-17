@@ -36,7 +36,7 @@ public class ClassifierTester {
                 i -= 5;
                 testData.add(copy.remove(0));
             } else {
-                classifier.train(copy.remove(0));
+                classifier.train(this.taxonomy, copy.remove(0));
             }
         }
     }

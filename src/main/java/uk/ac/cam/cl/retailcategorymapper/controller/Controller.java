@@ -41,7 +41,7 @@ public class Controller {
             List<Mapping> manualMappings = manualMappingClassifier.classify
                     (taxonomy, product);
 
-            if (manualMappings.size() > 0 &&
+            if (manualMappings.size() == 1 &&
                 manualMappings.get(0).getConfidence() == 1.0) {
                 results.put(product, Arrays.asList(manualMappings.get(0)));
                 continue;
@@ -73,7 +73,7 @@ public class Controller {
 
         if (request.getAddToManualMappings()) {
             for (Mapping mapping : mappings) {
-                if (manualMappingClassifier.train(mapping)) {
+                if (manualMappingClassifier.train(taxonomy, mapping)) {
                     trainCountManual += 1;
                 }
             }
@@ -81,7 +81,7 @@ public class Controller {
 
         if (request.getAddToTrainingSet()) {
             for (Mapping mapping : mappings) {
-                if (naiveBayesClassifier.train(mapping)) {
+                if (naiveBayesClassifier.train(taxonomy, mapping)) {
                     trainCountClassifier += 1;
                 }
             }

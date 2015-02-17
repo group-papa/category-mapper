@@ -24,7 +24,7 @@ public class GetUploadedProductRoute extends BaseApiRoute {
         }
 
         String productId = request.params(":product[id]");
-        Map<String, Product> products = UploadDb.getUploadProducts(upload);
+        Map<String, Product> products = upload.getProducts();
         Product product = products.get(productId);
         if (product == null) {
             throw new NotFoundException("Unknown product ID.");
