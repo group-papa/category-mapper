@@ -38,7 +38,7 @@ public class ClassifyRoute extends BaseApiRoute {
         try {
             inputJson = gson.fromJson(request.body(), InputJson.class);
         } catch (JsonSyntaxException e) {
-            throw new BadInputException("Invalid JSON provided.");
+            throw new BadInputException("Invalid request.");
         }
 
         String taxonomyId = inputJson.taxonomyId;
@@ -53,7 +53,16 @@ public class ClassifyRoute extends BaseApiRoute {
             throw new NotFoundException("Unknown upload ID.");
         }
 
-        List<Product> products = new ArrayList<>(upload.getProducts().values());
+        List<Product> products;
+        if (inputJson.productIds == null || inputJson.productIds.size() == 0) {
+            products = new ArrayList<>(upload.getProducts().values());
+        } else {
+            Map<String, Product> uploadedProducts = upload.getProducts();
+            products = new ArrayList<>();
+            products.addAll(inputJson.productIds.stream()
+                    .filter(uploadedProducts::containsKey)
+                    .map(uploadedProducts::get).collect(Collectors.toList()));
+        }
 
         ClassifyRequest classifyRequest = new ClassifyRequest(
                 taxonomy, products);
@@ -85,6 +94,8 @@ public class ClassifyRoute extends BaseApiRoute {
         String taxonomyId;
         @SerializedName("upload[id]")
         String uploadId;
+        @SerializedName("products")
+        List<String> productIds;
     }
 
     static class ClassifyReply {

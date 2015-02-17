@@ -18,6 +18,8 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Upload;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Train the mapping engine from an upload.
@@ -33,7 +35,7 @@ public class TrainRoute extends BaseApiRoute {
         try {
             inputJson = gson.fromJson(request.body(), InputJson.class);
         } catch (JsonSyntaxException e) {
-            throw new BadInputException("Invalid JSON provided.");
+            throw new BadInputException("Invalid request.");
         }
 
         String taxonomyId = inputJson.taxonomyId;
@@ -48,10 +50,19 @@ public class TrainRoute extends BaseApiRoute {
             throw new NotFoundException("Unknown upload ID.");
         }
 
-        List<Mapping> mappings = new ArrayList<>(upload.getMappings().values());
+        List<Mapping> mappings;
+        if (inputJson.productIds == null || inputJson.productIds.size() == 0) {
+            mappings = new ArrayList<>(upload.getMappings().values());
+        } else {
+            Map<String, Mapping> uploadedMappings = upload.getMappings();
+            mappings = new ArrayList<>();
+            mappings.addAll(inputJson.productIds.stream()
+                    .filter(uploadedMappings::containsKey)
+                    .map(uploadedMappings::get).collect(Collectors.toList()));
+        }
 
-        TrainRequest trainRequest = new TrainRequest(
-                taxonomy, mappings, true, true);
+        TrainRequest trainRequest = new TrainRequest(taxonomy, mappings,
+                inputJson.addToManualMappings, inputJson.addToTrainingSet);
 
         TrainResponse result = controller.train(trainRequest);
 
@@ -64,6 +75,12 @@ public class TrainRoute extends BaseApiRoute {
         String taxonomyId;
         @SerializedName("upload[id]")
         String uploadId;
+        @SerializedName("products")
+        List<String> productIds;
+        @SerializedName("addToManualMappings")
+        boolean addToManualMappings;
+        @SerializedName("addToTrainingSet")
+        boolean addToTrainingSet;
     }
 
     static class TrainReply {
