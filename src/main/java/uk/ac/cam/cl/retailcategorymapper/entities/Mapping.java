@@ -38,4 +38,24 @@ public class Mapping {
     public float getConfidence() {
         return confidence;
     }
+
+    @Override
+    public boolean equals(Object o){
+        if(!(o instanceof Mapping)){return false;}
+        Mapping m = (Mapping)o;
+        if(!m.product.equals(product)){return false;}
+        if(!m.category.equals(category)){return false;}
+        if(m.taxonomy!=taxonomy) {
+            if (!m.taxonomy.equals(taxonomy)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode(){
+        int answer = product.hashCode();
+        return answer*19+category.hashCode();
+    }
 }

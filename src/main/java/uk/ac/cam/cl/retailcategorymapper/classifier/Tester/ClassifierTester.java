@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.retailcategorymapper.classifier.Tester;
+package uk.ac.cam.cl.retailcategorymapper.classifier.tester;
 
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
@@ -78,5 +78,10 @@ public class ClassifierTester {
             }
         }
         return accuracyPerLevel;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("ClassifierTest Main Executed");
+        //TODO write
     }
 }
