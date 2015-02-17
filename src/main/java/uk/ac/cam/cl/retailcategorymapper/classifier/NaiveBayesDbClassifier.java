@@ -1,11 +1,11 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
-import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
-import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
-import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
+import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
+import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
+import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Method;
@@ -15,25 +15,16 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 
-
 /**
- * A Naive Bayes classifier implementation.
+ * A Naive Bayes classifier implementation which integrates with the database.
  */
-// TODO: Integrate with the database (don't store values in RAM)
-public class NaiveBayesClassifierWithDb implements Classifier {
-
-
-    public NaiveBayesClassifierWithDb() {
-    }
-
-
+public class NaiveBayesDbClassifier implements Classifier {
     /**
      * When we go through the training data and see a features linked with a category,
      * call this method to add to the maps and sets of Naive Bayes Classifier.
@@ -45,33 +36,33 @@ public class NaiveBayesClassifierWithDb implements Classifier {
         //add to feature set
         NaiveBayesDb.getFeatureSet(taxonomy).add(featureSeen);
 
-
         //update categoryCounts based on features:
 
+        Map<Category, Integer> categoryFeatureMap = NaiveBayesDb.getCategoryFeatureMap(taxonomy);
         //have seen category before associated with a feature
-        if (NaiveBayesDb.getCategoryFeatureMap(taxonomy).containsKey(category)) {
-            int prevCount = NaiveBayesDb.getCategoryFeatureMap(taxonomy).get(category);
-            NaiveBayesDb.getCategoryFeatureMap(taxonomy).put(category, prevCount + 1);
+        if (categoryFeatureMap.containsKey(category)) {
+            int prevCount = categoryFeatureMap.get(category);
+            categoryFeatureMap.put(category, prevCount + 1);
         }
         //have NOT seen category before
         else {
-            NaiveBayesDb.getCategoryFeatureMap(taxonomy).put(category, 1);
+            categoryFeatureMap.put(category, 1);
         }
-
 
         //update count of times specific features is seen in given category:
 
         //have seen feature before in this category
-        if (NaiveBayesDb.getCategoryFeatureObservationMap(taxonomy, category).containsKey(featureSeen)) {
-            int prevCount = NaiveBayesDb.getCategoryFeatureObservationMap(taxonomy, category).get(featureSeen);
-            NaiveBayesDb.getCategoryFeatureObservationMap(taxonomy, category).put(featureSeen, prevCount + 1);
+        Map<Feature, Integer> categoryFeatureObservationMap = NaiveBayesDb
+                .getCategoryFeatureObservationMap(taxonomy, category);
+        if (categoryFeatureObservationMap.containsKey(featureSeen)) {
+            int prevCount = categoryFeatureObservationMap.get(featureSeen);
+            categoryFeatureObservationMap.put(featureSeen, prevCount + 1);
         }
         //have NOT seen this features before in this category
         else {
-            NaiveBayesDb.getCategoryFeatureObservationMap(taxonomy, category).put(featureSeen, 1);
+            categoryFeatureObservationMap.put(featureSeen, 1);
         }
     }
-
 
     /**
      * Update the sets and maps held by the classifier which will be used for training with
@@ -86,13 +77,14 @@ public class NaiveBayesClassifierWithDb implements Classifier {
         NaiveBayesDb.incrementProductCount(taxonomy);
 
         //have seen category before
-        if (NaiveBayesDb.getCategoryProductMap(taxonomy).containsKey(category)) {
-            int prevCount = NaiveBayesDb.getCategoryProductMap(taxonomy).get(category);
-            NaiveBayesDb.getCategoryProductMap(taxonomy).put(category, prevCount + 1);
+        Map<Category, Integer> categoryProductMap = NaiveBayesDb.getCategoryProductMap(taxonomy);
+        if (categoryProductMap.containsKey(category)) {
+            int prevCount = categoryProductMap.get(category);
+            categoryProductMap.put(category, prevCount + 1);
         }
         //have not seen category before in training
         else {
-            NaiveBayesDb.getCategoryProductMap(taxonomy).put(category, 1);
+            categoryProductMap.put(category, 1);
         }
 
         for (Feature f : featuresFromProduct) {
@@ -101,7 +93,6 @@ public class NaiveBayesClassifierWithDb implements Classifier {
     }
 
     class ValueComparator implements Comparator<Category> {
-
         Map<Category, Double> base;
 
         public ValueComparator(Map<Category, Double> base) {
@@ -118,7 +109,6 @@ public class NaiveBayesClassifierWithDb implements Classifier {
         }
     }
 
-
     /**
      * Generate a list of top three mappings for a product given the destination taxonomy.
      * Use Laplace Smoothing to take into account any categories or features not seen
@@ -129,18 +119,15 @@ public class NaiveBayesClassifierWithDb implements Classifier {
      * @return mapping of the product into the destination taxonomy
      */
     public List<Mapping> classifyWithBagOfWords(Taxonomy taxonomy, Product product) {
-        //treemap sorts in increasing order of value
-        HashMap<Category, Double> map = new HashMap<Category, Double>();
+        // Treemap sorts in increasing order of value
+        HashMap<Category, Double> map = new HashMap<>();
         ValueComparator bvc = new ValueComparator(map);
-        NavigableMap<Category, Double> sorted_map = new TreeMap<Category, Double>(bvc);
+        NavigableMap<Category, Double> sorted_map = new TreeMap<>(bvc);
 
         List<Feature> features = FeatureConverter1.changeProductToFeature(product);
         Set<Category> allDestinationCategories = taxonomy.getCategories();
 
-
-        Iterator itr = allDestinationCategories.iterator();
-        while (itr.hasNext()) {
-            Category category = (Category) itr.next();
+        for (Category category : allDestinationCategories) {
             //calculate P(f_i | C)
             double pProductGivenC = 1.0;
             //category has been seen by classifier during training
@@ -189,20 +176,19 @@ public class NaiveBayesClassifierWithDb implements Classifier {
         }
         sorted_map.putAll(map);
 
-        List<Mapping> topThreeResults = new ArrayList<Mapping>();
-
+        List<Mapping> topThreeResults = new ArrayList<>();
 
         Category firstCategory = sorted_map.pollFirstEntry().getKey();
         Category secondCategory = sorted_map.pollFirstEntry().getKey();
         Category thirdCategory = sorted_map.pollFirstEntry().getKey();
 
-        Mapping m1 = (new MappingBuilder()).setCategory(firstCategory)
+        Mapping m1 = new MappingBuilder().setCategory(firstCategory)
                 .setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
 
-        Mapping m2 = (new MappingBuilder()).setCategory(secondCategory)
+        Mapping m2 = new MappingBuilder().setCategory(secondCategory)
                 .setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
 
-        Mapping m3 = (new MappingBuilder()).setCategory(thirdCategory)
+        Mapping m3 = new MappingBuilder().setCategory(thirdCategory)
                 .setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
 
         topThreeResults.add(m1);
@@ -211,7 +197,6 @@ public class NaiveBayesClassifierWithDb implements Classifier {
 
         return topThreeResults;
     }
-
 
     public void trainWithWeights(Taxonomy taxonomy, Product product, double originalCategoryWeight,
                                  double nameWeight, double descriptionWeight, double priceWeight,
@@ -226,11 +211,12 @@ public class NaiveBayesClassifierWithDb implements Classifier {
 
     @Override
     public List<Mapping> classify(Taxonomy taxonomy, Product product) {
-        throw new UnsupportedOperationException();
+        return classifyWithBagOfWords(taxonomy, product);
     }
 
     @Override
     public void train(Mapping mapping) {
-        throw new UnsupportedOperationException();
+        trainWithBagOfWordsSingleProduct(mapping.getProduct(), mapping
+                .getCategory(), mapping.getTaxonomy());
     }
 }
