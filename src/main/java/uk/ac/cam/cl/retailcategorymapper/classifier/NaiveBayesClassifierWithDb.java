@@ -12,7 +12,15 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.Set;
+import java.util.TreeMap;
 
 
 /**
