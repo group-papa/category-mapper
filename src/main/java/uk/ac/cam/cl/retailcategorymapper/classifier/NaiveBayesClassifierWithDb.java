@@ -11,16 +11,7 @@ import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
-
-import javax.swing.text.html.HTMLDocument;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * A Naive Bayes classifier implementation.
@@ -29,7 +20,8 @@ import java.util.TreeMap;
 public class NaiveBayesClassifierWithDb implements Classifier {
 
 
-    public NaiveBayesClassifierWithDb() {}
+    public NaiveBayesClassifierWithDb() {
+    }
 
 
     /**
@@ -86,7 +78,7 @@ public class NaiveBayesClassifierWithDb implements Classifier {
         //have seen category before
         if (NaiveBayesDb.getCategoryProductMap(taxonomy).containsKey(category)) {
             int prevCount = NaiveBayesDb.getCategoryProductMap(taxonomy).get(category);
-            NaiveBayesDb.getCategoryProductMap(taxonomy).put(category, prevCount+1);
+            NaiveBayesDb.getCategoryProductMap(taxonomy).put(category, prevCount + 1);
         }
         //have not seen category before in training
         else {
@@ -98,9 +90,27 @@ public class NaiveBayesClassifierWithDb implements Classifier {
         }
     }
 
+    class ValueComparator implements Comparator<Category> {
+
+        Map<Category, Double> base;
+
+        public ValueComparator(Map<Category, Double> base) {
+            this.base = base;
+        }
+
+        // Note: this comparator imposes orderings that are inconsistent with equals.
+        public int compare(Category a, Category b) {
+            if (base.get(a) >= base.get(b)) {
+                return -1;
+            } else {
+                return 1;
+            } // returning 0 would merge keys
+        }
+    }
+
 
     /**
-     * Generate a mapping for a product given the destination taxonomy.
+     * Generate a list of top three mappings for a product given the destination taxonomy.
      * Use Laplace Smoothing to take into account any categories or features not seen
      * so that the product never results in a value of 0.
      *
@@ -108,22 +118,19 @@ public class NaiveBayesClassifierWithDb implements Classifier {
      * @param product  Product we are mapping into the destination taxonomy
      * @return mapping of the product into the destination taxonomy
      */
-    public Mapping classifyWithBagOfWords(Taxonomy taxonomy, Product product) {
-        //treemap sorts in increasing order
-        NavigableMap<Double, Category> probabilityToAllPossibleCategories = new TreeMap<Double, Category>();
+    public List<Mapping> classifyWithBagOfWords(Taxonomy taxonomy, Product product) {
+        //treemap sorts in increasing order of value
+        HashMap<Category, Double> map = new HashMap<Category, Double>();
+        ValueComparator bvc = new ValueComparator(map);
+        NavigableMap<Category, Double> sorted_map = new TreeMap<Category, Double>(bvc);
 
-        //WILL NEED TO CHANGE ONCE THIS IS CHANGED FOR DB !!!!!!
         List<Feature> features = FeatureConverter1.changeProductToFeature(product);
-        List<Category> allDestinationCategories = TaxonomyDb.getCategoriesForTaxonomy(taxonomy);
+        Set<Category> allDestinationCategories = taxonomy.getCategories();
 
-//        Iterator itr = allDestinationCategories.iterator();
-//        while (itr.hasNext()) {
-//            ((Category) category) = itr.next();
-//        }
 
-        //take a single category
-        for (Category category : allDestinationCategories) {
-
+        Iterator itr = allDestinationCategories.iterator();
+        while (itr.hasNext()) {
+            Category category = (Category) itr.next();
             //calculate P(f_i | C)
             double pProductGivenC = 1.0;
             //category has been seen by classifier during training
@@ -168,13 +175,31 @@ public class NaiveBayesClassifierWithDb implements Classifier {
             }
 
             double pCGivenF = pProductGivenC * pC;
-            probabilityToAllPossibleCategories.put(pCGivenF, category);
+            map.put(category, pCGivenF);
         }
+        sorted_map.putAll(map);
 
-        Category mostLikelyCategory = probabilityToAllPossibleCategories.lastEntry().getValue();
-        Mapping m = (new MappingBuilder()).setCategory(mostLikelyCategory)
+        List<Mapping> topThreeResults = new ArrayList<Mapping>();
+
+
+        Category firstCategory = sorted_map.pollFirstEntry().getKey();
+        Category secondCategory = sorted_map.pollFirstEntry().getKey();
+        Category thirdCategory = sorted_map.pollFirstEntry().getKey();
+
+        Mapping m1 = (new MappingBuilder()).setCategory(firstCategory)
                 .setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
-        return m;
+
+        Mapping m2 = (new MappingBuilder()).setCategory(secondCategory)
+                .setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
+
+        Mapping m3 = (new MappingBuilder()).setCategory(thirdCategory)
+                .setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
+
+        topThreeResults.add(m1);
+        topThreeResults.add(m2);
+        topThreeResults.add(m3);
+
+        return topThreeResults;
     }
 
 
@@ -190,7 +215,7 @@ public class NaiveBayesClassifierWithDb implements Classifier {
     }
 
     @Override
-    public Mapping classify(Taxonomy taxonomy, Product product) {
+    public List<Mapping> classify(Taxonomy taxonomy, Product product) {
         throw new UnsupportedOperationException();
     }
 
