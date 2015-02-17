@@ -1,7 +1,11 @@
 package uk.ac.cam.cl.retailcategorymapper.api.routes;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.annotations.SerializedName;
 import spark.Request;
 import spark.Response;
+import uk.ac.cam.cl.retailcategorymapper.api.exceptions.BadInputException;
 import uk.ac.cam.cl.retailcategorymapper.api.exceptions.NotFoundException;
 import uk.ac.cam.cl.retailcategorymapper.controller.Controller;
 import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
@@ -25,17 +29,25 @@ import java.util.stream.Collectors;
  */
 public class ClassifyRoute extends BaseApiRoute {
     private final Controller controller = new Controller();
+    private final Gson gson = new Gson();
 
     @Override
     public Object handleRequest(Request request, Response response)
             throws Exception {
-        String taxonomyId = request.queryParams("taxonomy[id]");
+        InputJson inputJson;
+        try {
+            inputJson = gson.fromJson(request.body(), InputJson.class);
+        } catch (JsonSyntaxException e) {
+            throw new BadInputException("Invalid JSON provided.");
+        }
+
+        String taxonomyId = inputJson.taxonomyId;
         Taxonomy taxonomy = TaxonomyDb.getTaxonomy(taxonomyId);
         if (taxonomy == null) {
             throw new NotFoundException("Unknown taxonomy ID.");
         }
 
-        String uploadId = request.queryParams("upload[id]");
+        String uploadId = inputJson.uploadId;
         Upload upload = UploadDb.getUpload(uploadId);
         if (upload == null) {
             throw new NotFoundException("Unknown upload ID.");
@@ -55,7 +67,7 @@ public class ClassifyRoute extends BaseApiRoute {
 
             List<MappingEntry> mappings = mapping.getValue().stream()
                     .map(m -> new MappingEntry(m.getCategory(), m.getMethod(),
-                    m.getConfidence())).collect(Collectors.toList());
+                            m.getConfidence())).collect(Collectors.toList());
 
             results.add(new MappingResult(
                     product.getId(),
@@ -66,6 +78,13 @@ public class ClassifyRoute extends BaseApiRoute {
         }
 
         return new ClassifyReply(results);
+    }
+
+    static class InputJson {
+        @SerializedName("taxonomy[id]")
+        String taxonomyId;
+        @SerializedName("upload[id]")
+        String uploadId;
     }
 
     static class ClassifyReply {
