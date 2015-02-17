@@ -40,22 +40,29 @@ public class Mapping {
     }
 
     @Override
-    public boolean equals(Object o){
-        if(!(o instanceof Mapping)){return false;}
-        Mapping m = (Mapping)o;
-        if(!m.product.equals(product)){return false;}
-        if(!m.category.equals(category)){return false;}
-        if(m.taxonomy!=taxonomy) {
-            if (!m.taxonomy.equals(taxonomy)) {
-                return false;
-            }
-        }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Mapping)) return false;
+
+        Mapping mapping = (Mapping) o;
+
+        if (Float.compare(mapping.confidence, confidence) != 0) return false;
+        if (!category.equals(mapping.category)) return false;
+        if (method != mapping.method) return false;
+        if (!product.equals(mapping.product)) return false;
+        if (taxonomy != null ? !taxonomy.equals(mapping.taxonomy) : mapping.taxonomy != null)
+            return false;
+
         return true;
     }
 
     @Override
-    public int hashCode(){
-        int answer = product.hashCode();
-        return answer*19+category.hashCode();
+    public int hashCode() {
+        int result = product.hashCode();
+        result = 31 * result + category.hashCode();
+        result = 31 * result + (taxonomy != null ? taxonomy.hashCode() : 0);
+        result = 31 * result + (method != null ? method.hashCode() : 0);
+        result = 31 * result + (confidence != +0.0f ? Float.floatToIntBits(confidence) : 0);
+        return result;
     }
 }

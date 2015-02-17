@@ -7,6 +7,7 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.CategoryBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
+import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.ProductBuilder;
 
@@ -77,6 +78,7 @@ public class XmlUnmarshallingTest {
                     RandomStringUtils.randomAlphanumeric(10)};
             catBuild.setParts(s);
             mapBuild.setCategory(catBuild.createCategory());
+            mapBuild.setConfidence(1).setMethod(Method.UPLOAD);
             mappings.add(mapBuild.createMapping());
         }
 
