@@ -51,7 +51,7 @@ public class ClassifierTester {
         }
 
         for (Mapping originalMapping : testData) {
-            Mapping answerMapping = classifier.classify(taxonomy,
+            Mapping answerMapping = classifier.classify(
                     originalMapping.getProduct()).get(0);
 
             Category originalCategory = originalMapping.getCategory();

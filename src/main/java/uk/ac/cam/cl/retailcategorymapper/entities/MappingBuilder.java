@@ -1,8 +1,12 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
 /**
  * A builder class which produces an immutable Mapping.
  */
+@JsonPOJOBuilder(buildMethodName = "createMapping")
 public class MappingBuilder {
     private Product product;
     private Category category;
@@ -10,26 +14,31 @@ public class MappingBuilder {
     private Method method;
     private float confidence;
 
+    @JsonProperty("product")
     public MappingBuilder setProduct(Product product) {
         this.product = product;
         return this;
     }
 
+    @JsonProperty("category")
     public MappingBuilder setCategory(Category category) {
         this.category = category;
         return this;
     }
 
+    @JsonProperty("taxonomy")
     public MappingBuilder setTaxonomy(Taxonomy taxonomy) {
         this.taxonomy = taxonomy;
         return this;
     }
 
+    @JsonProperty("method")
     public MappingBuilder setMethod(Method method) {
         this.method = method;
         return this;
     }
 
+    @JsonProperty("confidence")
     public MappingBuilder setConfidence(float confidence) {
         this.confidence = confidence;
         return this;

@@ -1,6 +1,9 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import uk.ac.cam.cl.retailcategorymapper.db.UploadDb;
+
+import java.util.Map;
 
 /**
  * An immutable class to store an upload.
@@ -40,6 +43,14 @@ public class Upload {
 
     public int getMappingCount() {
         return mappingCount;
+    }
+
+    public Map<String, Product> getProducts() {
+        return UploadDb.getUploadProducts(this);
+    }
+
+    public Map<String, Mapping> getMappings() {
+        return UploadDb.getUploadMappings(this);
     }
 
     @Override

@@ -1,8 +1,13 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import java.util.Comparator;
+
 /**
  * An immutable class to store a details about a mapping.
  */
+@JsonDeserialize(builder = MappingBuilder.class)
 public class Mapping {
     private Product product;
     private Category category;
@@ -64,5 +69,12 @@ public class Mapping {
         result = 31 * result + (method != null ? method.hashCode() : 0);
         result = 31 * result + (confidence != +0.0f ? Float.floatToIntBits(confidence) : 0);
         return result;
+    }
+
+    public static class ConfidenceSorter implements Comparator<Mapping> {
+        @Override
+        public int compare(Mapping o1, Mapping o2) {
+            return Float.compare(o1.getConfidence(), o2.getConfidence());
+        }
     }
 }

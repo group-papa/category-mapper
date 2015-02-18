@@ -3,7 +3,6 @@ package uk.ac.cam.cl.retailcategorymapper.classifier;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
-import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
@@ -24,7 +23,25 @@ import java.util.TreeMap;
 /**
  * A Naive Bayes classifier implementation which integrates with the database.
  */
-public class NaiveBayesDbClassifier implements Classifier {
+public class NaiveBayesDbClassifier extends Classifier {
+    private Set<Feature> featureSet;
+    private Map<Category, Integer> categoryProductMap;
+    private Map<Category, Integer> categoryFeatureMap;
+    private Set<Category> allDestinationCategories;
+
+    /**
+     * Construct a new classifier for a given taxonomy.
+     *
+     * @param taxonomy The taxonomy.
+     */
+    public NaiveBayesDbClassifier(Taxonomy taxonomy) {
+        super(taxonomy);
+        featureSet = NaiveBayesDb.getFeatureSet(taxonomy);
+        categoryProductMap = NaiveBayesDb.getCategoryProductMap(taxonomy);
+        categoryFeatureMap = NaiveBayesDb.getCategoryFeatureMap(taxonomy);
+        allDestinationCategories = taxonomy.getCategories();
+    }
+
     /**
      * When we go through the training data and see a features linked with a category,
      * call this method to add to the maps and sets of Naive Bayes Classifier.
@@ -32,13 +49,11 @@ public class NaiveBayesDbClassifier implements Classifier {
      * @param featureSeen Feature from product in training set
      * @param category    Destination category that the product which features is derived from is put into
      */
-    public void addSeenFeatureInSpecifiedCategory(Feature featureSeen, Category category, Taxonomy taxonomy) {
+    public void addSeenFeatureInSpecifiedCategory(Feature featureSeen, Category category) {
         //add to feature set
-        NaiveBayesDb.getFeatureSet(taxonomy).add(featureSeen);
+        featureSet.add(featureSeen);
 
         //update categoryCounts based on features:
-
-        Map<Category, Integer> categoryFeatureMap = NaiveBayesDb.getCategoryFeatureMap(taxonomy);
         //have seen category before associated with a feature
         if (categoryFeatureMap.containsKey(category)) {
             int prevCount = categoryFeatureMap.get(category);
@@ -53,7 +68,7 @@ public class NaiveBayesDbClassifier implements Classifier {
 
         //have seen feature before in this category
         Map<Feature, Integer> categoryFeatureObservationMap = NaiveBayesDb
-                .getCategoryFeatureObservationMap(taxonomy, category);
+                .getCategoryFeatureObservationMap(getTaxonomy(), category);
         if (categoryFeatureObservationMap.containsKey(featureSeen)) {
             int prevCount = categoryFeatureObservationMap.get(featureSeen);
             categoryFeatureObservationMap.put(featureSeen, prevCount + 1);
@@ -71,13 +86,12 @@ public class NaiveBayesDbClassifier implements Classifier {
      * @param product  Product that has been classified
      * @param category Destination category that product has been mapped to
      */
-    public void trainWithBagOfWordsSingleProduct(Product product, Category category, Taxonomy taxonomy) {
+    public void trainWithBagOfWordsSingleProduct(Product product, Category category) {
         List<Feature> featuresFromProduct = FeatureConverter1.changeProductToFeature(product);
 
-        NaiveBayesDb.incrementProductCount(taxonomy);
+        NaiveBayesDb.incrementProductCount(getTaxonomy());
 
         //have seen category before
-        Map<Category, Integer> categoryProductMap = NaiveBayesDb.getCategoryProductMap(taxonomy);
         if (categoryProductMap.containsKey(category)) {
             int prevCount = categoryProductMap.get(category);
             categoryProductMap.put(category, prevCount + 1);
@@ -88,7 +102,7 @@ public class NaiveBayesDbClassifier implements Classifier {
         }
 
         for (Feature f : featuresFromProduct) {
-            this.addSeenFeatureInSpecifiedCategory(f, category, taxonomy);
+            this.addSeenFeatureInSpecifiedCategory(f, category);
         }
     }
 
@@ -114,26 +128,29 @@ public class NaiveBayesDbClassifier implements Classifier {
      * Use Laplace Smoothing to take into account any categories or features not seen
      * so that the product never results in a value of 0.
      *
-     * @param taxonomy Destination taxonomy containing the categories mapping to.
      * @param product  Product we are mapping into the destination taxonomy
      * @return mapping of the product into the destination taxonomy
      */
-    public List<Mapping> classifyWithBagOfWords(Taxonomy taxonomy, Product product) {
+    public List<Mapping> classifyWithBagOfWords(Product product) {
         // Treemap sorts in increasing order of value
         HashMap<Category, Double> map = new HashMap<>();
         ValueComparator bvc = new ValueComparator(map);
         NavigableMap<Category, Double> sorted_map = new TreeMap<>(bvc);
 
         List<Feature> features = FeatureConverter1.changeProductToFeature(product);
-        Set<Category> allDestinationCategories = taxonomy.getCategories();
+        int totalProducts = NaiveBayesDb.getProductCount(getTaxonomy());
 
         for (Category category : allDestinationCategories) {
-            //calculate P(f_i | C)
+            // P(f_i | C)
             double pProductGivenC = 1.0;
+            // P(C)
+            double pC = 1.0;
+
             //category has been seen by classifier during training
-            if (NaiveBayesDb.getCategoryFeatureMap(taxonomy).containsKey(category)) {
-                Map<Feature, Integer> featureOccurrencesInCategory
-                        = NaiveBayesDb.getCategoryFeatureObservationMap(taxonomy, category);
+            if (categoryFeatureMap.containsKey(category)) {
+                Map<Feature, Integer> featureOccurrencesInCategory =
+                        NaiveBayesDb.getCategoryFeatureObservationMap(
+                                getTaxonomy(), category);
 
                 for (Feature f : features) {
                     //assume f has NOT been seen in this category
@@ -143,32 +160,16 @@ public class NaiveBayesDbClassifier implements Classifier {
                         count = featureOccurrencesInCategory.get(f);
                     }
                     //Laplace smoothing
-                    int distinctFeaturesInCategory = NaiveBayesDb.getFeatureSet(taxonomy).size();
-                    int totalFeaturesInC = NaiveBayesDb.getCategoryFeatureMap(taxonomy).get(category);
+                    int totalFeaturesInC = categoryFeatureMap.get(category);
                     double pFeatureGivenC = ((double) (1 + count)) /
-                            ((double) (totalFeaturesInC + distinctFeaturesInCategory));
+                            ((double) (totalFeaturesInC + featureSet.size()));
                     pProductGivenC *= pFeatureGivenC;
                 }
-            }
-            //category has not been seen by the classifier during training
-            else {
-                System.err.println("category has not been seen by the classifier during training");
-            }
 
-            //calculate P(C)
-            double pC = 1.0;
-            //category seen by classifier during training
-            if (NaiveBayesDb.getCategoryFeatureMap(taxonomy).containsKey(category)) {
-                int productsInCategory = NaiveBayesDb.getCategoryProductMap(taxonomy).get(category);
-                int totalProducts = NaiveBayesDb.getProductCount(taxonomy);
-                int numDestinationCategories = TaxonomyDb.getCategoriesForTaxonomy(taxonomy).size();
+                int productsInCategory = categoryProductMap.get(category);
                 //Laplace smoothing
                 pC *= ((double) (productsInCategory + 1)) /
-                        ((double) (totalProducts + numDestinationCategories));
-            }
-            //category NOT seen by classifier during training
-            else {
-                System.err.println("category has not been seen by the classifier during training");
+                      ((double) (totalProducts + allDestinationCategories.size()));
             }
 
             double pCGivenF = pProductGivenC * pC;
@@ -198,25 +199,15 @@ public class NaiveBayesDbClassifier implements Classifier {
         return topThreeResults;
     }
 
-    public void trainWithWeights(Taxonomy taxonomy, Product product, double originalCategoryWeight,
-                                 double nameWeight, double descriptionWeight, double priceWeight,
-                                 double destinationCategoryWeight) {
-        throw new UnsupportedOperationException();
-    }
-
-    public Mapping classifyWithWeights(Taxonomy taxonomy, Product product, double originalCategoryWeight,
-                                       double nameWeight, double descriptionWeight, double priceWeight) {
-        throw new UnsupportedOperationException();
+    @Override
+    public List<Mapping> classify(Product product) {
+        return classifyWithBagOfWords(product);
     }
 
     @Override
-    public List<Mapping> classify(Taxonomy taxonomy, Product product) {
-        return classifyWithBagOfWords(taxonomy, product);
-    }
-
-    @Override
-    public void train(Mapping mapping) {
-        trainWithBagOfWordsSingleProduct(mapping.getProduct(), mapping
-                .getCategory(), mapping.getTaxonomy());
+    public boolean train(Mapping mapping) {
+        trainWithBagOfWordsSingleProduct(
+                mapping.getProduct(),mapping.getCategory());
+        return true;
     }
 }
