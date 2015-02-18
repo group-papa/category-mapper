@@ -14,11 +14,15 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 /**
  * A Naive Bayes classifier implementation which integrates with the database.
@@ -30,6 +34,7 @@ public class NaiveBayesDbClassifier extends Classifier {
     private Set<Category> destinationCategories;
     private Map<Category, Map<Feature, Integer>> categoryFeatureObservationMaps;
     private int totalProducts;
+    private int destinationCategoriesSize;
 
     /**
      * Construct a new classifier for a given taxonomy.
@@ -44,6 +49,7 @@ public class NaiveBayesDbClassifier extends Classifier {
         destinationCategories = taxonomy.getCategories();
         categoryFeatureObservationMaps = new HashMap<>();
         totalProducts = NaiveBayesDb.getProductCount(getTaxonomy());
+        destinationCategoriesSize = destinationCategories.size();
 
         for (Category category : destinationCategories) {
             categoryFeatureObservationMaps.put(category,
@@ -116,23 +122,6 @@ public class NaiveBayesDbClassifier extends Classifier {
         }
     }
 
-    static class ValueComparator implements Comparator<Category> {
-        Map<Category, Double> base;
-
-        public ValueComparator(Map<Category, Double> base) {
-            this.base = base;
-        }
-
-        // Note: this comparator imposes orderings that are inconsistent with equals.
-        public int compare(Category a, Category b) {
-            if (base.get(a) >= base.get(b)) {
-                return -1;
-            } else {
-                return 1;
-            } // returning 0 would merge keys
-        }
-    }
-
     /**
      * Generate a list of top three mappings for a product given the destination taxonomy.
      * Use Laplace Smoothing to take into account any categories or features not seen
@@ -142,14 +131,12 @@ public class NaiveBayesDbClassifier extends Classifier {
      * @return mapping of the product into the destination taxonomy
      */
     public List<Mapping> classifyWithBagOfWords(Product product) {
-        int destinationCategoriesSize = destinationCategories.size();
-
-        // Treemap sorts in increasing order of value
-        HashMap<Category, Double> map = new HashMap<>();
-        ValueComparator bvc = new ValueComparator(map);
-        NavigableMap<Category, Double> sortedMap = new TreeMap<>(bvc);
-
         List<Feature> features = FeatureConverter1.changeProductToFeature(product);
+
+        SortedMap<Double, Mapping> topMatches = new TreeMap<>();
+        topMatches.put(0.0, null);
+        topMatches.put(0.0, null);
+        topMatches.put(0.0, null);
 
         for (Category category : destinationCategories) {
             // P(f_i | C)
@@ -159,8 +146,8 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             //category has been seen by classifier during training
             if (categoryFeatureCount.containsKey(category)) {
-                int totalFeaturesInC = categoryFeatureCount.get(category);
                 int productsInCategory = categoryProductCount.get(category);
+                int totalFeaturesInC = categoryFeatureCount.get(category);
                 Map<Feature, Integer> featureOccurrencesInCategory =
                         categoryFeatureObservationMaps.get(category);
 
@@ -183,30 +170,20 @@ public class NaiveBayesDbClassifier extends Classifier {
             }
 
             double pCGivenF = pProductGivenC * pC;
-            map.put(category, pCGivenF);
+
+            if (pCGivenF > topMatches.firstKey()) {
+                topMatches.remove(topMatches.firstKey());
+                topMatches.put(pCGivenF,
+                        new MappingBuilder().setProduct(product)
+                                .setTaxonomy(getTaxonomy())
+                                .setCategory(category)
+                                .setConfidence((float) pCGivenF)
+                                .setMethod(Method.CLASSIFIED).createMapping());
+            }
         }
-        sortedMap.putAll(map);
 
-        List<Mapping> topThreeResults = new ArrayList<>();
-
-        Category firstCategory = sortedMap.pollFirstEntry().getKey();
-        Category secondCategory = sortedMap.pollFirstEntry().getKey();
-        Category thirdCategory = sortedMap.pollFirstEntry().getKey();
-
-        Mapping m1 = new MappingBuilder().setCategory(firstCategory)
-                .setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
-
-        Mapping m2 = new MappingBuilder().setCategory(secondCategory)
-                .setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
-
-        Mapping m3 = new MappingBuilder().setCategory(thirdCategory)
-                .setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
-
-        topThreeResults.add(m1);
-        topThreeResults.add(m2);
-        topThreeResults.add(m3);
-
-        return topThreeResults;
+        return topMatches.values().stream()
+                .filter(m -> m.getConfidence() > 0).collect(Collectors.toList());
     }
 
     @Override
