@@ -24,10 +24,12 @@ import java.util.TreeMap;
  * A Naive Bayes classifier implementation which integrates with the database.
  */
 public class NaiveBayesDbClassifier extends Classifier {
-    private Set<Feature> featureSet;
-    private Map<Category, Integer> categoryProductMap;
-    private Map<Category, Integer> categoryFeatureMap;
-    private Set<Category> allDestinationCategories;
+    private Set<Feature> taxonomyFeatureSet;
+    private Map<Category, Integer> categoryProductCount;
+    private Map<Category, Integer> categoryFeatureCount;
+    private Set<Category> destinationCategories;
+    private Map<Category, Map<Feature, Integer>> categoryFeatureObservationMaps;
+    private int totalProducts;
 
     /**
      * Construct a new classifier for a given taxonomy.
@@ -36,10 +38,18 @@ public class NaiveBayesDbClassifier extends Classifier {
      */
     public NaiveBayesDbClassifier(Taxonomy taxonomy) {
         super(taxonomy);
-        featureSet = NaiveBayesDb.getFeatureSet(taxonomy);
-        categoryProductMap = NaiveBayesDb.getCategoryProductMap(taxonomy);
-        categoryFeatureMap = NaiveBayesDb.getCategoryFeatureMap(taxonomy);
-        allDestinationCategories = taxonomy.getCategories();
+        taxonomyFeatureSet = NaiveBayesDb.getFeatureSet(taxonomy);
+        categoryProductCount = NaiveBayesDb.getCategoryProductMap(taxonomy);
+        categoryFeatureCount = NaiveBayesDb.getCategoryFeatureMap(taxonomy);
+        destinationCategories = taxonomy.getCategories();
+        categoryFeatureObservationMaps = new HashMap<>();
+        totalProducts = NaiveBayesDb.getProductCount(getTaxonomy());
+
+        for (Category category : destinationCategories) {
+            categoryFeatureObservationMaps.put(category,
+                    NaiveBayesDb.getCategoryFeatureObservationMap(
+                            getTaxonomy(), category));
+        }
     }
 
     /**
@@ -51,17 +61,17 @@ public class NaiveBayesDbClassifier extends Classifier {
      */
     public void addSeenFeatureInSpecifiedCategory(Feature featureSeen, Category category) {
         //add to feature set
-        featureSet.add(featureSeen);
+        taxonomyFeatureSet.add(featureSeen);
 
         //update categoryCounts based on features:
         //have seen category before associated with a feature
-        if (categoryFeatureMap.containsKey(category)) {
-            int prevCount = categoryFeatureMap.get(category);
-            categoryFeatureMap.put(category, prevCount + 1);
+        if (categoryFeatureCount.containsKey(category)) {
+            int prevCount = categoryFeatureCount.get(category);
+            categoryFeatureCount.put(category, prevCount + 1);
         }
         //have NOT seen category before
         else {
-            categoryFeatureMap.put(category, 1);
+            categoryFeatureCount.put(category, 1);
         }
 
         //update count of times specific features is seen in given category:
@@ -92,13 +102,13 @@ public class NaiveBayesDbClassifier extends Classifier {
         NaiveBayesDb.incrementProductCount(getTaxonomy());
 
         //have seen category before
-        if (categoryProductMap.containsKey(category)) {
-            int prevCount = categoryProductMap.get(category);
-            categoryProductMap.put(category, prevCount + 1);
+        if (categoryProductCount.containsKey(category)) {
+            int prevCount = categoryProductCount.get(category);
+            categoryProductCount.put(category, prevCount + 1);
         }
         //have not seen category before in training
         else {
-            categoryProductMap.put(category, 1);
+            categoryProductCount.put(category, 1);
         }
 
         for (Feature f : featuresFromProduct) {
@@ -106,7 +116,7 @@ public class NaiveBayesDbClassifier extends Classifier {
         }
     }
 
-    class ValueComparator implements Comparator<Category> {
+    static class ValueComparator implements Comparator<Category> {
         Map<Category, Double> base;
 
         public ValueComparator(Map<Category, Double> base) {
@@ -132,25 +142,27 @@ public class NaiveBayesDbClassifier extends Classifier {
      * @return mapping of the product into the destination taxonomy
      */
     public List<Mapping> classifyWithBagOfWords(Product product) {
+        int destinationCategoriesSize = destinationCategories.size();
+
         // Treemap sorts in increasing order of value
         HashMap<Category, Double> map = new HashMap<>();
         ValueComparator bvc = new ValueComparator(map);
-        NavigableMap<Category, Double> sorted_map = new TreeMap<>(bvc);
+        NavigableMap<Category, Double> sortedMap = new TreeMap<>(bvc);
 
         List<Feature> features = FeatureConverter1.changeProductToFeature(product);
-        int totalProducts = NaiveBayesDb.getProductCount(getTaxonomy());
 
-        for (Category category : allDestinationCategories) {
+        for (Category category : destinationCategories) {
             // P(f_i | C)
             double pProductGivenC = 1.0;
             // P(C)
             double pC = 1.0;
 
             //category has been seen by classifier during training
-            if (categoryFeatureMap.containsKey(category)) {
+            if (categoryFeatureCount.containsKey(category)) {
+                int totalFeaturesInC = categoryFeatureCount.get(category);
+                int productsInCategory = categoryProductCount.get(category);
                 Map<Feature, Integer> featureOccurrencesInCategory =
-                        NaiveBayesDb.getCategoryFeatureObservationMap(
-                                getTaxonomy(), category);
+                        categoryFeatureObservationMaps.get(category);
 
                 for (Feature f : features) {
                     //assume f has NOT been seen in this category
@@ -160,28 +172,26 @@ public class NaiveBayesDbClassifier extends Classifier {
                         count = featureOccurrencesInCategory.get(f);
                     }
                     //Laplace smoothing
-                    int totalFeaturesInC = categoryFeatureMap.get(category);
-                    double pFeatureGivenC = ((double) (1 + count)) /
-                            ((double) (totalFeaturesInC + featureSet.size()));
+                    double pFeatureGivenC = ((double) (count + 1)) /
+                            ((double) (totalFeaturesInC + taxonomyFeatureSet.size()));
                     pProductGivenC *= pFeatureGivenC;
                 }
 
-                int productsInCategory = categoryProductMap.get(category);
                 //Laplace smoothing
                 pC *= ((double) (productsInCategory + 1)) /
-                      ((double) (totalProducts + allDestinationCategories.size()));
+                      ((double) (totalProducts + destinationCategoriesSize));
             }
 
             double pCGivenF = pProductGivenC * pC;
             map.put(category, pCGivenF);
         }
-        sorted_map.putAll(map);
+        sortedMap.putAll(map);
 
         List<Mapping> topThreeResults = new ArrayList<>();
 
-        Category firstCategory = sorted_map.pollFirstEntry().getKey();
-        Category secondCategory = sorted_map.pollFirstEntry().getKey();
-        Category thirdCategory = sorted_map.pollFirstEntry().getKey();
+        Category firstCategory = sortedMap.pollFirstEntry().getKey();
+        Category secondCategory = sortedMap.pollFirstEntry().getKey();
+        Category thirdCategory = sortedMap.pollFirstEntry().getKey();
 
         Mapping m1 = new MappingBuilder().setCategory(firstCategory)
                 .setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
