@@ -127,11 +127,20 @@ public class NaiveBayesDbClassifier implements Classifier {
         List<Feature> features = FeatureConverter1.changeProductToFeature(product);
         Set<Category> allDestinationCategories = taxonomy.getCategories();
 
+        int distinctFeaturesInCategory = NaiveBayesDb.getFeatureSet(taxonomy).size();
+        int totalProducts = NaiveBayesDb.getProductCount(taxonomy);
+        int numDestinationCategories = TaxonomyDb.getCategoriesForTaxonomy(taxonomy).size();
+        Map<Category, Integer> categoryProductMap = NaiveBayesDb.getCategoryProductMap(taxonomy);
+        Map<Category, Integer> categoryFeatureMap = NaiveBayesDb.getCategoryFeatureMap(taxonomy);
+
         for (Category category : allDestinationCategories) {
-            //calculate P(f_i | C)
+            // P(f_i | C)
             double pProductGivenC = 1.0;
+            // P(C)
+            double pC = 1.0;
+
             //category has been seen by classifier during training
-            if (NaiveBayesDb.getCategoryFeatureMap(taxonomy).containsKey(category)) {
+            if (categoryFeatureMap.containsKey(category)) {
                 Map<Feature, Integer> featureOccurrencesInCategory
                         = NaiveBayesDb.getCategoryFeatureObservationMap(taxonomy, category);
 
@@ -143,21 +152,13 @@ public class NaiveBayesDbClassifier implements Classifier {
                         count = featureOccurrencesInCategory.get(f);
                     }
                     //Laplace smoothing
-                    int distinctFeaturesInCategory = NaiveBayesDb.getFeatureSet(taxonomy).size();
-                    int totalFeaturesInC = NaiveBayesDb.getCategoryFeatureMap(taxonomy).get(category);
+                    int totalFeaturesInC = categoryFeatureMap.get(category);
                     double pFeatureGivenC = ((double) (1 + count)) /
                             ((double) (totalFeaturesInC + distinctFeaturesInCategory));
                     pProductGivenC *= pFeatureGivenC;
                 }
-            }
 
-            //calculate P(C)
-            double pC = 1.0;
-            //category seen by classifier during training
-            if (NaiveBayesDb.getCategoryFeatureMap(taxonomy).containsKey(category)) {
-                int productsInCategory = NaiveBayesDb.getCategoryProductMap(taxonomy).get(category);
-                int totalProducts = NaiveBayesDb.getProductCount(taxonomy);
-                int numDestinationCategories = TaxonomyDb.getCategoriesForTaxonomy(taxonomy).size();
+                int productsInCategory = categoryProductMap.get(category);
                 //Laplace smoothing
                 pC *= ((double) (productsInCategory + 1)) /
                         ((double) (totalProducts + numDestinationCategories));
