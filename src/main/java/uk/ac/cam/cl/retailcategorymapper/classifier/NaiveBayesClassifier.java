@@ -1,9 +1,8 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
-import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
-import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
+import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Method;
@@ -23,7 +22,7 @@ import java.util.TreeMap;
  * Old Naive Bayes classifier implementation which does not integrate with
  * the database.
  */
-public class NaiveBayesClassifier extends Classifier {
+public class NaiveBayesClassifier {
     private Set<Feature> featureSet;
     private Set<Category> categorySet;
 
@@ -31,8 +30,7 @@ public class NaiveBayesClassifier extends Classifier {
     private Map<Category, Integer> categoryCounts; // how many times has classifier encountered a category
     private Map<Category, Map<Feature, Integer>> featureCountPerCategory;
 
-    public NaiveBayesClassifier(Taxonomy taxonomy) {
-        super(taxonomy);
+    public NaiveBayesClassifier() {
         this.featureSet = new HashSet<>();
         this.categorySet = new HashSet<>();
         this.totalFeatureCounts = new HashMap<>();
@@ -364,16 +362,6 @@ public class NaiveBayesClassifier extends Classifier {
 
     public Mapping classifyWithWeights(Taxonomy taxonomy, Product product, double originalCategoryWeight,
                                        double nameWeight, double descriptionWeight, double priceWeight) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<Mapping> classify(Product product) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean train(Mapping mapping) {
         throw new UnsupportedOperationException();
     }
 }

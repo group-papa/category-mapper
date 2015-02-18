@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier.tester;
 
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
+import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
@@ -17,13 +18,16 @@ import java.util.List;
  */
 public class ClassifierTester {
     Classifier classifier;
+    Trainer trainer;
     List<Mapping> testData;
     Taxonomy taxonomy;
     static final int depthConsidered = 5;
 
     /* we load the classifier tested with a classifier and a list of mappings */
-    public ClassifierTester(Classifier classifier, List<Mapping> mappings, Taxonomy taxonomy) {
+    public ClassifierTester(Classifier classifier, Trainer trainer,
+                            List<Mapping> mappings, Taxonomy taxonomy) {
         this.classifier = classifier;
+        this.trainer = trainer;
         this.taxonomy = taxonomy;
         //we use 20% of the dataset for testing and 80% for training
 
@@ -36,7 +40,7 @@ public class ClassifierTester {
                 i -= 5;
                 testData.add(copy.remove(0));
             } else {
-                classifier.train(copy.remove(0));
+                trainer.train(copy.remove(0));
             }
         }
     }
