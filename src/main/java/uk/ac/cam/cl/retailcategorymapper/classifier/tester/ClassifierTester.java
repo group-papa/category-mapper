@@ -36,7 +36,7 @@ public class ClassifierTester {
                 i -= 5;
                 testData.add(copy.remove(0));
             } else {
-                classifier.train(this.taxonomy, copy.remove(0));
+                classifier.train(copy.remove(0));
             }
         }
     }
@@ -51,7 +51,7 @@ public class ClassifierTester {
         }
 
         for (Mapping originalMapping : testData) {
-            Mapping answerMapping = classifier.classify(taxonomy,
+            Mapping answerMapping = classifier.classify(
                     originalMapping.getProduct()).get(0);
 
             Category originalCategory = originalMapping.getCategory();

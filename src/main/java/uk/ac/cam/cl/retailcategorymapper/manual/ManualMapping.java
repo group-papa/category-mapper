@@ -18,9 +18,20 @@ import java.util.Set;
 /**
  * A classifier implementation for manual mappings.
  */
-public class ManualMapping implements Classifier {
+public class ManualMapping extends Classifier {
+    /**
+     * Construct a new classifier for a given taxonomy.
+     *
+     * @param taxonomy The taxonomy.
+     */
+    public ManualMapping(Taxonomy taxonomy) {
+        super(taxonomy);
+    }
+
     @Override
-    public List<Mapping> classify(Taxonomy taxonomy, Product product) {
+    public List<Mapping> classify(Product product) {
+        Taxonomy taxonomy = getTaxonomy();
+
         MappingBuilder mappingBuilder = new MappingBuilder()
                 .setTaxonomy(taxonomy)
                 .setProduct(product)
@@ -40,7 +51,8 @@ public class ManualMapping implements Classifier {
     }
 
     @Override
-    public boolean train(Taxonomy taxonomy, Mapping mapping) {
+    public boolean train(Mapping mapping) {
+        Taxonomy taxonomy = getTaxonomy();
         Product product = mapping.getProduct();
         Category category = mapping.getCategory();
 

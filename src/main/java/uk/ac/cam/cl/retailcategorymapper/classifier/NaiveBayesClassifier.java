@@ -23,7 +23,7 @@ import java.util.TreeMap;
  * Old Naive Bayes classifier implementation which does not integrate with
  * the database.
  */
-public class NaiveBayesClassifier implements Classifier {
+public class NaiveBayesClassifier extends Classifier {
     private Set<Feature> featureSet;
     private Set<Category> categorySet;
 
@@ -31,12 +31,13 @@ public class NaiveBayesClassifier implements Classifier {
     private Map<Category, Integer> categoryCounts; // how many times has classifier encountered a category
     private Map<Category, Map<Feature, Integer>> featureCountPerCategory;
 
-    public NaiveBayesClassifier() {
-        this.featureSet = new HashSet<Feature>();
-        this.categorySet = new HashSet<Category>();
-        this.totalFeatureCounts = new HashMap<Feature, Integer>();
-        this.categoryCounts = new HashMap<Category, Integer>();
-        this.featureCountPerCategory = new HashMap<Category, Map<Feature, Integer>>();
+    public NaiveBayesClassifier(Taxonomy taxonomy) {
+        super(taxonomy);
+        this.featureSet = new HashSet<>();
+        this.categorySet = new HashSet<>();
+        this.totalFeatureCounts = new HashMap<>();
+        this.categoryCounts = new HashMap<>();
+        this.featureCountPerCategory = new HashMap<>();
     }
 
     /**
@@ -367,12 +368,12 @@ public class NaiveBayesClassifier implements Classifier {
     }
 
     @Override
-    public List<Mapping> classify(Taxonomy taxonomy, Product product) {
+    public List<Mapping> classify(Product product) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean train(Taxonomy taxonomy, Mapping mapping) {
+    public boolean train(Mapping mapping) {
         throw new UnsupportedOperationException();
     }
 }

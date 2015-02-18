@@ -22,13 +22,10 @@ import java.util.Map;
  * The mapping controller.
  */
 public class Controller {
-    private final Classifier manualMappingClassifier = new ManualMapping();
-    private final Classifier naiveBayesClassifier = new
-            NaiveBayesDbClassifier();
-
     /**
      * Classify a list of products using the manual mapper first and then
      * falling back to the Naive Bayes classifier.
+     *
      * @param request The ClassifyRequest.
      * @return A ClassifyResponse.
      */
@@ -37,18 +34,21 @@ public class Controller {
         List<Product> products = request.getProducts();
         Map<Product, List<Mapping>> results = new HashMap<>();
 
+        Classifier manualMappingClassifier = new ManualMapping(taxonomy);
+        Classifier naiveBayesClassifier = new NaiveBayesDbClassifier(taxonomy);
+
         for (Product product : products) {
             List<Mapping> manualMappings = manualMappingClassifier.classify
-                    (taxonomy, product);
+                    (product);
 
             if (manualMappings.size() == 1 &&
-                manualMappings.get(0).getConfidence() == 1.0) {
+                    manualMappings.get(0).getConfidence() == 1.0) {
                 results.put(product, Arrays.asList(manualMappings.get(0)));
                 continue;
             }
 
             List<Mapping> classifiedMappings = naiveBayesClassifier.classify
-                    (taxonomy, product);
+                    (product);
 
             classifiedMappings.sort(new Mapping.ConfidenceSorter());
 
@@ -62,26 +62,35 @@ public class Controller {
     /**
      * Train the mapping engine using the mappings supplied in the training
      * request.
+     *
      * @param request The TrainRequest.
      * @return A TrainResponse.
      */
     public TrainResponse train(TrainRequest request) {
         Taxonomy taxonomy = request.getTaxonomy();
+
+        if (!request.getAddToManualMappings()
+                && !request.getAddToTrainingSet()) {
+            return new TrainResponse(taxonomy, 0, 0);
+        }
+
+        Classifier manualMappingClassifier = new ManualMapping(taxonomy);
+        Classifier naiveBayesClassifier = new NaiveBayesDbClassifier(taxonomy);
+
         List<Mapping> mappings = request.getMappings();
+
         int trainCountManual = 0;
         int trainCountClassifier = 0;
 
-        if (request.getAddToManualMappings()) {
-            for (Mapping mapping : mappings) {
-                if (manualMappingClassifier.train(taxonomy, mapping)) {
+        for (Mapping mapping : mappings) {
+            if (request.getAddToManualMappings()) {
+                if (manualMappingClassifier.train(mapping)) {
                     trainCountManual += 1;
                 }
             }
-        }
 
-        if (request.getAddToTrainingSet()) {
-            for (Mapping mapping : mappings) {
-                if (naiveBayesClassifier.train(taxonomy, mapping)) {
+            if (request.getAddToTrainingSet()) {
+                if (naiveBayesClassifier.train(mapping)) {
                     trainCountClassifier += 1;
                 }
             }
@@ -94,6 +103,7 @@ public class Controller {
     /**
      * A generic request handler which determines the correct method of
      * handling the request.
+     *
      * @param request The request.
      * @return The response to the request.
      */
