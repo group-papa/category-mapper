@@ -7,7 +7,7 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import java.util.List;
 
 /**
- * An abstract class for all classifiers used by the category mapper to extend.
+ * An abstract class for classifiers.
  */
 public abstract class Classifier {
     /**
@@ -37,11 +37,4 @@ public abstract class Classifier {
      * @return A list of possible mappings.
      */
     public abstract List<Mapping> classify(Product product);
-
-    /**
-     * Use the given mapping to train the classifer.
-     * @param mapping The mapping to train on.
-     * @return Whether the mapping was used to train the classifer.
-     */
-    public abstract boolean train(Mapping mapping);
 }

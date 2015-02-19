@@ -32,25 +32,17 @@ public class NaiveBayesDb {
     }
 
     /**
-     * Increment the count of total products seen in a taxonomy by 1.
+     * Set the count of total products seen in a taxonomy.
      * @param taxonomy The taxonomy.
-     * @return The new product count.
+     * @param count The new count.
      */
-    public static int incrementProductCount(Taxonomy taxonomy) {
+    public static void setProductCount(Taxonomy taxonomy, int count) {
         Redisson redisson = RedissonWrapper.getInstance();
 
         String key = KeyBuilder.naiveProductsCount(taxonomy.getId());
         RBucket<Integer> productCountRBucket = redisson.getBucket(key);
 
-        int count;
-        if (productCountRBucket.exists()) {
-            count = productCountRBucket.get() + 1;
-        } else {
-            count = 1;
-        }
         productCountRBucket.set(count);
-
-        return count;
     }
 
     /**

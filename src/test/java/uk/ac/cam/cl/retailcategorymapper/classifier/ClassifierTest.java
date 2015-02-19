@@ -16,9 +16,9 @@ import java.util.List;
  * Created by tatsianaivonchyk on 2/11/15.
  */
 public class ClassifierTest {
-    private static NaiveBayesClassifier nbc1 = new NaiveBayesClassifier(null);
-    private static NaiveBayesClassifier nbc2 = new NaiveBayesClassifier(null);
-    private static NaiveBayesClassifier nbc3 = new NaiveBayesClassifier(null);
+    private static NaiveBayesClassifier nbc1 = new NaiveBayesClassifier();
+    private static NaiveBayesClassifier nbc2 = new NaiveBayesClassifier();
+    private static NaiveBayesClassifier nbc3 = new NaiveBayesClassifier();
 
     private static String[] c1Array = {"cat", "subcat", "subsubcat"};
     private static Category c1 = (new CategoryBuilder()).setId("catID").setParts(c1Array).createCategory();

@@ -1,5 +1,8 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Class to represent the features that the classifier will use.
  */
@@ -7,7 +10,9 @@ public class Feature {
     private final FeatureSource source;
     private final String featureString;
 
-    public Feature(FeatureSource source, String featureString) {
+    @JsonCreator
+    public Feature(@JsonProperty("source") FeatureSource source,
+                   @JsonProperty("featureString") String featureString) {
         this.source = source;
         this.featureString = featureString;
     }

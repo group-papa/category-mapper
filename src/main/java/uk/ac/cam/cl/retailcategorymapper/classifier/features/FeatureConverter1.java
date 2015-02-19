@@ -13,9 +13,8 @@ import java.util.List;
  * feel free to get a better name
  */
 public class FeatureConverter1 {
-
     public static List<Feature> changeProductToFeature(Product product) {
-        List<Feature> createdFeatures = new ArrayList<Feature>();
+        List<Feature> createdFeatures = new ArrayList<>();
 
         String name = product.getName();
         if ((name != null) && !(name.equals(""))) {
@@ -50,16 +49,11 @@ public class FeatureConverter1 {
         if ((!(partsArray == null)) && (!(partsArray.length == 0))) {
             FeatureSource ft = FeatureSource.ORIGINAL_CATEGORY;
             for (String s : partsArray) {
-                String categoryPart = s;
-                Feature cpFeature = new Feature(ft, categoryPart);
+                Feature cpFeature = new Feature(ft, s);
                 createdFeatures.add(cpFeature);
             }
         }
 
-        //not used right now!!!
-        //Map<String, String> attributes = product.getAttributesMap();
-
         return createdFeatures;
     }
-
 }
