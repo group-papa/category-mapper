@@ -24,7 +24,7 @@ task execute(type:JavaExec, dependsOn:['classes']) {
 }
 
 task classifierTest(type:JavaExec, dependsOn:['classes']) {
-    main = 'uk.ac.cam.cl.retailcategorymapper.classifier.tester.ClassifierTester'
+    main = 'uk.ac.cam.cl.retailcategorymapper.classifier.tester.AccuracyTester'
     classpath = sourceSets.main.runtimeClasspath
     if (project.hasProperty('execargs')) {
         // Run with -Pexecargs="a,b,c"

@@ -21,7 +21,7 @@ import java.util.Random;
 /**
  * Created by Charlie
  */
-public class ClassifierTester {
+public class AccuracyTester {
     Classifier classifier;
     Trainer trainer;
     List<Mapping> testData;
@@ -29,8 +29,8 @@ public class ClassifierTester {
     static final int depthConsidered = 5;
 
     /* we load the classifier tested with a classifier and a list of mappings */
-    public ClassifierTester(Classifier classifier, Trainer trainer,
-                            List<Mapping> mappings, Taxonomy taxonomy) {
+    public AccuracyTester(Classifier classifier, Trainer trainer,
+                          List<Mapping> mappings, Taxonomy taxonomy) {
         this.classifier = classifier;
         this.trainer = trainer;
         this.taxonomy = taxonomy;
@@ -117,7 +117,7 @@ public class ClassifierTester {
             String inputString = inputData.toString();
             List<Mapping> inputMappings = new XmlMappingUnmarshaller().unmarshal(inputString);
 
-            ClassifierTester tester = new ClassifierTester(classifier,
+            AccuracyTester tester = new AccuracyTester(classifier,
                     trainer, inputMappings, taxonomy);
 
             double[] results = tester.test(1);
