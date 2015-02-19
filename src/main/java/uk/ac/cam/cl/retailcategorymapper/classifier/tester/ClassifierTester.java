@@ -4,9 +4,12 @@ import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbClassifier;
 import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbTrainer;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
+import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
+import uk.ac.cam.cl.retailcategorymapper.entities.TaxonomyBuilder;
+import uk.ac.cam.cl.retailcategorymapper.marshalling.CategoryFileUnmarshaller;
 import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlMappingUnmarshaller;
 
 import java.io.BufferedReader;
@@ -14,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -25,16 +29,16 @@ public class ClassifierTester {
     Classifier classifier;
     Trainer trainer;
     List<Mapping> testData;
-    Taxonomy taxonomy;
     static final int depthConsidered = 5;
+    Taxonomy taxonomy;
 
     /* we load the classifier tested with a classifier and a list of mappings */
     public ClassifierTester(Classifier classifier, Trainer trainer,
-                            List<Mapping> mappings, Taxonomy taxonomy) {
+                            List<Mapping> mappings,Taxonomy taxonomy) {
         this.classifier = classifier;
         this.trainer = trainer;
-        this.taxonomy = taxonomy;
         this.testData = new LinkedList<>(mappings);
+        this.taxonomy = taxonomy;
     }
 
     public double[] test(int iterationsNeeded) {
@@ -66,7 +70,12 @@ public class ClassifierTester {
             }
 
             for (Mapping originalMapping : mappingsToDo) {
-                Mapping answerMapping = classifier.classify(originalMapping.getProduct()).get(0);
+                //System.out.println(originalMapping.getProduct().getName());
+                List<Mapping> answerMappings = classifier.classify(originalMapping.getProduct());
+
+                if(answerMappings.size()==0){continue;}
+
+                Mapping answerMapping = answerMappings.get(0);
 
                 Category originalCategory = originalMapping.getCategory();
                 Category answerCategory = answerMapping.getCategory();
@@ -98,14 +107,21 @@ public class ClassifierTester {
 
     public static void main(String[] args) {
         try {
+
+            if(args.length!=2){
+                throw new RuntimeException("incorrect number of arguements");
+            }
+
+            String filePath = args[0];
+            String taxonomyPath = args[1];
+
             //TODO connect input arguments to the filePath and taxonomy references
             System.out.println("ClassifierTest Main Executed");
             System.out.println(Arrays.toString(args));
 
-            Taxonomy taxonomy = null;
-            Classifier classifier = new NaiveBayesDbClassifier(taxonomy);
-            Trainer trainer = new NaiveBayesDbTrainer(taxonomy);
-            String filePath = "";
+
+
+
             BufferedReader reader = new BufferedReader(new FileReader(filePath));
 
             StringBuilder inputData = new StringBuilder();
@@ -117,6 +133,31 @@ public class ClassifierTester {
             String inputString = inputData.toString();
             List<Mapping> inputMappings = new XmlMappingUnmarshaller().unmarshal(inputString);
 
+            reader = new BufferedReader(new FileReader(taxonomyPath));
+            inputData = new StringBuilder();
+            s = reader.readLine();
+            while (s != null) {
+                inputData.append(s);
+                inputData.append("\n");
+                s = reader.readLine();
+            }
+            inputString = inputData.toString();
+            List<Category> inputCategories = new CategoryFileUnmarshaller().unmarshal(inputString);
+            System.out.println(inputCategories.size()+" input categories were found");
+
+
+
+            TaxonomyBuilder taxonomyBuilder = new TaxonomyBuilder();
+            taxonomyBuilder.setName("test Taxonomy");
+            taxonomyBuilder.setId("abc"+System.currentTimeMillis());
+
+            Taxonomy taxonomy = taxonomyBuilder.createTaxonomy();
+
+            Trainer trainer = new NaiveBayesDbTrainer(taxonomy);
+
+            TaxonomyDb.setTaxonomy(taxonomy,new HashSet<>(inputCategories));
+
+            Classifier classifier = new NaiveBayesDbClassifier(taxonomy);
             ClassifierTester tester = new ClassifierTester(classifier,
                     trainer, inputMappings, taxonomy);
 
