@@ -1,17 +1,22 @@
 package uk.ac.cam.cl.retailcategorymapper.entities;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import java.util.Comparator;
+
 /**
  * An immutable class to store a details about a mapping.
  */
+@JsonDeserialize(builder = MappingBuilder.class)
 public class Mapping {
     private Product product;
     private Category category;
     private Taxonomy taxonomy;
     private Method method;
-    private float confidence;
+    private double confidence;
 
     protected Mapping(Product product, Category category, Taxonomy taxonomy,
-                      Method method, float confidence) {
+                      Method method, double confidence) {
         this.product = product;
         this.category = category;
         this.taxonomy = taxonomy;
@@ -35,7 +40,7 @@ public class Mapping {
         return method;
     }
 
-    public float getConfidence() {
+    public double getConfidence() {
         return confidence;
     }
 
@@ -46,7 +51,7 @@ public class Mapping {
 
         Mapping mapping = (Mapping) o;
 
-        if (Float.compare(mapping.confidence, confidence) != 0) return false;
+        if (Double.compare(mapping.confidence, confidence) != 0) return false;
         if (!category.equals(mapping.category)) return false;
         if (method != mapping.method) return false;
         if (!product.equals(mapping.product)) return false;
@@ -58,11 +63,21 @@ public class Mapping {
 
     @Override
     public int hashCode() {
-        int result = product.hashCode();
+        int result;
+        long temp;
+        result = product.hashCode();
         result = 31 * result + category.hashCode();
         result = 31 * result + (taxonomy != null ? taxonomy.hashCode() : 0);
-        result = 31 * result + (method != null ? method.hashCode() : 0);
-        result = 31 * result + (confidence != +0.0f ? Float.floatToIntBits(confidence) : 0);
+        result = 31 * result + method.hashCode();
+        temp = Double.doubleToLongBits(confidence);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
+    }
+
+    public static class ConfidenceSorter implements Comparator<Mapping> {
+        @Override
+        public int compare(Mapping o1, Mapping o2) {
+            return Double.compare(o1.getConfidence(), o2.getConfidence());
+        }
     }
 }

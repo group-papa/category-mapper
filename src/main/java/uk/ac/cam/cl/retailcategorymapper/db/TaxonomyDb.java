@@ -92,20 +92,16 @@ public class TaxonomyDb {
      * @return Whether the taxonomy existed.
      */
     public static boolean deleteTaxonomy(String taxonomyId) {
-        Redisson redisson = RedissonWrapper.getInstance();
+        Jedis jedis = JedisWrapper.getInstance();
 
-        String instanceKey = KeyBuilder.taxonomyInstance(taxonomyId);
-        RBucket<Taxonomy> taxonomyRBucket = redisson.getBucket(instanceKey);
-        if (!taxonomyRBucket.exists()) {
+        Set<String> keys = jedis.keys(KeyBuilder.taxonomyFamily(taxonomyId));
+
+        if (keys.size() == 0) {
             return false;
         }
-        taxonomyRBucket.delete();
 
-        String categoriesKey = KeyBuilder.categoriesForTaxonomy(taxonomyId);
-        RSet<Category> categoryRSet = redisson.getSet(categoriesKey);
-        categoryRSet.delete();
+        jedis.del(keys.toArray(new String[keys.size()]));
 
-        // TODO: Delete probabilities and manual mappings.
         return true;
     }
 }

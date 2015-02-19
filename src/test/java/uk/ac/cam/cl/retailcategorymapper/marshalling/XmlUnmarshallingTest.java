@@ -78,7 +78,7 @@ public class XmlUnmarshallingTest {
                     RandomStringUtils.randomAlphanumeric(10)};
             catBuild.setParts(s);
             mapBuild.setCategory(catBuild.createCategory());
-            mapBuild.setConfidence(1).setMethod(Method.UPLOAD);
+            mapBuild.setConfidence(Double.MAX_VALUE).setMethod(Method.UPLOAD);
             mappings.add(mapBuild.createMapping());
         }
 

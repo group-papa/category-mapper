@@ -110,22 +110,15 @@ public class UploadDb {
      * @return Whether the upload existed.
      */
     public static boolean deleteUpload(String uploadId) {
-        Redisson redisson = RedissonWrapper.getInstance();
+        Jedis jedis = JedisWrapper.getInstance();
 
-        String instanceKey = KeyBuilder.uploadInstance(uploadId);
-        RBucket<Upload> uploadRBucket = redisson.getBucket(instanceKey);
-        if (!uploadRBucket.exists()) {
+        Set<String> keys = jedis.keys(KeyBuilder.uploadFamily(uploadId));
+
+        if (keys.size() == 0) {
             return false;
         }
-        uploadRBucket.delete();
 
-        String productsKey = KeyBuilder.uploadProducts(uploadId);
-        RMap<String, Product> productsRMap = redisson.getMap(productsKey);
-        productsRMap.delete();
-
-        String mappingsKey = KeyBuilder.uploadMappings(uploadId);
-        RMap<String, Mapping> mappingsRMap = redisson.getMap(mappingsKey);
-        mappingsRMap.delete();
+        jedis.del(keys.toArray(new String[keys.size()]));
 
         return true;
     }

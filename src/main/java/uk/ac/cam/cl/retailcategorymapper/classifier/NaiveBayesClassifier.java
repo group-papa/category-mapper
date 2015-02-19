@@ -1,9 +1,8 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
-import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
-import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
+import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Method;
@@ -23,7 +22,7 @@ import java.util.TreeMap;
  * Old Naive Bayes classifier implementation which does not integrate with
  * the database.
  */
-public class NaiveBayesClassifier implements Classifier {
+public class NaiveBayesClassifier {
     private Set<Feature> featureSet;
     private Set<Category> categorySet;
 
@@ -32,11 +31,11 @@ public class NaiveBayesClassifier implements Classifier {
     private Map<Category, Map<Feature, Integer>> featureCountPerCategory;
 
     public NaiveBayesClassifier() {
-        this.featureSet = new HashSet<Feature>();
-        this.categorySet = new HashSet<Category>();
-        this.totalFeatureCounts = new HashMap<Feature, Integer>();
-        this.categoryCounts = new HashMap<Category, Integer>();
-        this.featureCountPerCategory = new HashMap<Category, Map<Feature, Integer>>();
+        this.featureSet = new HashSet<>();
+        this.categorySet = new HashSet<>();
+        this.totalFeatureCounts = new HashMap<>();
+        this.categoryCounts = new HashMap<>();
+        this.featureCountPerCategory = new HashMap<>();
     }
 
     /**
@@ -363,16 +362,6 @@ public class NaiveBayesClassifier implements Classifier {
 
     public Mapping classifyWithWeights(Taxonomy taxonomy, Product product, double originalCategoryWeight,
                                        double nameWeight, double descriptionWeight, double priceWeight) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<Mapping> classify(Taxonomy taxonomy, Product product) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void train(Mapping mapping) {
         throw new UnsupportedOperationException();
     }
 }

@@ -78,7 +78,7 @@ public class XmlMappingUnmarshaller implements Unmarshaller<String,
                         .setProduct(product)
                         .setCategory(mappedCategory)
                         .setMethod(Method.UPLOAD)
-                        .setConfidence(1)
+                        .setConfidence(Double.MAX_VALUE)
                         .createMapping();
 
                 result.add(mapping);

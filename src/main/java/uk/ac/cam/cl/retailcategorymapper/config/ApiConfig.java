@@ -4,6 +4,7 @@ import uk.ac.cam.cl.retailcategorymapper.api.Method;
 import uk.ac.cam.cl.retailcategorymapper.api.RouteBinding;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.AddTaxonomyRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.AddUploadRoute;
+import uk.ac.cam.cl.retailcategorymapper.api.routes.ClassifyRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.DeleteTaxonomyRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.DeleteUploadRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.GetTaxonomyRoute;
@@ -12,6 +13,7 @@ import uk.ac.cam.cl.retailcategorymapper.api.routes.GetUploadedProductRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.HomeRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.ListTaxonomiesRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.ListUploadsRoute;
+import uk.ac.cam.cl.retailcategorymapper.api.routes.TrainRoute;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +42,8 @@ public final class ApiConfig {
      */
     public static final List<RouteBinding> BINDINGS = new ArrayList<>(
             Arrays.asList(
-                    new RouteBinding("/", Method.GET,
+                    new RouteBinding("/",
+                            Method.GET,
                             new HomeRoute()),
 
                     new RouteBinding("/taxonomies", Method.GET,
@@ -62,7 +65,12 @@ public final class ApiConfig {
                             new DeleteUploadRoute()),
 
                     new RouteBinding("/products/:upload[id]/:product[id]",
-                            Method.GET, new GetUploadedProductRoute())
+                            Method.GET, new GetUploadedProductRoute()),
+
+                    new RouteBinding("/classify", Method.POST,
+                            new ClassifyRoute()),
+                    new RouteBinding("/train", Method.POST,
+                            new TrainRoute())
             ));
 
     /**
