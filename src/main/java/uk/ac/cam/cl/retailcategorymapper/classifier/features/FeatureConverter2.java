@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -22,7 +23,10 @@ import java.util.TreeSet;
  */
 public class FeatureConverter2 {
 
-    public static Set<String> blackList = new TreeSet<>();
+    public static final String[] uselessWords = new String[]{"an", "are",
+            "best", "in", "is", "it", "of", "or", "our", "out", "than", "the", "then", "your"};
+    public static Set<String> blackList = new TreeSet<String>(Arrays.asList(uselessWords));
+
 
     public static void loadBlackListFromFile(File f) {
         try {
@@ -39,7 +43,6 @@ public class FeatureConverter2 {
         } catch (IOException e) {
             throw new RuntimeException("I/O exception in loading blacklist in FeatureConverter2");
         }
-
     }
 
     public static String removeCapitals(String s) {
@@ -82,7 +85,7 @@ public class FeatureConverter2 {
             if (s.equals("")) {
                 continue;
             }
-            if (!blackList.contains(s)) {
+            if (!blackList.contains(s) && s.length() > 1) {
                 s = removeCapitals(removePunctuation(s));
                 createdFeatures.add(new Feature(FeatureSource.NAME, s));
             }
