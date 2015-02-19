@@ -43,7 +43,7 @@ public class Controller {
             List<Mapping> manualMappings = manualClassifier.classify(product);
 
             if (manualMappings.size() == 1 &&
-                    manualMappings.get(0).getConfidence() == Float.MAX_VALUE) {
+                    manualMappings.get(0).getConfidence() == Double.MAX_VALUE) {
                 results.put(product, Arrays.asList(manualMappings.get(0)));
                 continue;
             }

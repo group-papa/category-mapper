@@ -125,10 +125,10 @@ public class ClassifyRoute extends BaseApiRoute {
     static class MappingEntry {
         private Category category;
         private Method method;
-        private float confidence;
+        private double confidence;
 
         public MappingEntry(Category category, Method method,
-                            float confidence) {
+                            double confidence) {
             this.category = category;
             this.method = method;
             this.confidence = confidence;

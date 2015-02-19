@@ -44,12 +44,12 @@ public class ManualClassifier extends Classifier {
                 .setTaxonomy(taxonomy)
                 .setProduct(product)
                 .setMethod(Method.MANUAL)
-                .setConfidence(0);
+                .setConfidence(Double.MIN_VALUE);
 
         if (manualMappings.containsKey(product.getId())) {
             mappingBuilder
                     .setCategory(manualMappings.get(product.getId()))
-                    .setConfidence(Float.MAX_VALUE);
+                    .setConfidence(Double.MAX_VALUE);
         }
 
         return Collections.singletonList(mappingBuilder.createMapping());

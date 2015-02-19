@@ -11,6 +11,7 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -70,16 +71,13 @@ public class NaiveBayesDbClassifier extends Classifier {
     public List<Mapping> classify(Product product) {
         List<Feature> features = FeatureConverter1.changeProductToFeature(product);
 
-        SortedMap<Double, Mapping> topMatches = new TreeMap<>();
-        topMatches.put(0.0, null);
-        topMatches.put(0.0, null);
-        topMatches.put(0.0, null);
+        SortedMap<Double, Mapping> matches = new TreeMap<>();
 
         for (Category category : destinationCategories) {
             // P(f_i | C)
-            double pProductGivenC = 1.0;
+            double pProductGivenC = 0.0;
             // P(C)
-            double pC = 1.0;
+            double pC = 0.0;
 
             //category has been seen by classifier during training
             if (categoryFeatureCount.containsKey(category)) {
@@ -99,28 +97,32 @@ public class NaiveBayesDbClassifier extends Classifier {
                     //Laplace smoothing
                     double pFeatureGivenC = ((double) (count + 1)) /
                             ((double) (totalFeaturesInC + taxonomyFeatureSet.size()));
-                    pProductGivenC *= pFeatureGivenC;
+                    pProductGivenC += Math.log10(pFeatureGivenC);
                 }
 
                 //Laplace smoothing
-                pC *= ((double) (productsInCategory + 1)) /
-                      ((double) (totalProducts + destinationCategoriesSize));
+                pC += Math.log(((double) (productsInCategory + 1)) /
+                      ((double) (totalProducts + destinationCategoriesSize)));
             }
 
-            double pCGivenF = pProductGivenC * pC;
+            double pCGivenF = pProductGivenC + pC;
 
-            if (pCGivenF > topMatches.firstKey()) {
-                topMatches.remove(topMatches.firstKey());
-                topMatches.put(pCGivenF,
-                        new MappingBuilder().setProduct(product)
-                                .setTaxonomy(getTaxonomy())
-                                .setCategory(category)
-                                .setConfidence((float) pCGivenF)
-                                .setMethod(Method.CLASSIFIED).createMapping());
-            }
+            matches.put(pCGivenF,
+                    new MappingBuilder().setProduct(product)
+                            .setTaxonomy(getTaxonomy())
+                            .setCategory(category)
+                            .setConfidence(pCGivenF)
+                            .setMethod(Method.CLASSIFIED).createMapping());
         }
 
-        return topMatches.values().stream()
-                .filter(m -> m.getConfidence() > 0).collect(Collectors.toList());
+        List<Mapping> result = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            if (matches.size() == 0) {
+                break;
+            }
+            Mapping mapping = matches.remove(matches.lastKey());
+            result.add(mapping);
+        }
+        return result;
     }
 }

@@ -12,7 +12,7 @@ public class MappingBuilder {
     private Category category;
     private Taxonomy taxonomy;
     private Method method;
-    private float confidence;
+    private double confidence = Double.MIN_VALUE;
 
     @JsonProperty("product")
     public MappingBuilder setProduct(Product product) {
@@ -39,7 +39,7 @@ public class MappingBuilder {
     }
 
     @JsonProperty("confidence")
-    public MappingBuilder setConfidence(float confidence) {
+    public MappingBuilder setConfidence(double confidence) {
         this.confidence = confidence;
         return this;
     }
