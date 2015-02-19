@@ -42,6 +42,35 @@ public class FeatureConverter2 {
 
     }
 
+    public static String removeCapitals(String s) {
+        return s.toLowerCase();
+    }
+
+    public static String removePunctuation(String s) {
+        s = s.replace(")", "");
+        s = s.replace("(", "");
+        s = s.replace("/", "");
+        s = s.replace("\\", "");
+        s = s.replace("\"", "");
+        s = s.replace("{", "");
+        s = s.replace("}", "");
+        s = s.replace("[", "");
+        s = s.replace("]", "");
+        s = s.replace(".", "");
+        s = s.replace(",", "");
+        s = s.replace("-", "");
+        s = s.replace("!", "");
+        s = s.replace(";", "");
+        s = s.replace(":", "");
+        s = s.replace("?", "");
+        s = s.replace("|", "");
+        s = s.replace("&", "");
+        s = s.replace("£", "");
+        s = s.replace("$", "");
+        return s;
+    }
+
+
     public static List<Feature> changeProductToFeature(Product product) {
         List<Feature> createdFeatures = new ArrayList<Feature>();
 
@@ -54,6 +83,7 @@ public class FeatureConverter2 {
                 continue;
             }
             if (!blackList.contains(s)) {
+                s = removeCapitals(removePunctuation(s));
                 createdFeatures.add(new Feature(FeatureSource.NAME, s));
             }
         }
@@ -64,6 +94,7 @@ public class FeatureConverter2 {
             FeatureSource ft = FeatureSource.ORIGINAL_CATEGORY;
             for (int i = 0; i < partsArray.length; i++) {
                 String categoryPart = partsArray[i];
+                categoryPart = removePunctuation(removeCapitals(categoryPart));
                 Feature cpFeature = new Feature(ft, categoryPart);
                 createdFeatures.add(cpFeature);
             }
