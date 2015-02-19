@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 /**
  * A Naive Bayes classifier implementation which integrates with the database.
