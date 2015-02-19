@@ -5,6 +5,7 @@ import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
+import uk.ac.cam.cl.retailcategorymapper.entities.FeatureSource;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Method;
@@ -124,4 +125,85 @@ public class NaiveBayesDbClassifier extends Classifier {
         }
         return result;
     }
+
+    public List<Mapping> classifyWithWeights(Product product, double nameWeight,
+                                             double descriptionWeight, double priceWeight,
+                                             double originalCategoryWeight, double attributeWeight) {
+
+        if (nameWeight+descriptionWeight+priceWeight+originalCategoryWeight+attributeWeight!=1.0) {
+            throw new RuntimeException("the weights don't sum to 1");
+        }
+
+
+        List<Feature> features = FeatureConverter1.changeProductToFeature(product);
+
+        SortedMap<Double, Mapping> matches = new TreeMap<>();
+
+        for (Category category : destinationCategories) {
+            // P(f_i | C)
+            double pProductGivenC = 0.0;
+            // P(C)
+            double pC = 0.0;
+
+            //category has been seen by classifier during training
+            if (categoryFeatureCount.containsKey(category)) {
+                int productsInCategory = categoryProductCount.get(category);
+                int totalFeaturesInC = categoryFeatureCount.get(category);
+
+                Map<Feature, Integer> featureOccurrencesInCategory =
+                        categoryFeatureObservationMaps.get(category);
+
+                for (Feature f : features) {
+                    double correctWeight;
+                    if (f.getSource() == FeatureSource.NAME) {
+                        correctWeight = nameWeight;
+                    } else if (f.getSource() == FeatureSource.DESCRIPTION) {
+                        correctWeight = descriptionWeight;
+                    } else if (f.getSource() == FeatureSource.PRICE) {
+                        correctWeight = priceWeight;
+                    } else if (f.getSource() == FeatureSource.ORIGINAL_CATEGORY) {
+                        correctWeight = originalCategoryWeight;
+                    } else {
+                        correctWeight = attributeWeight;
+                    }
+
+                    //assume f has NOT been seen in this category
+                    int count = 0;
+                    //update if actually has been seen in this category
+                    if (featureOccurrencesInCategory.containsKey(f)) {
+                        count = featureOccurrencesInCategory.get(f);
+                    }
+                    //Laplace smoothing
+                    double pFeatureGivenC = (((double) (count + 1)) * correctWeight) /
+                            ((double) (totalFeaturesInC + taxonomyFeatureSet.size()));
+                    pProductGivenC += Math.log10(pFeatureGivenC);
+                }
+
+                //Laplace smoothing
+                pC += Math.log(((double) (productsInCategory + 1)) /
+                        ((double) (totalProducts + destinationCategoriesSize)));
+            }
+
+            double pCGivenF = pProductGivenC + pC;
+
+            matches.put(pCGivenF,
+                    new MappingBuilder().setProduct(product)
+                            .setTaxonomy(getTaxonomy())
+                            .setCategory(category)
+                            .setConfidence(pCGivenF)
+                            .setMethod(Method.CLASSIFIED).createMapping());
+        }
+
+        List<Mapping> result = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            if (matches.size() == 0) {
+                break;
+            }
+            Mapping mapping = matches.remove(matches.lastKey());
+            result.add(mapping);
+        }
+        return result;
+    }
+
+
 }
