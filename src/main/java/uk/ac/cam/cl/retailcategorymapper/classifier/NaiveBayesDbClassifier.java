@@ -72,6 +72,8 @@ public class NaiveBayesDbClassifier extends Classifier {
 
         SortedMap<Double, Mapping> matches = new TreeMap<>();
 
+        System.out.println(destinationCategories.size()+" target destination categories");
+
         for (Category category : destinationCategories) {
             // P(f_i | C)
             double pProductGivenC = 0.0;
@@ -80,6 +82,7 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             //category has been seen by classifier during training
             if (categoryFeatureCount.containsKey(category)) {
+                System.out.println("this runs");
                 int productsInCategory = categoryProductCount.get(category);
                 int totalFeaturesInC = categoryFeatureCount.get(category);
 
@@ -94,6 +97,11 @@ public class NaiveBayesDbClassifier extends Classifier {
                         count = featureOccurrencesInCategory.get(f);
                     }
                     //Laplace smoothing
+
+                    if(count!=0){
+                        System.out.println("FEATURE ACTUALLY RECODED");
+                    }
+
                     double pFeatureGivenC = ((double) (count + 1)) /
                             ((double) (totalFeaturesInC + taxonomyFeatureSet.size()));
                     pProductGivenC += Math.log10(pFeatureGivenC);
@@ -102,16 +110,19 @@ public class NaiveBayesDbClassifier extends Classifier {
                 //Laplace smoothing
                 pC += Math.log(((double) (productsInCategory + 1)) /
                       ((double) (totalProducts + destinationCategoriesSize)));
+
+                double pCGivenF = pProductGivenC + pC;
+
+                matches.put(pCGivenF,
+                        new MappingBuilder().setProduct(product)
+                                .setTaxonomy(getTaxonomy())
+                                .setCategory(category)
+                                .setConfidence(pCGivenF)
+                                .setMethod(Method.CLASSIFIED).createMapping());
+
+                System.out.println(pProductGivenC+"  "+pC+"  "+category.toString());
             }
 
-            double pCGivenF = pProductGivenC + pC;
-
-            matches.put(pCGivenF,
-                    new MappingBuilder().setProduct(product)
-                            .setTaxonomy(getTaxonomy())
-                            .setCategory(category)
-                            .setConfidence(pCGivenF)
-                            .setMethod(Method.CLASSIFIED).createMapping());
         }
 
         List<Mapping> result = new ArrayList<>();
