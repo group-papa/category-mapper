@@ -26,6 +26,8 @@ public class TaxonomyDb {
 
         Set<String> keys = jedis.keys(KeyBuilder.allTaxonomyInstances());
 
+        JedisWrapper.returnInstance(jedis);
+
         List<Taxonomy> result = new ArrayList<>();
         for (String key : keys) {
             RBucket<Taxonomy> taxonomyRBucket = redisson.getBucket(key);
@@ -101,6 +103,8 @@ public class TaxonomyDb {
         }
 
         jedis.del(keys.toArray(new String[keys.size()]));
+
+        JedisWrapper.returnInstance(jedis);
 
         return true;
     }
