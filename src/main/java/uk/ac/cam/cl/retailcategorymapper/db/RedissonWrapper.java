@@ -20,14 +20,19 @@ class RedissonWrapper {
      */
     private RedissonWrapper() {}
 
+    public static void initialise() {
+        close();
+        Config config = new Config();
+        config.setCodec(new JsonJacksonCodec());
+        String address = DbConfig.HOST + ":" + DbConfig.PORT;
+        config.useSingleServer().setAddress(address);
+        redisson = Redisson.create(config);
+        timeoutPatch(redisson);
+    }
+
     public static Redisson getInstance() {
         if (redisson == null) {
-            Config config = new Config();
-            config.setCodec(new JsonJacksonCodec());
-            String address = DbConfig.HOST + ":" + DbConfig.PORT;
-            config.useSingleServer().setAddress(address);
-            redisson = Redisson.create(config);
-            timeoutPatch(redisson);
+            initialise();
         }
         return redisson;
     }

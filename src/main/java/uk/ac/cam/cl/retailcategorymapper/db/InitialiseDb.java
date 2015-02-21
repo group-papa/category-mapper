@@ -5,7 +5,7 @@ package uk.ac.cam.cl.retailcategorymapper.db;
  */
 public class InitialiseDb {
     public static void initialise() {
-        JedisWrapper.getInstance();
-        RedissonWrapper.getInstance();
+        JedisWrapper.initialise();
+        RedissonWrapper.initialise();
     }
 }
