@@ -37,6 +37,9 @@ public class TrainRoute extends BaseApiRoute {
         } catch (JsonSyntaxException e) {
             throw new BadInputException("Invalid request.");
         }
+        if (inputJson == null) {
+            throw new BadInputException("Invalid request.");
+        }
 
         String taxonomyId = inputJson.taxonomyId;
         Taxonomy taxonomy = TaxonomyDb.getTaxonomy(taxonomyId);
