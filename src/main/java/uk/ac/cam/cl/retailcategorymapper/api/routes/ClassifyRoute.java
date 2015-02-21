@@ -40,6 +40,9 @@ public class ClassifyRoute extends BaseApiRoute {
         } catch (JsonSyntaxException e) {
             throw new BadInputException("Invalid request.");
         }
+        if (inputJson == null) {
+            throw new BadInputException("Invalid request.");
+        }
 
         String taxonomyId = inputJson.taxonomyId;
         Taxonomy taxonomy = TaxonomyDb.getTaxonomy(taxonomyId);
@@ -75,7 +78,9 @@ public class ClassifyRoute extends BaseApiRoute {
             Product product = mapping.getKey();
 
             List<MappingEntry> mappings = mapping.getValue().stream()
-                    .map(m -> new MappingEntry(m.getCategory(), m.getMethod(),
+                    .map(m -> new MappingEntry(
+                            m.getCategory().getId(),
+                            m.getMethod(),
                             m.getConfidence())).collect(Collectors.toList());
 
             results.add(new MappingResult(
@@ -99,10 +104,10 @@ public class ClassifyRoute extends BaseApiRoute {
     }
 
     static class ClassifyReply {
-        List<MappingResult> mappings;
+        List<MappingResult> products;
 
-        public ClassifyReply(List<MappingResult> mappings) {
-            this.mappings = mappings;
+        public ClassifyReply(List<MappingResult> products) {
+            this.products = products;
         }
     }
 
@@ -123,13 +128,13 @@ public class ClassifyRoute extends BaseApiRoute {
     }
 
     static class MappingEntry {
-        private Category category;
+        private String categoryId;
         private Method method;
         private double confidence;
 
-        public MappingEntry(Category category, Method method,
+        public MappingEntry(String categoryId, Method method,
                             double confidence) {
-            this.category = category;
+            this.categoryId = categoryId;
             this.method = method;
             this.confidence = confidence;
         }
