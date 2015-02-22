@@ -76,7 +76,7 @@ public class NaiveBayesDbTrainer extends Trainer {
             return false;
         }
 
-        List<Feature> featuresFromProduct = FeatureConverter1.changeProductToFeature(product);
+        List<Feature> featuresFromProduct = FeatureConverter2.changeProductToFeature(product);
 
         newProductsSeen += 1;
 

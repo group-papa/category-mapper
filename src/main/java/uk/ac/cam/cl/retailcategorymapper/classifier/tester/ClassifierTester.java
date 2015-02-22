@@ -2,6 +2,7 @@ package uk.ac.cam.cl.retailcategorymapper.classifier.tester;
 
 import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbClassifier;
 import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbTrainer;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter2;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.controller.Controller;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
@@ -9,11 +10,13 @@ import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 import uk.ac.cam.cl.retailcategorymapper.db.UploadDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.ClassifyRequest;
+import uk.ac.cam.cl.retailcategorymapper.entities.ClassifyResponse;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import uk.ac.cam.cl.retailcategorymapper.entities.TaxonomyBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.TrainRequest;
+import uk.ac.cam.cl.retailcategorymapper.entities.TrainResponse;
 import uk.ac.cam.cl.retailcategorymapper.entities.Upload;
 import uk.ac.cam.cl.retailcategorymapper.entities.UploadBuilder;
 import uk.ac.cam.cl.retailcategorymapper.marshalling.CategoryFileUnmarshaller;
@@ -26,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -170,8 +174,24 @@ public class ClassifierTester {
 
             Controller controller = new Controller();
 
-            controller.train(new TrainRequest(taxonomy, inputMappings,false,true));
+            TrainResponse trainResponse = controller.train(new TrainRequest(taxonomy, inputMappings, false, true));
+            System.out.println(trainResponse.getTrainCountClassifier()+" products were used to train");
 
+            Product chosenProduct = inputMappings.get(0).getProduct();
+
+            System.out.println(FeatureConverter2.changeProductToFeature(chosenProduct).size());
+
+            ArrayList<Product> singletonProduct = new ArrayList<>();
+            singletonProduct.add(chosenProduct);
+
+            ClassifyRequest classifyRequest = new ClassifyRequest(taxonomy,singletonProduct);
+            ClassifyResponse classifyResponse = controller.classify(classifyRequest);
+
+            System.out.println(chosenProduct.getName());
+            System.out.println(classifyResponse.getMappings().get(chosenProduct).get(0).getCategory().toString());
+
+
+            /*
             Classifier classifier = new NaiveBayesDbClassifier(taxonomy);
 
             ClassifierTester tester = new ClassifierTester(classifier, inputMappings, taxonomy);
@@ -184,6 +204,7 @@ public class ClassifierTester {
             for (int i = 0; i < results.length; i++) {
                 System.out.println("Level " + i + " accuracy : " + results[i]);
             }
+            */
 
         } catch (FileNotFoundException e) {
             System.err.println("Classifier test failed - file not found exception");

@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter2;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
@@ -68,7 +69,7 @@ public class NaiveBayesDbClassifier extends Classifier {
      */
     @Override
     public List<Mapping> classify(Product product) {
-        List<Feature> features = FeatureConverter1.changeProductToFeature(product);
+        List<Feature> features = FeatureConverter2.changeProductToFeature(product);
 
         SortedMap<Double, Mapping> matches = new TreeMap<>();
 
@@ -82,7 +83,6 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             //category has been seen by classifier during training
             if (categoryFeatureCount.containsKey(category)) {
-                System.out.println("this runs");
                 int productsInCategory = categoryProductCount.get(category);
                 int totalFeaturesInC = categoryFeatureCount.get(category);
 
@@ -95,6 +95,7 @@ public class NaiveBayesDbClassifier extends Classifier {
                     //update if actually has been seen in this category
                     if (featureOccurrencesInCategory.containsKey(f)) {
                         count = featureOccurrencesInCategory.get(f);
+                        System.out.println("FEATURE ACTUALLY CONTAINED KEY");
                     }
                     //Laplace smoothing
 
