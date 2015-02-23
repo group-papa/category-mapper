@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -71,7 +72,7 @@ public class NaiveBayesDbClassifier extends Classifier {
     public List<Mapping> classify(Product product) {
         List<Feature> features = FeatureConverter1.changeProductToFeature(product);
 
-        SortedMap<Double, Mapping> matches = new TreeMap<>();
+        TreeMap<Double, MappingBuilder> matches = new TreeMap<>();
 
         for (Category category : destinationCategories) {
             // P(f_i | C)
@@ -111,17 +112,27 @@ public class NaiveBayesDbClassifier extends Classifier {
                     new MappingBuilder().setProduct(product)
                             .setTaxonomy(getTaxonomy())
                             .setCategory(category)
-                            .setConfidence(pCGivenF)
-                            .setMethod(Method.CLASSIFIED).createMapping());
+                            .setMethod(Method.CLASSIFIED));
         }
 
-        List<Mapping> result = new ArrayList<>();
+        List<Entry<Double, MappingBuilder>> topThree = new ArrayList<>();
+        double topThreeSum = 0;
         for (int i = 0; i < 3; i++) {
             if (matches.size() == 0) {
                 break;
             }
-            Mapping mapping = matches.remove(matches.lastKey());
-            result.add(mapping);
+            Entry<Double, MappingBuilder> mappingBuilderEntry = matches.lastEntry();
+            topThree.add(mappingBuilderEntry);
+            topThreeSum += mappingBuilderEntry.getKey();
+        }
+
+        List<Mapping> result = new ArrayList<>();
+        for (int i=0; i<3; i++) {
+            Entry<Double, MappingBuilder> mbe = topThree.get(i);
+            MappingBuilder mb = mbe.getValue();
+            double confidence = mbe.getKey()/topThreeSum;
+            mb.setConfidence(confidence);
+            result.add(mb.createMapping());
         }
         return result;
     }
@@ -137,7 +148,7 @@ public class NaiveBayesDbClassifier extends Classifier {
 
         List<Feature> features = FeatureConverter1.changeProductToFeature(product);
 
-        SortedMap<Double, Mapping> matches = new TreeMap<>();
+        TreeMap<Double, MappingBuilder> matches = new TreeMap<>();
 
         for (Category category : destinationCategories) {
             // P(f_i | C)
@@ -186,21 +197,32 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             double pCGivenF = pProductGivenC + pC;
 
+
             matches.put(pCGivenF,
                     new MappingBuilder().setProduct(product)
                             .setTaxonomy(getTaxonomy())
                             .setCategory(category)
-                            .setConfidence(pCGivenF)
-                            .setMethod(Method.CLASSIFIED).createMapping());
+                            .setMethod(Method.CLASSIFIED));
         }
 
-        List<Mapping> result = new ArrayList<>();
+        List<Entry<Double, MappingBuilder>> topThree = new ArrayList<>();
+        double topThreeSum = 0;
         for (int i = 0; i < 3; i++) {
             if (matches.size() == 0) {
                 break;
             }
-            Mapping mapping = matches.remove(matches.lastKey());
-            result.add(mapping);
+            Entry<Double, MappingBuilder> mappingBuilderEntry = matches.lastEntry();
+            topThree.add(mappingBuilderEntry);
+            topThreeSum += mappingBuilderEntry.getKey();
+        }
+
+        List<Mapping> result = new ArrayList<>();
+        for (int i=0; i<3; i++) {
+            Entry<Double, MappingBuilder> mbe = topThree.get(i);
+            MappingBuilder mb = mbe.getValue();
+            double confidence = mbe.getKey()/topThreeSum;
+            mb.setConfidence(confidence);
+            result.add(mb.createMapping());
         }
         return result;
     }
