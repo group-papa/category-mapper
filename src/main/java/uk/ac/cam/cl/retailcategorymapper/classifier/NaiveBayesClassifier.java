@@ -1,14 +1,16 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
-import uk.ac.cam.cl.retailcategorymapper.entities.Category;
-import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
-import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
-import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
-import uk.ac.cam.cl.retailcategorymapper.entities.Method;
-import uk.ac.cam.cl.retailcategorymapper.entities.Product;
-import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
+import uk.ac.cam.cl.retailcategorymapper.entities.*;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.NGramFeatureExtractor;
+import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
+import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlProductUnmarshaller;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -279,7 +281,7 @@ public class NaiveBayesClassifier {
      * @param category Destination category that product has been mapped to
      */
     public void trainWithBagOfWordsSingleProduct(Product product, Category category) {
-        List<Feature> featuresFromProduct = FeatureConverter1.changeProductToFeature(product);
+        List<Feature> featuresFromProduct = NGramFeatureExtractor.changeProductToFeature(product);
 
         for (Feature f : featuresFromProduct) {
             this.addSeenFeatureInSpecifiedCategory(f, category);
@@ -300,7 +302,7 @@ public class NaiveBayesClassifier {
         //treemap sorts in increasing order
         NavigableMap<Double, Category> probabilityToAllPossibleCategories = new TreeMap<Double, Category>();
 
-        List<Feature> features = FeatureConverter1.changeProductToFeature(product);
+        List<Feature> features = NGramFeatureExtractor.changeProductToFeature(product);
         Set<Category> allDestinationCategories = taxonomy.getCategories();
 
         //take a single category
@@ -363,5 +365,26 @@ public class NaiveBayesClassifier {
     public Mapping classifyWithWeights(Taxonomy taxonomy, Product product, double originalCategoryWeight,
                                        double nameWeight, double descriptionWeight, double priceWeight) {
         throw new UnsupportedOperationException();
+    }
+
+    public static void main(String[] args) throws IOException {
+        XmlProductUnmarshaller unmarshaller = new XmlProductUnmarshaller();
+        List<Product> trainProducts = unmarshaller.unmarshal(new String(Files.readAllBytes(Paths
+                .get(args[0])), StandardCharsets.UTF_8));
+        NaiveBayesClassifier classifier = new NaiveBayesClassifier();
+        TaxonomyBuilder taxonomyBuilder = new TaxonomyBuilder();
+        taxonomyBuilder.setName("Test Taxonomy");
+        Taxonomy t = taxonomyBuilder.createTaxonomy();
+        for (Product p : trainProducts) {
+            classifier.trainWithBagOfWordsSingleProduct(p, p.getOriginalCategory());
+            t.getCategories().add(p.getOriginalCategory());
+        }
+        List<Product> testProducts = unmarshaller.unmarshal(new String(Files.readAllBytes(Paths
+                .get(args[1])), StandardCharsets.UTF_8));
+        for (Product p : testProducts) {
+            Mapping m = classifier.classifyWithBagOfWords(t, p);
+            System.out.format("Classified as %s: %s - %s\n", String.join(" > ", m.getCategory()
+                    .getAllParts()), m.getProduct().getName(), m.getProduct().getDescription());
+        }
     }
 }
