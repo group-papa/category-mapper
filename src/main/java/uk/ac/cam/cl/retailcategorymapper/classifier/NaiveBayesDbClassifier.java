@@ -120,20 +120,22 @@ public class NaiveBayesDbClassifier extends Classifier {
                 }
 
                 //Laplace smoothing
-                pC += Math.log(((double) (productsInCategory + 1)) /
+                pC += Math.log10(((double) (productsInCategory + 1)) /
                         ((double) (totalProducts + destinationCategoriesSize)));
             }
 
             //category has not been seen by classifier in training -- CHECK MATHS!!!!!
             else {
-                pProductGivenC += ((double) (1)) /
-                        ((double) (taxonomyFeatureSet.size()));
-                pC +=  Math.log(((double) (1)) /
+                System.out.println("category has not been seen by classifier in training");
+                pProductGivenC += features.size()
+                        * Math.log10(((double) 1) / ((double) taxonomyFeatureSet.size()));
+                pC +=  Math.log10(((double) (1)) /
                         ((double) (destinationCategoriesSize)));
 
             }
             double pCGivenF = pProductGivenC + pC;
 
+            System.out.println("pCGivenF: "+pCGivenF);
             Set<MappingBuilder> prevValue = matches.get(pCGivenF);
             if (prevValue == null) {
                 System.out.println("is null");
