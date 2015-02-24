@@ -102,7 +102,7 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             //category has been seen by classifier during training
             if (categoryFeatureCount.containsKey(category)) {
-                categorySeen ++;
+                categorySeen++;
                 int productsInCategory = categoryProductCount.get(category);
                 int totalFeaturesInC = categoryFeatureCount.get(category);
                 nFeats.add(totalFeaturesInC);
@@ -133,7 +133,7 @@ public class NaiveBayesDbClassifier extends Classifier {
             else {
                 pProductGivenC += features.size()
                         * Math.log10(((double) 1) / ((double) taxonomyFeatureSet.size()));
-                pC +=  Math.log10(((double) (1)) /
+                pC += Math.log10(((double) (1)) /
                         ((double) (destinationCategoriesSize)));
 
             }
@@ -183,7 +183,7 @@ public class NaiveBayesDbClassifier extends Classifier {
             else {
                 int nAdded = 0;
                 Iterator iter = mbSet.iterator();
-                while ((countToThree+nAdded) < 3) {
+                while ((countToThree + nAdded) < 3) {
                     MappingBuilder mb = (MappingBuilder) iter.next();
                     DoubleMBTuple probMBTuple = new DoubleMBTuple(d, mb);
                     topThree.add(probMBTuple);
@@ -228,7 +228,7 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             //category has been seen by classifier during training
             if (categoryFeatureCount.containsKey(category)) {
-                categorySeen ++;
+                categorySeen++;
                 int productsInCategory = categoryProductCount.get(category);
                 int totalFeaturesInC = categoryFeatureCount.get(category);
                 nFeats.add(totalFeaturesInC);
@@ -254,7 +254,7 @@ public class NaiveBayesDbClassifier extends Classifier {
                         count = featureOccurrencesInCategory.get(f);
                     }
                     //Laplace smoothing
-                    double pFeatureGivenC = correctWeight*((double) (count + 1)) /
+                    double pFeatureGivenC = correctWeight * ((double) (count + 1)) /
                             ((double) (totalFeaturesInC + taxonomyFeatureSet.size()));
                     pProductGivenC += Math.log10(pFeatureGivenC);
                 }
@@ -265,11 +265,11 @@ public class NaiveBayesDbClassifier extends Classifier {
             }
 
             //category has not been seen by classifier in training
-                //no weights used in this section 
+            //no weights used in this section
             else {
                 pProductGivenC += features.size()
                         * Math.log10(((double) 1) / ((double) taxonomyFeatureSet.size()));
-                pC +=  Math.log10(((double) (1)) /
+                pC += Math.log10(((double) (1)) /
                         ((double) (destinationCategoriesSize)));
 
             }
@@ -319,7 +319,7 @@ public class NaiveBayesDbClassifier extends Classifier {
             else {
                 int nAdded = 0;
                 Iterator iter = mbSet.iterator();
-                while ((countToThree+nAdded) < 3) {
+                while ((countToThree + nAdded) < 3) {
                     MappingBuilder mb = (MappingBuilder) iter.next();
                     DoubleMBTuple probMBTuple = new DoubleMBTuple(d, mb);
                     topThree.add(probMBTuple);
@@ -342,7 +342,5 @@ public class NaiveBayesDbClassifier extends Classifier {
 
         return result;
     }
-    }
-
-
 }
+
