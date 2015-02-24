@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter2;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
 import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
@@ -75,7 +76,7 @@ public class NaiveBayesDbTrainer extends Trainer {
             return false;
         }
 
-        List<Feature> featuresFromProduct = FeatureConverter1.changeProductToFeature(product);
+        List<Feature> featuresFromProduct = FeatureConverter2.changeProductToFeature(product);
 
         newProductsSeen += 1;
 
