@@ -11,6 +11,7 @@ import uk.ac.cam.cl.retailcategorymapper.db.UploadDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.ClassifyRequest;
 import uk.ac.cam.cl.retailcategorymapper.entities.ClassifyResponse;
+import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
@@ -137,6 +138,9 @@ public class ClassifierTester {
             String inputString = inputData.toString();
             List<Mapping> inputMappings = new XmlMappingUnmarshaller().unmarshal(inputString);
 
+            Mapping singleMapping  = inputMappings.get(0);
+            inputMappin
+
             reader = new BufferedReader(new FileReader(taxonomyPath));
             inputData = new StringBuilder();
             s = reader.readLine();
@@ -174,12 +178,16 @@ public class ClassifierTester {
 
             Controller controller = new Controller();
 
-            TrainResponse trainResponse = controller.train(new TrainRequest(taxonomy, inputMappings, false, true));
+            TrainResponse trainResponse = controller.train(new TrainRequest(taxonomy, inputMappings, true, true));
             System.out.println(trainResponse.getTrainCountClassifier()+" products were used to train");
 
             Product chosenProduct = inputMappings.get(0).getProduct();
 
-            System.out.println(FeatureConverter2.changeProductToFeature(chosenProduct).size());
+            List<Feature> featureList = FeatureConverter2.changeProductToFeature((chosenProduct));
+            System.out.println("the chosen product has "+featureList.size()+" features");
+            for(Feature f:featureList){
+                System.out.println(f.toString());
+            }
 
             ArrayList<Product> singletonProduct = new ArrayList<>();
             singletonProduct.add(chosenProduct);
