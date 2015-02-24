@@ -3,6 +3,7 @@ package uk.ac.cam.cl.retailcategorymapper.classifier;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
+import uk.ac.cam.cl.retailcategorymapper.entities.FeatureSource;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Method;
@@ -286,6 +287,77 @@ public class NaiveBayesClassifier {
         }
     }
 
+    public Mapping classifyWithBagOfWords(Product product,Set<Category> allDestinationCategories) {
+        //treemap sorts in increasing order
+        NavigableMap<Double, Category> probabilityToAllPossibleCategories = new TreeMap<>();
+
+        List<Feature> features = FeatureConverter1.changeProductToFeature(product);
+
+        double min = -1;
+        Category currentBest = null;
+
+        //take a single category
+        for (Category category : allDestinationCategories) {
+
+            //calculate P(f_i | C)
+            double pProductGivenC = 1.0;
+            //category has been seen by classifier during training
+            if (this.categorySet.contains(category)) {
+                Map<Feature, Integer> featureOccurrencesInCategory = this.featureCountPerCategory.get(category);
+                for (Feature f : features) {
+                    //assume f has NOT been seen in this category
+                    int count = 0;
+                    //update if it has been seen in this category
+                    if (featureOccurrencesInCategory.containsKey(f)) {
+                        count = featureOccurrencesInCategory.get(f);
+                    }
+                    //Laplace smoothing
+                    double pFeatureGivenC = ((double) (1 + count)) /
+                            ((double) (featureOccurrencesInCategory.size() + this.featureSet.size()));
+
+                    if(f.getSource()== FeatureSource.NAME){
+                        pFeatureGivenC = (pFeatureGivenC+0.005);
+                    } else {
+                        pFeatureGivenC = (pFeatureGivenC+0.005);
+                    }
+
+                    pProductGivenC *= pFeatureGivenC;
+
+                }
+            }
+            //category has not been seen by the classifier during training ?!?!
+            else {
+                System.err.println("category has not been seen by the classifier during training");
+            }
+
+            //calculate P(C)
+            double pC = 1.0;
+            //category seen by classifier during training
+            if (this.categorySet.contains(category)) {
+                int catCount = this.getCategoryCount(category);
+                int totalSeenCategoryCount = this.getTotalCategoriesSeen();
+                int numberAllCategories = allDestinationCategories.size();
+                //Laplace smoothing
+                pC *= ((double) (catCount + 1)) / ((double) (totalSeenCategoryCount + numberAllCategories));
+
+                pC +=0.1;
+            }
+            //category NOT seen by classifier during training
+            else {
+                System.err.println("category has not been seen by the classifier during training");
+            }
+            double pCGivenF = pProductGivenC * pC;
+
+            if(pCGivenF>min){
+                min=pCGivenF;
+                currentBest=category;
+            }
+        }
+
+        Mapping m = (new MappingBuilder()).setCategory(currentBest)
+                .setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
+        return m;
+    }
 
     /**
      * Generate a mapping for a product given the destination taxonomy.
@@ -296,6 +368,7 @@ public class NaiveBayesClassifier {
      * @param product  Product we are mapping into the destination taxonomy
      * @return mapping of the product into the destination taxonomy
      */
+
     public Mapping classifyWithBagOfWords(Taxonomy taxonomy, Product product) {
         //treemap sorts in increasing order
         NavigableMap<Double, Category> probabilityToAllPossibleCategories = new TreeMap<Double, Category>();

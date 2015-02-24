@@ -1,11 +1,13 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier.tester;
 
+import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesClassifier;
 import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbClassifier;
 import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbTrainer;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter2;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.controller.Controller;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
+import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
 import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 import uk.ac.cam.cl.retailcategorymapper.db.UploadDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
@@ -38,25 +40,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Created by Charlie
  */
 public class ClassifierTester {
-    Classifier classifier;
-    List<Mapping> testData;
     static final int depthConsidered = 5;
-    Taxonomy taxonomy;
 
-    /* we load the classifier tested with a classifier and a list of mappings */
-    public ClassifierTester(Classifier classifier,List<Mapping> mappings,Taxonomy taxonomy) {
-        this.classifier = classifier;
-        this.testData = new LinkedList<>(mappings);
-        this.taxonomy = taxonomy;
-    }
-
-    public double[] test(List<Mapping> mappingsToDo,int iterationsNeeded) {
+    public static double[] test(List<Mapping> mappingsToDo,int iterationsNeeded) {
         Random randGen = new Random(System.currentTimeMillis());
+        NaiveBayesClassifier classifier;
 
         int[] successes = new int[depthConsidered];
         int[] trials = new int[depthConsidered];
@@ -68,22 +62,34 @@ public class ClassifierTester {
 
         for (int iterations = 0; iterations < iterationsNeeded; iterations++) {
 
-            //for (Mapping originalMapping : mappingsToDo) {
-                Mapping originalMapping = mappingsToDo.get(0);
-                System.out.println(originalMapping.getProduct().getName());
-                List<Mapping> answerMappings = classifier.classify(originalMapping.getProduct());
+            System.out.println("performing iteration "+(iterations+1)+" of "+iterationsNeeded);
 
-                if(answerMappings.size()==0){continue;}
+            classifier = new NaiveBayesClassifier();
 
-                Mapping answerMapping = answerMappings.get(0);
+            Set<Mapping> trainingData = new HashSet<>();
+            Set<Mapping> testData = new HashSet<>();
+            Set<Category> allCategoriesSeen = new HashSet<>();
 
-                Category originalCategory = originalMapping.getCategory();
-                Category answerCategory = answerMapping.getCategory();
+            for (Mapping mapping : mappingsToDo) {
+                if (randGen.nextInt(5) == 0) {
+                    testData.add(mapping);
+                } else {
+                    trainingData.add(mapping);
+                }
+            }
 
+            for(Mapping m:trainingData){
+                List<Feature> features = FeatureConverter2.changeProductToFeature(m.getProduct());
+                for(Feature f:features) {
+                    classifier.addSeenFeatureInSpecifiedCategory(f, m.getCategory());
+                }
+                allCategoriesSeen.add(m.getCategory());
+            }
 
-                System.out.println("original   "+originalCategory.toString());
-                System.out.println("answer     "+answerCategory.toString());
-                System.out.println();
+            for(Mapping m:testData) {
+
+                Category originalCategory = m.getCategory();
+                Category answerCategory = classifier.classifyWithBagOfWords(m.getProduct(), allCategoriesSeen).getCategory();
 
                 int minDepth = Math.min(originalCategory.getDepth(), answerCategory.getDepth());
                 minDepth = Math.min(depthConsidered, minDepth);
@@ -94,7 +100,7 @@ public class ClassifierTester {
                         successes[i]++;
                     }
                 }
-            //}
+            }
         }
 
         double[] accuracyPerLevel = new double[depthConsidered];
@@ -103,8 +109,13 @@ public class ClassifierTester {
             if (trials[i] == 0) {
                 accuracyPerLevel[i] = 0;
             } else {
+                System.out.println(i+" "+successes[i]+" "+trials[i]);
                 accuracyPerLevel[i] = ((double) successes[i]) / ((double) trials[i]);
             }
+        }
+
+        for(int i=0;i<depthConsidered;i++){
+            System.out.println(successes[i]);
         }
 
         return accuracyPerLevel;
@@ -113,6 +124,12 @@ public class ClassifierTester {
     public static void main(String[] args) {
         try {
 
+            FeatureConverter2.addToBlackList("and");
+            FeatureConverter2.addToBlackList("or");
+            FeatureConverter2.addToBlackList("for");
+            FeatureConverter2.addToBlackList("in");
+            FeatureConverter2.addToBlackList("as");
+
             if(args.length!=2){
                 throw new RuntimeException("incorrect number of arguements");
             }
@@ -120,12 +137,8 @@ public class ClassifierTester {
             String filePath = args[0];
             String taxonomyPath = args[1];
 
-            //TODO connect input arguments to the filePath and taxonomy references
             System.out.println("ClassifierTest Main Executed");
             System.out.println(Arrays.toString(args));
-
-
-
 
             BufferedReader reader = new BufferedReader(new FileReader(filePath));
 
@@ -138,9 +151,6 @@ public class ClassifierTester {
             String inputString = inputData.toString();
             List<Mapping> inputMappings = new XmlMappingUnmarshaller().unmarshal(inputString);
 
-            Mapping singleMapping  = inputMappings.get(0);
-            inputMappin
-
             reader = new BufferedReader(new FileReader(taxonomyPath));
             inputData = new StringBuilder();
             s = reader.readLine();
@@ -151,68 +161,14 @@ public class ClassifierTester {
             }
             inputString = inputData.toString();
             List<Category> inputCategories = new CategoryFileUnmarshaller().unmarshal(inputString);
-            System.out.println(inputCategories.size()+" input categories were found");
 
-            TaxonomyBuilder taxonomyBuilder = new TaxonomyBuilder();
-            taxonomyBuilder.setName("test Taxonomy");
-            taxonomyBuilder.setId("tax"+System.currentTimeMillis());
-            Taxonomy taxonomy = taxonomyBuilder.createTaxonomy();
-            TaxonomyDb.setTaxonomy(taxonomy,new HashSet<>(inputCategories));
+            //at this point all the data is loaded
 
-            Upload upload = new UploadBuilder()
-                    .setId(Uuid.generateUUID())
-                    .setFilename(filePath)
-                    .setDateCreated(DateTime.getCurrentTimeIso8601())
-                    .setProductCount(inputMappings.size())
-                    .setMappingCount(inputMappings.size())
-                    .createUpload();
+            double[] accuracy = test(inputMappings,10);
 
-            Map<String,Product> productMap = new HashMap<>();
-            Map<String,Mapping> mappingMap = new HashMap<>();
-            for(Mapping m:inputMappings){
-                productMap.put(m.getProduct().getId(),m.getProduct());
-                mappingMap.put(m.getProduct().getId(), m);
+            for(int i=0;i<accuracy.length;i++){
+                System.out.println(accuracy[i]);
             }
-
-            UploadDb.setUpload(upload,productMap,mappingMap);
-
-            Controller controller = new Controller();
-
-            TrainResponse trainResponse = controller.train(new TrainRequest(taxonomy, inputMappings, true, true));
-            System.out.println(trainResponse.getTrainCountClassifier()+" products were used to train");
-
-            Product chosenProduct = inputMappings.get(0).getProduct();
-
-            List<Feature> featureList = FeatureConverter2.changeProductToFeature((chosenProduct));
-            System.out.println("the chosen product has "+featureList.size()+" features");
-            for(Feature f:featureList){
-                System.out.println(f.toString());
-            }
-
-            ArrayList<Product> singletonProduct = new ArrayList<>();
-            singletonProduct.add(chosenProduct);
-
-            ClassifyRequest classifyRequest = new ClassifyRequest(taxonomy,singletonProduct);
-            ClassifyResponse classifyResponse = controller.classify(classifyRequest);
-
-            System.out.println(chosenProduct.getName());
-            System.out.println(classifyResponse.getMappings().get(chosenProduct).get(0).getCategory().toString());
-
-
-            /*
-            Classifier classifier = new NaiveBayesDbClassifier(taxonomy);
-
-            ClassifierTester tester = new ClassifierTester(classifier, inputMappings, taxonomy);
-
-
-
-
-            double[] results = tester.test(inputMappings,1);
-
-            for (int i = 0; i < results.length; i++) {
-                System.out.println("Level " + i + " accuracy : " + results[i]);
-            }
-            */
 
         } catch (FileNotFoundException e) {
             System.err.println("Classifier test failed - file not found exception");

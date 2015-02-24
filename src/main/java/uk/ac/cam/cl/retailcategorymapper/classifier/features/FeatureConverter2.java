@@ -42,6 +42,10 @@ public class FeatureConverter2 {
 
     }
 
+    public static void addToBlackList(String s){
+        blackList.add(s);
+    }
+
     public static List<Feature> changeProductToFeature(Product product) {
         List<Feature> createdFeatures = new ArrayList<Feature>();
 
