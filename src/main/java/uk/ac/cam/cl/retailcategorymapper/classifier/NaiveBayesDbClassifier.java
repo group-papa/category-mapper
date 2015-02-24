@@ -92,6 +92,10 @@ public class NaiveBayesDbClassifier extends Classifier {
         List<Feature> features = FeatureConverter2.changeProductToFeature(product);
         TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
 
+
+
+        int categorySeen = 0;
+        Set<Integer> nFeats = new HashSet<>();
         for (Category category : destinationCategories) {
             // P(f_i | C)
             double pProductGivenC = 0.0;
@@ -100,11 +104,14 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             //category has been seen by classifier during training
             if (categoryFeatureCount.containsKey(category)) {
+                categorySeen ++;
                 int productsInCategory = categoryProductCount.get(category);
                 int totalFeaturesInC = categoryFeatureCount.get(category);
+                nFeats.add(totalFeaturesInC);
 
                 Map<Feature, Integer> featureOccurrencesInCategory =
                         categoryFeatureObservationMaps.get(category);
+
 
                 for (Feature f : features) {
                     //assume f has NOT been seen in this category
@@ -124,9 +131,8 @@ public class NaiveBayesDbClassifier extends Classifier {
                         ((double) (totalProducts + destinationCategoriesSize)));
             }
 
-            //category has not been seen by classifier in training -- CHECK MATHS!!!!!
+            //category has not been seen by classifier in training
             else {
-                System.out.println("category has not been seen by classifier in training");
                 pProductGivenC += features.size()
                         * Math.log10(((double) 1) / ((double) taxonomyFeatureSet.size()));
                 pC +=  Math.log10(((double) (1)) /
@@ -135,7 +141,6 @@ public class NaiveBayesDbClassifier extends Classifier {
             }
             double pCGivenF = pProductGivenC + pC;
 
-            System.out.println("pCGivenF: "+pCGivenF);
             Set<MappingBuilder> prevValue = matches.get(pCGivenF);
             if (prevValue == null) {
                 System.out.println("is null");
@@ -155,6 +160,7 @@ public class NaiveBayesDbClassifier extends Classifier {
             matches.put(pCGivenF, prevValue);
         }
 
+
         List<DoubleMBTuple> topThree = new ArrayList<>();
         double topThreeProbSum = 0;
         int countToThree = 0;
@@ -163,7 +169,6 @@ public class NaiveBayesDbClassifier extends Classifier {
                 break;
             }
             Entry<Double, Set<MappingBuilder>> mappingBuilderSetEntry = matches.pollLastEntry();
-            System.out.println("mappingBuilderSetEntry: "+mappingBuilderSetEntry);
             Double d = mappingBuilderSetEntry.getKey();
             Set<MappingBuilder> mbSet = mappingBuilderSetEntry.getValue();
             int setSize = mbSet.size();
@@ -179,8 +184,8 @@ public class NaiveBayesDbClassifier extends Classifier {
             //too many to add all
             else {
                 int nAdded = 0;
+                Iterator iter = mbSet.iterator();
                 while ((countToThree+nAdded) < 3) {
-                    Iterator iter = mbSet.iterator();
                     MappingBuilder mb = (MappingBuilder) iter.next();
                     DoubleMBTuple probMBTuple = new DoubleMBTuple(d, mb);
                     topThree.add(probMBTuple);
