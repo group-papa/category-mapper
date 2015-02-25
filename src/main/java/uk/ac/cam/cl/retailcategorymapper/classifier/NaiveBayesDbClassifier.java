@@ -203,7 +203,8 @@ public class NaiveBayesDbClassifier extends Classifier {
 
 
         List<Mapping> result = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
+        int maximum = Math.min(3, topThree.size());
+        for (int i = 0; i < maximum; i++) {
             DoubleMBTuple mbTuple = topThree.get(i);
             MappingBuilder mb = mbTuple.getMappingBuilder();
             double confidence = mbTuple.getDouble().doubleValue() / topThreeProbSum;
