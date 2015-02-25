@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Charlie
@@ -113,11 +114,21 @@ public class ClassifierTester {
         Taxonomy taxonomy = new TaxonomyBuilder().setId(UUID.randomUUID().toString()).setName("Test Taxonomy").createNonDbTaxonomy();
         Set<Category> taxonomyCategories = taxonomy.getCategories();
 
+        System.out.println("loading products from files...");
 
         for (String filename : args) {
             List<Product> inputProducts = unmarshaller.unmarshal(new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8));
-
-            for (Product p : inputProducts) {
+            //Collections.shuffle(inputProducts);
+            //inputProducts = inputProducts.subList(0, 500);
+            for (Product inputProduct : inputProducts) {
+                /*Product p = new ProductBuilder().setName(inputProduct.getName()).setDescription
+                        (inputProduct.getDescription()).setId(inputProduct.getId())
+                        .setOriginalCategory(inputProduct.getOriginalCategory())
+                        .setDestinationCategory(new CategoryBuilder().setId(UUID.randomUUID()
+                                .toString()).setParts(new String[] { inputProduct
+                                .getDestinationCategory().getPart(0) }).createCategory())
+                        .createProduct();*/
+                Product p = inputProduct;
                 // Split products 80/20 into train/test
                 if (rand.nextDouble() > 0.8) {
                     testProducts.add(p);
@@ -128,37 +139,82 @@ public class ClassifierTester {
             }
         }
 
-        NaiveBayesDbTrainer trainer = new NaiveBayesDbTrainer(taxonomy, storage);
+        /*Collections.shuffle(trainProducts);
+        Collections.shuffle(testProducts);
+        trainProducts = trainProducts.subList(0, 8000);
+        testProducts = testProducts.subList(0, 2000);*/
+
+        Trainer trainer = new NaiveBayesDbTrainer(taxonomy, storage);
+
+        int numProductsTrained = 0;
 
         for (Product product : trainProducts) {
+            if (numProductsTrained % 1000 == 0) System.out.format("trained: %d of %d\n",
+                    numProductsTrained, trainProducts.size());
             Mapping trainingMapping = new MappingBuilder().setMethod(Method.MANUAL).setCategory(product.getDestinationCategory()).setTaxonomy(taxonomy).setProduct(product).setConfidence(1.0).createMapping();
             trainer.train(trainingMapping);
+            //System.out.println("trained on " + product.getName());
+            numProductsTrained++;
         }
+
+        System.out.format("trained: %d of %d\n", numProductsTrained, trainProducts.size());
 
         trainer.save();
 
-        NaiveBayesDbClassifier classifier = new NaiveBayesDbClassifier(taxonomy, storage);
+        Classifier classifier = new NaiveBayesDbClassifier(taxonomy, storage);
 
         int totalProducts = 0;
         int correctProducts = 0;
 
+
+        //int[] levelCorrectProducts = new int[taxonomyCategories.stream().mapToInt(category ->
+         //       category.getDepth()).max().getAsInt()];
+        int[] levelCorrectProducts = new int[10];
+        Arrays.fill(levelCorrectProducts, 0);
+        int[] levelTotalProducts = new int[levelCorrectProducts.length];
+        Arrays.fill(levelTotalProducts, 0);
+
         for (Product p : testProducts) {
-            if (totalProducts % 1000 == 0) System.out.println(totalProducts);
+            if (totalProducts % 1000 == 0) System.out.format("classified: %d of %d\n",
+                    totalProducts, testProducts.size());
             Mapping m = classifier.classify(p).get(0);
-            /*System.out.format("Classified as %s: %s (originally, %s; manually, %s)\n", String
-                    .join(" > ", m.getCategory().getAllParts()), m.getProduct().getName(), String
-                    .join(" > ", m.getProduct().getOriginalCategory().getAllParts()), String.join
-                    (" > ", m.getProduct().getDestinationCategory().getAllParts()));*/
+            /*System.out.format("Classified as %s: %s (originally, %s; manually, %s)\n", m
+                    .getCategory().toString(), m.getProduct().getName(), m.getProduct()
+                    .getOriginalCategory().toString(), m.getProduct().getDestinationCategory()
+                    .toString());*/
             totalProducts++;
             if (m.getCategory().equals(p.getDestinationCategory())) {
                 correctProducts++;
             }
+
+            for (int i = 0; i < p.getDestinationCategory().getDepth(); i++) {
+                levelTotalProducts[i]++;
+            }
+            int maxDepth = Math.max(m.getCategory().getDepth(), p.getDestinationCategory()
+                    .getDepth());
+            for (int i = 0; i < maxDepth; i++) {
+                try {
+                    if (m.getCategory().getPart(i).equals(p.getDestinationCategory().getPart(i))) {
+                        levelCorrectProducts[i]++;
+                    } else {
+                        break;
+                    }
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    continue;
+                }
+            }
         }
 
-        System.out.println(totalProducts);
+        System.out.format("classified: %d of %d\n", totalProducts, testProducts.size());
 
         System.out.println();
         System.out.format("==== Overall accuracy: %.2f%%\n", ((double) correctProducts / (double)
         totalProducts) * 100.0);
+        for (int i = 0; i < levelCorrectProducts.length; i++) {
+            System.out.format("%d level accuracy: %.2f%%\n",
+                     i+1, ((double) levelCorrectProducts[i] /
+            (double)
+                    levelTotalProducts[i]) * 100.0);
+        }
     }
 }
