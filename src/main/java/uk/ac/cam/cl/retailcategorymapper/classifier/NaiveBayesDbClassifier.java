@@ -279,7 +279,6 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             Set<MappingBuilder> prevValue = matches.get(pCGivenF);
             if (prevValue == null) {
-                System.out.println("is null");
                 prevValue = new HashSet<MappingBuilder>();
                 prevValue.add(new MappingBuilder()
                         .setProduct(product)
