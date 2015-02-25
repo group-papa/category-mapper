@@ -11,18 +11,20 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 /*
- * FeatureConverter2 differs from FeatureConverter1 as it does not use the
+ * FeatureConverter differs from BasicFeatureConverter as it does not use the
  * price or the description and splits up the words in the title (and filters
  * according to the loaded blacklist - just a file with one word per line)
  */
-public class FeatureConverter2 {
-
-    public static Set<String> blackList = new TreeSet<>();
+public class FeatureConverter {
+    public static final String[] uselessWords = new String[]{"an", "are",
+            "best", "in", "is", "it", "of", "or", "our", "out", "than", "the", "then", "your"};
+    public static Set<String> blackList = new TreeSet<>(Arrays.asList(uselessWords));
 
     public static void loadBlackListFromFile(File f) {
         try {
@@ -39,33 +41,30 @@ public class FeatureConverter2 {
         } catch (IOException e) {
             throw new RuntimeException("I/O exception in loading blacklist in FeatureConverter2");
         }
-
     }
 
     public static List<Feature> changeProductToFeature(Product product) {
-        List<Feature> createdFeatures = new ArrayList<Feature>();
+        List<Feature> createdFeatures = new ArrayList<>();
 
         String name = product.getName();
-        name = Sanitizer1.sanitize(name);
+        name = Sanitizer.sanitize(name);
         String[] nameWords = name.split(" ");
 
         for (String s : nameWords) {
-            if (s.equals("")) {
+            s = s.trim();
+            if (s.length() == 0 || blackList.contains(s)) {
                 continue;
             }
-            if (!blackList.contains(s)) {
-                createdFeatures.add(new Feature(FeatureSource.NAME, s));
-            }
+            createdFeatures.add(new Feature(FeatureSource.NAME, s));
         }
 
         Category originalCategory = product.getOriginalCategory();
         String[] partsArray = originalCategory.getAllParts();
-        if ((!(partsArray == null)) && (!(partsArray.length == 0))) {
+        if (partsArray != null && partsArray.length > 0) {
             FeatureSource ft = FeatureSource.ORIGINAL_CATEGORY;
-            for (int i = 0; i < partsArray.length; i++) {
-                String categoryPart = partsArray[i];
-                Feature cpFeature = new Feature(ft, categoryPart);
-                createdFeatures.add(cpFeature);
+            for (String part : partsArray) {
+                String categoryPart = Sanitizer.sanitize(part);
+                createdFeatures.add(new Feature(ft, categoryPart));
             }
         }
 

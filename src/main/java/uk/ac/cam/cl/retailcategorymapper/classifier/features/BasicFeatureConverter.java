@@ -12,7 +12,7 @@ import java.util.List;
  * taken the code from tatsianaivonchyk's implementation in NaiveBayesClassifier
  * feel free to get a better name
  */
-public class FeatureConverter1 {
+public class BasicFeatureConverter {
     public static List<Feature> changeProductToFeature(Product product) {
         List<Feature> createdFeatures = new ArrayList<>();
 
