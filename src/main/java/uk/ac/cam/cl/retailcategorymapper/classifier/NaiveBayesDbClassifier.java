@@ -116,6 +116,7 @@ public class NaiveBayesDbClassifier extends Classifier {
                         categoryFeatureObservationMaps.get(category);
 
 
+
                 for (Feature f : features) {
                     //assume f has NOT been seen in this category
                     int count = 0;
@@ -126,7 +127,16 @@ public class NaiveBayesDbClassifier extends Classifier {
                     //Laplace smoothing
                     double pFeatureGivenC = ((double) (count + 1)) /
                             ((double) (totalFeaturesInC + taxonomyFeatureSet.size()));
+
+                    if(f.getSource()==FeatureSource.DESCRIPTION){
+                        pFeatureGivenC+=0.01;
+                    }
+                    if(f.getSource()==FeatureSource.NAME){
+                        pFeatureGivenC+=0.005;
+                    }
+
                     pProductGivenC += Math.log10(pFeatureGivenC);
+
                 }
 
                 //Laplace smoothing
