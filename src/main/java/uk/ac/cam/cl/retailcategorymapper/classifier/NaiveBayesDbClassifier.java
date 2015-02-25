@@ -125,11 +125,15 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             //category has not been seen by classifier in training
             else {
-                pProductGivenC += features.size()
-                        * Math.log10(((double) 1) / ((double) taxonomyFeatureSet.size()));
-                pC += Math.log10(((double) (1)) /
-                        ((double) (destinationCategoriesSize)));
-
+                if (taxonomyFeatureSet.size() > 0) {
+                    pProductGivenC += features.size()
+                            * Math.log10(((double) 1)
+                            /  ((double) taxonomyFeatureSet.size()));
+                }
+                if (destinationCategoriesSize > 0) {
+                    pC += Math.log10(((double) (1)) /
+                            ((double) (destinationCategoriesSize)));
+                }
             }
             double pCGivenF = pProductGivenC + pC;
 
@@ -186,12 +190,14 @@ public class NaiveBayesDbClassifier extends Classifier {
             }
         }
 
-
         List<Mapping> result = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             DoubleMBTuple mbTuple = topThree.get(i);
             MappingBuilder mb = mbTuple.getMappingBuilder();
             double confidence = mbTuple.getDouble() / topThreeProbSum;
+            if (Double.isNaN(confidence)) {
+                confidence = mbTuple.getDouble();
+            }
             mb.setConfidence(confidence);
             result.add(mb.createMapping());
         }
@@ -255,11 +261,15 @@ public class NaiveBayesDbClassifier extends Classifier {
             //category has not been seen by classifier in training
             //no weights used in this section
             else {
-                pProductGivenC += features.size()
-                        * Math.log10(((double) 1) / ((double) taxonomyFeatureSet.size()));
-                pC += Math.log10(((double) (1)) /
-                        ((double) (destinationCategoriesSize)));
-
+                if (taxonomyFeatureSet.size() > 0) {
+                    pProductGivenC += features.size()
+                            * Math.log10(((double) 1)
+                            /  ((double) taxonomyFeatureSet.size()));
+                }
+                if (destinationCategoriesSize > 0) {
+                    pC += Math.log10(((double) (1)) /
+                            ((double) (destinationCategoriesSize)));
+                }
             }
             double pCGivenF = pProductGivenC + pC;
 
@@ -321,7 +331,10 @@ public class NaiveBayesDbClassifier extends Classifier {
         for (int i = 0; i < 3; i++) {
             DoubleMBTuple mbTuple = topThree.get(i);
             MappingBuilder mb = mbTuple.getMappingBuilder();
-            double confidence = mbTuple.getDouble() / topThreeProbSum;
+            double confidence = mbTuple.getDouble();
+            if (topThreeProbSum != 0.0) {
+                confidence /= topThreeProbSum;
+            }
             mb.setConfidence(confidence);
             result.add(mb.createMapping());
         }
