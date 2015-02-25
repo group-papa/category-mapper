@@ -4,24 +4,26 @@ import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbClassifier;
 import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbTrainer;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
-import uk.ac.cam.cl.retailcategorymapper.entities.*;
-import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlMappingUnmarshaller;
+import uk.ac.cam.cl.retailcategorymapper.entities.Category;
+import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
+import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
+import uk.ac.cam.cl.retailcategorymapper.entities.Method;
+import uk.ac.cam.cl.retailcategorymapper.entities.Product;
+import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
+import uk.ac.cam.cl.retailcategorymapper.entities.TaxonomyBuilder;
+import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlProductUnmarshaller;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlProductUnmarshaller;
-
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Created by Charlie
