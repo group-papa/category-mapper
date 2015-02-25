@@ -12,11 +12,12 @@ import java.util.List;
 
 public class NGramFeatureExtractor {
 
-	static int MAX_NGRAM_LENGTH = 4;
+	static int MIN_NGRAM_LENGTH = 1;
+	static int MAX_NGRAM_LENGTH = 3;
 
 	private static List<Feature> generateNGramFeatures(FeatureSource source, String words) {
 		ArrayList<Feature> features = new ArrayList<Feature>();
-		for (int ngramLength = 1; ngramLength <= MAX_NGRAM_LENGTH; ngramLength++) {
+		for (int ngramLength = MIN_NGRAM_LENGTH; ngramLength <= MAX_NGRAM_LENGTH; ngramLength++) {
 			for (String ngram : NGramExtractor.getNGrams(words, ngramLength)) {
 				features.add(new Feature(source, ngram));
 			}
