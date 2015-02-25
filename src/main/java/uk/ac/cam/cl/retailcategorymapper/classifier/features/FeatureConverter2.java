@@ -22,11 +22,9 @@ import java.util.TreeSet;
  * according to the loaded blacklist - just a file with one word per line)
  */
 public class FeatureConverter2 {
-
     public static final String[] uselessWords = new String[]{"an", "are",
             "best", "in", "is", "it", "of", "or", "our", "out", "than", "the", "then", "your"};
-    public static Set<String> blackList = new TreeSet<String>(Arrays.asList(uselessWords));
-
+    public static Set<String> blackList = new TreeSet<>(Arrays.asList(uselessWords));
 
     public static void loadBlackListFromFile(File f) {
         try {
@@ -72,7 +70,6 @@ public class FeatureConverter2 {
         s = s.replace("$", "");
         return s;
     }
-
 
     public static List<Feature> changeProductToFeature(Product product) {
         List<Feature> createdFeatures = new ArrayList<Feature>();

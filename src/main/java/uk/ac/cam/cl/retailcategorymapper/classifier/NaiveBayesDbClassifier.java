@@ -91,9 +91,6 @@ public class NaiveBayesDbClassifier extends Classifier {
         List<Feature> features = FeatureConverter2.changeProductToFeature(product);
         TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
 
-        int categorySeen = 0;
-        Set<Integer> nFeats = new HashSet<>();
-        Set<Integer> nProds = new HashSet<>();
         for (Category category : destinationCategories) {
             // P(f_i | C)
             double pProductGivenC = 0.0;
@@ -102,15 +99,11 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             //category has been seen by classifier during training
             if (categoryFeatureCount.containsKey(category)) {
-                categorySeen++;
                 int productsInCategory = categoryProductCount.get(category);
-                nProds.add(productsInCategory);
                 int totalFeaturesInC = categoryFeatureCount.get(category);
-                nFeats.add(totalFeaturesInC);
 
                 Map<Feature, Integer> featureOccurrencesInCategory =
                         categoryFeatureObservationMaps.get(category);
-
 
                 for (Feature f : features) {
                     //assume f has NOT been seen in this category
@@ -142,7 +135,7 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             Set<MappingBuilder> prevValue = matches.get(pCGivenF);
             if (prevValue == null) {
-                prevValue = new HashSet<MappingBuilder>();
+                prevValue = new HashSet<>();
                 prevValue.add(new MappingBuilder()
                         .setProduct(product)
                         .setTaxonomy(getTaxonomy())
@@ -157,7 +150,6 @@ public class NaiveBayesDbClassifier extends Classifier {
             }
             matches.put(pCGivenF, prevValue);
         }
-
 
         List<DoubleMBTuple> topThree = new ArrayList<>();
         double topThreeProbSum = 0;
@@ -199,7 +191,7 @@ public class NaiveBayesDbClassifier extends Classifier {
         for (int i = 0; i < 3; i++) {
             DoubleMBTuple mbTuple = topThree.get(i);
             MappingBuilder mb = mbTuple.getMappingBuilder();
-            double confidence = mbTuple.getDouble().doubleValue() / topThreeProbSum;
+            double confidence = mbTuple.getDouble() / topThreeProbSum;
             mb.setConfidence(confidence);
             result.add(mb.createMapping());
         }
@@ -209,7 +201,6 @@ public class NaiveBayesDbClassifier extends Classifier {
 
     public List<Mapping> classifyWithWeights(Product product, double nameWeight,
                                              double originalCategoryWeight) {
-
         if (nameWeight + originalCategoryWeight != 1.0) {
             throw new RuntimeException("the weights don't sum to 1");
         }
@@ -217,8 +208,6 @@ public class NaiveBayesDbClassifier extends Classifier {
         List<Feature> features = FeatureConverter2.changeProductToFeature(product);
         TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
 
-
-        int categorySeen = 0;
         Set<Integer> nFeats = new HashSet<>();
         for (Category category : destinationCategories) {
             // P(f_i | C)
@@ -228,7 +217,6 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             //category has been seen by classifier during training
             if (categoryFeatureCount.containsKey(category)) {
-                categorySeen++;
                 int productsInCategory = categoryProductCount.get(category);
                 int totalFeaturesInC = categoryFeatureCount.get(category);
                 nFeats.add(totalFeaturesInC);
@@ -329,12 +317,11 @@ public class NaiveBayesDbClassifier extends Classifier {
             }
         }
 
-
         List<Mapping> result = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             DoubleMBTuple mbTuple = topThree.get(i);
             MappingBuilder mb = mbTuple.getMappingBuilder();
-            double confidence = mbTuple.getDouble().doubleValue() / topThreeProbSum;
+            double confidence = mbTuple.getDouble() / topThreeProbSum;
             mb.setConfidence(confidence);
             result.add(mb.createMapping());
         }
