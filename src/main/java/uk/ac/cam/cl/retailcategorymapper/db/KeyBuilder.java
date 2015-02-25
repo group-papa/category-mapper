@@ -25,6 +25,8 @@ class KeyBuilder {
     private static final String UPLOAD = "upload";
     private static final String MAPPINGS = "mappings";
 
+    private static final String DOWNLOAD = "download";
+
     private static String build(String... parts) {
         return StringUtils.join(parts, SEPARATOR);
     }
@@ -89,5 +91,9 @@ class KeyBuilder {
 
     public static String uploadFamily(String uploadId) {
         return build(UPLOAD, uploadId, "*");
+    }
+
+    public static String download(String downloadId) {
+        return build(DOWNLOAD, downloadId);
     }
 }
