@@ -80,6 +80,7 @@ public class ClassifyRoute extends BaseApiRoute {
             List<MappingEntry> mappings = mapping.getValue().stream()
                     .map(m -> new MappingEntry(
                             m.getCategory().getId(),
+                            m.getCategory().toString(),
                             m.getMethod(),
                             m.getConfidence())).collect(Collectors.toList());
 
@@ -129,12 +130,14 @@ public class ClassifyRoute extends BaseApiRoute {
 
     static class MappingEntry {
         private String categoryId;
+        private String categoryString;
         private Method method;
         private double confidence;
 
-        public MappingEntry(String categoryId, Method method,
-                            double confidence) {
+        public MappingEntry(String categoryId, String categoryString,
+                            Method method, double confidence) {
             this.categoryId = categoryId;
+            this.categoryString = categoryString;
             this.method = method;
             this.confidence = confidence;
         }
