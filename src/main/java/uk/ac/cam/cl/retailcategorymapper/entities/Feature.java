@@ -17,6 +17,14 @@ public class Feature {
         this.featureString = featureString;
     }
 
+    /**
+     * Get the source of the feature
+     * @return Where the feature information originated
+     */
+    public FeatureSource getSource() {
+        return this.source;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

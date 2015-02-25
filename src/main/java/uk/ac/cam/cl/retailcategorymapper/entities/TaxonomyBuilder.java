@@ -33,4 +33,6 @@ public class TaxonomyBuilder {
     public Taxonomy createTaxonomy() {
         return new Taxonomy(id, name, dateCreated);
     }
+
+    public NonDbTaxonomy createNonDbTaxonomy() { return new NonDbTaxonomy(id, name, dateCreated); }
 }
