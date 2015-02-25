@@ -12,50 +12,50 @@ import java.util.List;
 
 public class NGramFeatureExtractor {
 
-	static int MIN_NGRAM_LENGTH = 1;
-	static int MAX_NGRAM_LENGTH = 3;
+    static int MIN_NGRAM_LENGTH = 1;
+    static int MAX_NGRAM_LENGTH = 3;
 
-	private static List<Feature> generateNGramFeatures(FeatureSource source, String words) {
-		ArrayList<Feature> features = new ArrayList<Feature>();
-		for (int ngramLength = MIN_NGRAM_LENGTH; ngramLength <= MAX_NGRAM_LENGTH; ngramLength++) {
-			for (String ngram : NGramExtractor.getNGrams(words, ngramLength)) {
-				features.add(new Feature(source, ngram));
-			}
-		}
-		return features;
-	}
+    private static List<Feature> generateNGramFeatures(FeatureSource source, String words) {
+        ArrayList<Feature> features = new ArrayList<Feature>();
+        for (int ngramLength = MIN_NGRAM_LENGTH; ngramLength <= MAX_NGRAM_LENGTH; ngramLength++) {
+            for (String ngram : NGramExtractor.getNGrams(words, ngramLength)) {
+                features.add(new Feature(source, ngram));
+            }
+        }
+        return features;
+    }
 
-	public static List<Feature> changeProductToFeature(Product product) {
-		Product normalizedProduct = ProductNormalizer.normalizeProduct(product);
-		ArrayList<Feature> features = new ArrayList<Feature>();
+    public static List<Feature> changeProductToFeature(Product product) {
+        Product normalizedProduct = ProductNormalizer.normalizeProduct(product);
+        ArrayList<Feature> features = new ArrayList<Feature>();
 
-		String name = normalizedProduct.getName();
-		if (name != null && name.length() > 0) {
-			features.addAll(generateNGramFeatures(FeatureSource.NAME, name));
-		}
+        String name = normalizedProduct.getName();
+        if (name != null && name.length() > 0) {
+            features.addAll(generateNGramFeatures(FeatureSource.NAME, name));
+        }
 
-		String description = normalizedProduct.getDescription();
-		if (description != null && description.length() > 0) {
-			features.addAll(generateNGramFeatures(FeatureSource.DESCRIPTION, description));
-		}
+        String description = normalizedProduct.getDescription();
+        if (description != null && description.length() > 0) {
+            features.addAll(generateNGramFeatures(FeatureSource.DESCRIPTION, description));
+        }
 
-		Integer priceInteger = normalizedProduct.getPrice();
-		if ((priceInteger != null) && (priceInteger != -1)) {
-			String price = Integer.toString(priceInteger);
-			features.add(new Feature(FeatureSource.PRICE, price));
-		}
+        Integer priceInteger = normalizedProduct.getPrice();
+        if ((priceInteger != null) && (priceInteger != -1)) {
+            String price = Integer.toString(priceInteger);
+            features.add(new Feature(FeatureSource.PRICE, price));
+        }
 
-		Category originalCategory = normalizedProduct.getOriginalCategory();
-		String[] partsArray = originalCategory.getAllParts();
-		if ((!(partsArray == null)) && (!(partsArray.length == 0))) {
-			FeatureSource ft = FeatureSource.ORIGINAL_CATEGORY;
-			for (int i = 0; i < partsArray.length; i++) {
-				String categoryPart = partsArray[i];
-				Feature cpFeature = new Feature(ft, categoryPart);
-				features.add(cpFeature);
-			}
-		}
+        Category originalCategory = normalizedProduct.getOriginalCategory();
+        String[] partsArray = originalCategory.getAllParts();
+        if ((!(partsArray == null)) && (!(partsArray.length == 0))) {
+            FeatureSource ft = FeatureSource.ORIGINAL_CATEGORY;
+            for (int i = 0; i < partsArray.length; i++) {
+                String categoryPart = partsArray[i];
+                Feature cpFeature = new Feature(ft, categoryPart);
+                features.add(cpFeature);
+            }
+        }
 
-		return features;
-	}
+        return features;
+    }
 }
