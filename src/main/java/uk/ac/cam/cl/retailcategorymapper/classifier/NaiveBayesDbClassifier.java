@@ -1,6 +1,6 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
-import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter2;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
@@ -88,7 +88,7 @@ public class NaiveBayesDbClassifier extends Classifier {
      */
     @Override
     public List<Mapping> classify(Product product) {
-        List<Feature> features = FeatureConverter2.changeProductToFeature(product);
+        List<Feature> features = FeatureConverter.changeProductToFeature(product);
         TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
 
         for (Category category : destinationCategories) {
@@ -205,7 +205,7 @@ public class NaiveBayesDbClassifier extends Classifier {
             throw new RuntimeException("the weights don't sum to 1");
         }
 
-        List<Feature> features = FeatureConverter2.changeProductToFeature(product);
+        List<Feature> features = FeatureConverter.changeProductToFeature(product);
         TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
 
         Set<Integer> nFeats = new HashSet<>();

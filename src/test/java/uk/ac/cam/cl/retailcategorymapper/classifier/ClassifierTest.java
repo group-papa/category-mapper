@@ -3,7 +3,7 @@ package uk.ac.cam.cl.retailcategorymapper.classifier;
 import org.junit.Assert;
 import org.junit.Test;
 import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
-import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.BasicFeatureConverter;
 import uk.ac.cam.cl.retailcategorymapper.entities.FeatureSource;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.CategoryBuilder;
@@ -32,7 +32,7 @@ public class ClassifierTest {
     private static Product p3 = (new ProductBuilder()).setId("prodID3").setName("part2 three")
             .setDescription("p3").setPrice(300).setOriginalCategory(c1).createProduct();
 
-    private static FeatureConverter1 fc1 = new FeatureConverter1();
+    private static BasicFeatureConverter fc1 = new BasicFeatureConverter();
 
     private static Feature pName1 = new Feature(FeatureSource.NAME, "part1");
     private static Feature pName2 = new Feature(FeatureSource.NAME, "part2");
