@@ -7,6 +7,7 @@ import uk.ac.cam.cl.retailcategorymapper.api.routes.AddUploadRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.ClassifyRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.DeleteTaxonomyRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.DeleteUploadRoute;
+import uk.ac.cam.cl.retailcategorymapper.api.routes.GetDownloadRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.GetTaxonomyRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.GetUploadRoute;
 import uk.ac.cam.cl.retailcategorymapper.api.routes.GetUploadedProductRoute;
@@ -70,7 +71,10 @@ public final class ApiConfig {
                     new RouteBinding("/classify", Method.POST,
                             new ClassifyRoute()),
                     new RouteBinding("/train", Method.POST,
-                            new TrainRoute())
+                            new TrainRoute()),
+
+                    new RouteBinding("/downloads/:download[id]", Method.GET,
+                            new GetDownloadRoute())
             ));
 
     /**

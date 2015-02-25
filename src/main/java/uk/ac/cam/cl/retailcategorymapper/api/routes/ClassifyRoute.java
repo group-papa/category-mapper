@@ -8,6 +8,7 @@ import spark.Response;
 import uk.ac.cam.cl.retailcategorymapper.api.exceptions.BadInputException;
 import uk.ac.cam.cl.retailcategorymapper.api.exceptions.NotFoundException;
 import uk.ac.cam.cl.retailcategorymapper.controller.Controller;
+import uk.ac.cam.cl.retailcategorymapper.db.DownloadDb;
 import uk.ac.cam.cl.retailcategorymapper.db.TaxonomyDb;
 import uk.ac.cam.cl.retailcategorymapper.db.UploadDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
@@ -18,6 +19,7 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import uk.ac.cam.cl.retailcategorymapper.entities.Upload;
+import uk.ac.cam.cl.retailcategorymapper.marshalling.MappingXmlMarshaller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,6 +75,7 @@ public class ClassifyRoute extends BaseApiRoute {
         ClassifyResponse classifyResponse = controller.classify(classifyRequest);
 
         List<MappingResult> results = new ArrayList<>();
+        List<Mapping> primaryMappings = new ArrayList<>();
         for (Map.Entry<Product, List<Mapping>> mapping : classifyResponse
                 .getMappings().entrySet()) {
             Product product = mapping.getKey();
@@ -80,6 +83,7 @@ public class ClassifyRoute extends BaseApiRoute {
             List<MappingEntry> mappings = mapping.getValue().stream()
                     .map(m -> new MappingEntry(
                             m.getCategory().getId(),
+                            m.getCategory().toString(),
                             m.getMethod(),
                             m.getConfidence())).collect(Collectors.toList());
 
@@ -89,9 +93,17 @@ public class ClassifyRoute extends BaseApiRoute {
                     product.getOriginalCategory(),
                     mappings
             ));
+
+            if (mapping.getValue().size() > 0) {
+                primaryMappings.add(mapping.getValue().get(0));
+            }
         }
 
-        return new ClassifyReply(results);
+        MappingXmlMarshaller marshaller = new MappingXmlMarshaller();
+        String xml = marshaller.marshal(primaryMappings);
+        String downloadId = DownloadDb.setDownload(xml);
+
+        return new ClassifyReply(results, downloadId);
     }
 
     static class InputJson {
@@ -105,9 +117,11 @@ public class ClassifyRoute extends BaseApiRoute {
 
     static class ClassifyReply {
         List<MappingResult> products;
+        String downloadId;
 
-        public ClassifyReply(List<MappingResult> products) {
+        public ClassifyReply(List<MappingResult> products, String downloadId) {
             this.products = products;
+            this.downloadId = downloadId;
         }
     }
 
@@ -129,12 +143,14 @@ public class ClassifyRoute extends BaseApiRoute {
 
     static class MappingEntry {
         private String categoryId;
+        private String categoryString;
         private Method method;
         private double confidence;
 
-        public MappingEntry(String categoryId, Method method,
-                            double confidence) {
+        public MappingEntry(String categoryId, String categoryString,
+                            Method method, double confidence) {
             this.categoryId = categoryId;
+            this.categoryString = categoryString;
             this.method = method;
             this.confidence = confidence;
         }
