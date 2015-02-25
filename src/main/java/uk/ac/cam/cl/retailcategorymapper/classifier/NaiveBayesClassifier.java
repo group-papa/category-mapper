@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-
 /**
  * Old Naive Bayes classifier implementation which does not integrate with
  * the database.
