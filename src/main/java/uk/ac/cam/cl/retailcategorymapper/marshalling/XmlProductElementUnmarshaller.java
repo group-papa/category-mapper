@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.retailcategorymapper.marshalling;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.ProductBuilder;
 
@@ -30,9 +31,17 @@ public class XmlProductElementUnmarshaller implements Unmarshaller<Element,
         productBuilder.setDescription(element.getElementsByTagName(DESCRIPTION_TAG).item(0).getTextContent());
         String categoryString = element.getElementsByTagName(CATEGORY_TAG).item(0).getTextContent();
         productBuilder.setOriginalCategory(categoryUnmarshaller.unmarshal(categoryString));
-        String destCategoryString = element.getElementsByTagName(DEST_CATEGORY_TAG).item(0)
-                .getTextContent();
-        productBuilder.setDestinationCategory(categoryUnmarshaller.unmarshal(destCategoryString));
+
+
+        NodeList categoryNodes = element.getElementsByTagName(DEST_CATEGORY_TAG);
+        if (categoryNodes.getLength() > 0) {
+            String destCategoryString = categoryNodes.item(0).getTextContent();
+            productBuilder.setDestinationCategory(categoryUnmarshaller.unmarshal
+                    (destCategoryString));
+
+        } else {
+            productBuilder.setDestinationCategory(null);
+        }
 
 
         return productBuilder.createProduct();
