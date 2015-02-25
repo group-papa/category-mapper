@@ -34,21 +34,24 @@ public class NaiveBayesDbTrainer extends Trainer {
 
     private int newProductsSeen;
 
+    private NaiveBayesStorage storage;
+
     /**
      * Construct a new classifier for a given taxonomy.
      *
      * @param taxonomy The taxonomy.
      */
-    public NaiveBayesDbTrainer(Taxonomy taxonomy) {
+    public NaiveBayesDbTrainer(Taxonomy taxonomy, NaiveBayesStorage storage) {
         super(taxonomy);
+        this.storage = storage;
         newTaxonomyFeatureSet = new HashSet<>();
 
         categoryProductCount = new HashMap<>(
-                NaiveBayesDb.getCategoryProductMap(taxonomy));
+                storage.getCategoryProductMap(taxonomy));
         updatedCategoryProductCount = new HashMap<>();
 
         categoryFeatureCount = new HashMap<>(
-                NaiveBayesDb.getCategoryFeatureMap(taxonomy));
+                storage.getCategoryFeatureMap(taxonomy));
         updatedCategoryFeatureCount = new HashMap<>();
 
         destinationCategories = new HashSet<>(taxonomy.getCategories());
@@ -103,29 +106,29 @@ public class NaiveBayesDbTrainer extends Trainer {
      */
     @Override
     public void save() {
-        NaiveBayesDb.getFeatureSet(getTaxonomy()).addAll(newTaxonomyFeatureSet);
+        storage.getFeatureSet(getTaxonomy()).addAll(newTaxonomyFeatureSet);
         newTaxonomyFeatureSet.clear();
 
-        NaiveBayesDb.getCategoryProductMap(getTaxonomy())
+        storage.getCategoryProductMap(getTaxonomy())
                 .putAll(updatedCategoryProductCount);
         categoryProductCount.putAll(updatedCategoryProductCount);
         updatedCategoryProductCount.clear();
 
-        NaiveBayesDb.getCategoryFeatureMap(getTaxonomy())
+        storage.getCategoryFeatureMap(getTaxonomy())
                 .putAll(updatedCategoryFeatureCount);
         categoryFeatureCount.putAll(updatedCategoryFeatureCount);
         updatedCategoryFeatureCount.clear();
 
         for (Map.Entry<Category, Map<Feature, Integer>> categoryMapEntry :
                 updatedCategoryFeatureObservationMaps.entrySet()) {
-            NaiveBayesDb.getCategoryFeatureObservationMap(getTaxonomy(),
+            storage.getCategoryFeatureObservationMap(getTaxonomy(),
                     categoryMapEntry.getKey()).putAll(categoryMapEntry.getValue());
         }
         categoryFeatureObservationMaps.clear();
         updatedCategoryFeatureObservationMaps.clear();
 
-        NaiveBayesDb.setProductCount(getTaxonomy(),
-                NaiveBayesDb.getProductCount(getTaxonomy()) +
+        storage.setProductCount(getTaxonomy(),
+                storage.getProductCount(getTaxonomy()) +
                         newProductsSeen);
         newProductsSeen = 0;
     }
@@ -159,7 +162,7 @@ public class NaiveBayesDbTrainer extends Trainer {
         //update count of times specific features is seen in given category:
         if (!categoryFeatureObservationMaps.containsKey(category)) {
             categoryFeatureObservationMaps.put(category,
-                    new HashMap<>(NaiveBayesDb.getCategoryFeatureObservationMap(
+                    new HashMap<>(storage.getCategoryFeatureObservationMap(
                             getTaxonomy(), category)));
         }
 
