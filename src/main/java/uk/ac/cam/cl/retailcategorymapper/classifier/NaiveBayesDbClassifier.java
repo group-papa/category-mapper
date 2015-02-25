@@ -1,6 +1,5 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
-import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter2;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
