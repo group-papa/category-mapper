@@ -34,31 +34,37 @@ public class NaiveBayesDbClassifier extends Classifier {
     private Map<Category, Map<Feature, Integer>> categoryFeatureObservationMaps;
     private int totalProducts;
     private int destinationCategoriesSize;
+    private NaiveBayesStorage storage;
 
     /**
      * Construct a new classifier for a given taxonomy.
      *
      * @param taxonomy The taxonomy.
      */
-    public NaiveBayesDbClassifier(Taxonomy taxonomy) {
+    public NaiveBayesDbClassifier(Taxonomy taxonomy, NaiveBayesStorage storage) {
         super(taxonomy);
+        this.storage = storage;
         taxonomyFeatureSet = new HashSet<>(
-                NaiveBayesDb.getFeatureSet(taxonomy));
+                storage.getFeatureSet(taxonomy));
         categoryProductCount = new HashMap<>(
-                NaiveBayesDb.getCategoryProductMap(taxonomy));
+                storage.getCategoryProductMap(taxonomy));
         categoryFeatureCount = new HashMap<>(
-                NaiveBayesDb.getCategoryFeatureMap(taxonomy));
+                storage.getCategoryFeatureMap(taxonomy));
         destinationCategories = new HashSet<>(taxonomy.getCategories());
 
         categoryFeatureObservationMaps = new HashMap<>();
         for (Category category : destinationCategories) {
             categoryFeatureObservationMaps.put(category,
-                    new HashMap<>(NaiveBayesDb.getCategoryFeatureObservationMap(
+                    new HashMap<>(storage.getCategoryFeatureObservationMap(
                             getTaxonomy(), category)));
         }
 
-        totalProducts = NaiveBayesDb.getProductCount(getTaxonomy());
+        totalProducts = storage.getProductCount(getTaxonomy());
         destinationCategoriesSize = destinationCategories.size();
+    }
+
+    public NaiveBayesDbClassifier(Taxonomy taxonomy) {
+        this(taxonomy, NaiveBayesDb.getInstance());
     }
 
     class DoubleMBTuple {
