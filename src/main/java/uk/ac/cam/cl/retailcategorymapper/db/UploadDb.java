@@ -28,6 +28,8 @@ public class UploadDb {
 
         Set<String> keys = jedis.keys(KeyBuilder.allUploadInstances());
 
+        JedisWrapper.returnInstance(jedis);
+
         List<Upload> result = new ArrayList<>();
         for (String key : keys) {
             RBucket<Upload> uploadRBucket = redisson.getBucket(key);
@@ -119,6 +121,8 @@ public class UploadDb {
         }
 
         jedis.del(keys.toArray(new String[keys.size()]));
+
+        JedisWrapper.returnInstance(jedis);
 
         return true;
     }

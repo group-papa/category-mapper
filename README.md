@@ -5,6 +5,8 @@
 This repository holds the codebase for the backend mapping engine, classifier
 and API.
 
+This software requires Redis to be installed.
+
 ## Development Environment
 It is recommended to use IntelliJ IDEA to develop this project. IntelliJ has
 Git, GitHub and Gradle plugins which are recommended.

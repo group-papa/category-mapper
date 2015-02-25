@@ -4,6 +4,7 @@ import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbClassifier;
 import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbTrainer;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
+<<<<<<< HEAD
 import uk.ac.cam.cl.retailcategorymapper.entities.*;
 import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlProductUnmarshaller;
 
@@ -13,12 +14,24 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+=======
+import uk.ac.cam.cl.retailcategorymapper.entities.Category;
+import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
+import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
+import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlMappingUnmarshaller;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+>>>>>>> master
 
 /**
- * Created by Charlie on 15/02/2015.
- *
- * An alternative implementation would be to split the input mappings set several times
- * randomly and then to run the method several times to get more test data.
+ * Created by Charlie
  */
 public class ClassifierTester {
     Classifier classifier;
@@ -33,23 +46,12 @@ public class ClassifierTester {
         this.classifier = classifier;
         this.trainer = trainer;
         this.taxonomy = taxonomy;
-        //we use 20% of the dataset for testing and 80% for training
-
-        List<Mapping> copy = new LinkedList<>(mappings);
-        testData = new LinkedList<>();
-        int i = 0;
-        while (!copy.isEmpty()) {
-            i++;
-            if (i >= 5) {
-                i -= 5;
-                testData.add(copy.remove(0));
-            } else {
-                trainer.train(copy.remove(0));
-            }
-        }
+        this.testData = new LinkedList<>(mappings);
     }
 
-    public double[] test() {
+    public double[] test(int iterationsNeeded) {
+        Random randGen = new Random(System.currentTimeMillis());
+
         int[] successes = new int[depthConsidered];
         int[] trials = new int[depthConsidered];
 
@@ -58,25 +60,43 @@ public class ClassifierTester {
             trials[i] = 0;
         }
 
-        for (Mapping originalMapping : testData) {
-            Mapping answerMapping = classifier.classify(
-                    originalMapping.getProduct()).get(0);
+        for (int iterations = 0; iterations < iterationsNeeded; iterations++) {
+            List<Mapping> mappingsToDo = new LinkedList<>();
 
-            Category originalCategory = originalMapping.getCategory();
-            Category answerCategory = answerMapping.getCategory();
+            /*
+             * TODO clear all training data from the classifier before training
+             * this needs a change to the classifier interface
+             */
 
-            int minDepth = Math.min(originalCategory.getDepth(), answerCategory.getDepth());
-            minDepth = Math.min(depthConsidered, minDepth);
+            //this loop allocates 80% of the data to the test data-set and 20% to be tested
+            for (Mapping m : testData) {
+                if (randGen.nextInt(5) == 0) {
+                    mappingsToDo.add(m);
+                } else {
+                    trainer.train(m);
+                }
+            }
 
-            for (int i = 0; i < minDepth; i++) {
-                trials[i]++;
-                if (originalCategory.getPart(i).equals(answerCategory.getPart(i))) {
-                    successes[i]++;
+            for (Mapping originalMapping : mappingsToDo) {
+                Mapping answerMapping = classifier.classify(originalMapping.getProduct()).get(0);
+
+                Category originalCategory = originalMapping.getCategory();
+                Category answerCategory = answerMapping.getCategory();
+
+                int minDepth = Math.min(originalCategory.getDepth(), answerCategory.getDepth());
+                minDepth = Math.min(depthConsidered, minDepth);
+
+                for (int i = 0; i < minDepth; i++) {
+                    trials[i]++;
+                    if (originalCategory.getPart(i).equals(answerCategory.getPart(i))) {
+                        successes[i]++;
+                    }
                 }
             }
         }
 
         double[] accuracyPerLevel = new double[depthConsidered];
+
         for (int i = 0; i < depthConsidered; i++) {
             if (trials[i] == 0) {
                 accuracyPerLevel[i] = 0;
@@ -84,6 +104,7 @@ public class ClassifierTester {
                 accuracyPerLevel[i] = ((double) successes[i]) / ((double) trials[i]);
             }
         }
+
         return accuracyPerLevel;
     }
 
