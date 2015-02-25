@@ -134,7 +134,7 @@ public class ClassifierTester {
                         .createProduct();*/
                 Product p = inputProduct;
                 // Split products 80/20 into train/test
-                if (rand.nextDouble() > 0.8) {
+                if (rand.nextDouble() > 0.05) {
                     testProducts.add(p);
                 } else {
                     trainProducts.add(p);
