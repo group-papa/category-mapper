@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class ProductNormalizer {
     private static List<String> STOP_WORDS = Arrays.asList("a", "an", "and", "are", "as", "at",
-            "be", "by",	"do", "don't", "for", "from", "has", "in", "is", "it", "its", "of", "on",
+            "be", "by", "do", "don't", "for", "from", "has", "in", "is", "it", "its", "of", "on",
             "that", "the", "this", "to", "was", "were", "will", "with");
 
     public static Product normalizeProduct(Product inputProduct) {
