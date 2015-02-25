@@ -2,6 +2,7 @@ package uk.ac.cam.cl.retailcategorymapper.classifier;
 
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter2;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.NGramFeatureExtractor;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
@@ -95,7 +96,7 @@ public class NaiveBayesDbClassifier extends Classifier {
      */
     @Override
     public List<Mapping> classify(Product product) {
-        List<Feature> features = FeatureConverter2.changeProductToFeature(product);
+        List<Feature> features = NGramFeatureExtractor.changeProductToFeature(product);
         TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
 
         int categorySeen = 0;
@@ -147,7 +148,7 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             Set<MappingBuilder> prevValue = matches.get(pCGivenF);
             if (prevValue == null) {
-                System.out.println("is null");
+                //System.out.println("is null");
                 prevValue = new HashSet<MappingBuilder>();
                 prevValue.add(new MappingBuilder()
                         .setProduct(product)
@@ -220,7 +221,7 @@ public class NaiveBayesDbClassifier extends Classifier {
             throw new RuntimeException("the weights don't sum to 1");
         }
 
-        List<Feature> features = FeatureConverter2.changeProductToFeature(product);
+        List<Feature> features = NGramFeatureExtractor.changeProductToFeature(product);
         TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
 
 
@@ -283,7 +284,7 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             Set<MappingBuilder> prevValue = matches.get(pCGivenF);
             if (prevValue == null) {
-                System.out.println("is null");
+                //System.out.println("is null");
                 prevValue = new HashSet<MappingBuilder>();
                 prevValue.add(new MappingBuilder()
                         .setProduct(product)

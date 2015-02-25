@@ -1,14 +1,17 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier.tester;
 
+import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbClassifier;
+import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbTrainer;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
-import uk.ac.cam.cl.retailcategorymapper.entities.Category;
-import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
-import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
+import uk.ac.cam.cl.retailcategorymapper.entities.*;
+import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlProductUnmarshaller;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
  * Created by Charlie on 15/02/2015.
@@ -83,9 +86,65 @@ public class ClassifierTester {
         return accuracyPerLevel;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         System.out.println("ClassifierTest Main Executed");
-        System.out.println(Arrays.toString(args));
-        //TODO write
+        System.out.println("Files: " + Arrays.toString(args));
+        System.out.println();
+
+        NaiveBayesFakeTestDb storage = NaiveBayesFakeTestDb.getInstance();
+        List<Product> trainProducts = new ArrayList<Product>();
+        List<Product> testProducts = new ArrayList<Product>();
+        Random rand = new Random();
+        XmlProductUnmarshaller unmarshaller = new XmlProductUnmarshaller();
+        Taxonomy taxonomy = new TaxonomyBuilder().setId(UUID.randomUUID().toString()).setName("Test Taxonomy").createNonDbTaxonomy();
+        Set<Category> taxonomyCategories = taxonomy.getCategories();
+
+
+        for (String filename : args) {
+            List<Product> inputProducts = unmarshaller.unmarshal(new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8));
+
+            for (Product p : inputProducts) {
+                // Split products 80/20 into train/test
+                if (rand.nextDouble() > 0.8) {
+                    testProducts.add(p);
+                } else {
+                    trainProducts.add(p);
+                }
+                taxonomyCategories.add(p.getDestinationCategory());
+            }
+        }
+
+        NaiveBayesDbTrainer trainer = new NaiveBayesDbTrainer(taxonomy, storage);
+
+        for (Product product : trainProducts) {
+            Mapping trainingMapping = new MappingBuilder().setMethod(Method.MANUAL).setCategory(product.getDestinationCategory()).setTaxonomy(taxonomy).setProduct(product).setConfidence(1.0).createMapping();
+            trainer.train(trainingMapping);
+        }
+
+        trainer.save();
+
+        NaiveBayesDbClassifier classifier = new NaiveBayesDbClassifier(taxonomy, storage);
+
+        int totalProducts = 0;
+        int correctProducts = 0;
+
+        for (Product p : testProducts) {
+            if (totalProducts % 1000 == 0) System.out.println(totalProducts);
+            Mapping m = classifier.classify(p).get(0);
+            /*System.out.format("Classified as %s: %s (originally, %s; manually, %s)\n", String
+                    .join(" > ", m.getCategory().getAllParts()), m.getProduct().getName(), String
+                    .join(" > ", m.getProduct().getOriginalCategory().getAllParts()), String.join
+                    (" > ", m.getProduct().getDestinationCategory().getAllParts()));*/
+            totalProducts++;
+            if (m.getCategory().equals(p.getDestinationCategory())) {
+                correctProducts++;
+            }
+        }
+
+        System.out.println(totalProducts);
+
+        System.out.println();
+        System.out.format("==== Overall accuracy: %.2f%%\n", ((double) correctProducts / (double)
+        totalProducts) * 100.0);
     }
 }
