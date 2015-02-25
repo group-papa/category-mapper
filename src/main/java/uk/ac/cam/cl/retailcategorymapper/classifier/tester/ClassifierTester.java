@@ -36,8 +36,8 @@ public class ClassifierTester {
     static final int depthConsidered = 5;
 
     /* we load the classifier tested with a classifier and a list of mappings */
-    public ClassifierTester(Classifier classifier, Trainer trainer,
-                            List<Mapping> mappings, Taxonomy taxonomy) {
+    public ClassifierTester(Classifier classifier, Trainer trainer, List<Mapping> mappings,
+                            Taxonomy taxonomy) {
         this.classifier = classifier;
         this.trainer = trainer;
         this.taxonomy = taxonomy;
@@ -113,13 +113,15 @@ public class ClassifierTester {
         List<Product> testProducts = new ArrayList<Product>();
         Random rand = new Random();
         XmlProductUnmarshaller unmarshaller = new XmlProductUnmarshaller();
-        Taxonomy taxonomy = new TaxonomyBuilder().setId(UUID.randomUUID().toString()).setName("Test Taxonomy").createNonDbTaxonomy();
+        Taxonomy taxonomy = new TaxonomyBuilder().setId(UUID.randomUUID().toString()).setName
+                ("Test Taxonomy").createNonDbTaxonomy();
         Set<Category> taxonomyCategories = taxonomy.getCategories();
 
         System.out.println("loading products from files...");
 
         for (String filename : args) {
-            List<Product> inputProducts = unmarshaller.unmarshal(new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8));
+            List<Product> inputProducts = unmarshaller.unmarshal(new String(Files.readAllBytes
+                    (Paths.get(filename)), StandardCharsets.UTF_8));
             //Collections.shuffle(inputProducts);
             //inputProducts = inputProducts.subList(0, 500);
             for (Product inputProduct : inputProducts) {
@@ -151,9 +153,11 @@ public class ClassifierTester {
         int numProductsTrained = 0;
 
         for (Product product : trainProducts) {
-            if (numProductsTrained % 1000 == 0) System.out.format("trained: %d of %d\n",
-                    numProductsTrained, trainProducts.size());
-            Mapping trainingMapping = new MappingBuilder().setMethod(Method.MANUAL).setCategory(product.getDestinationCategory()).setTaxonomy(taxonomy).setProduct(product).setConfidence(1.0).createMapping();
+            if (numProductsTrained % 1000 == 0)
+                System.out.format("trained: %d of %d\n", numProductsTrained, trainProducts.size());
+            Mapping trainingMapping = new MappingBuilder().setMethod(Method.MANUAL).setCategory
+                    (product.getDestinationCategory()).setTaxonomy(taxonomy).setProduct(product)
+                    .setConfidence(1.0).createMapping();
             trainer.train(trainingMapping);
             //System.out.println("trained on " + product.getName());
             numProductsTrained++;
@@ -170,15 +174,15 @@ public class ClassifierTester {
 
 
         //int[] levelCorrectProducts = new int[taxonomyCategories.stream().mapToInt(category ->
-         //       category.getDepth()).max().getAsInt()];
+        //       category.getDepth()).max().getAsInt()];
         int[] levelCorrectProducts = new int[10];
         Arrays.fill(levelCorrectProducts, 0);
         int[] levelTotalProducts = new int[levelCorrectProducts.length];
         Arrays.fill(levelTotalProducts, 0);
 
         for (Product p : testProducts) {
-            if (totalProducts % 1000 == 0) System.out.format("classified: %d of %d\n",
-                    totalProducts, testProducts.size());
+            if (totalProducts % 1000 == 0)
+                System.out.format("classified: %d of %d\n", totalProducts, testProducts.size());
             Mapping m = classifier.classify(p).get(0);
             /*System.out.format("Classified as %s: %s (originally, %s; manually, %s)\n", m
                     .getCategory().toString(), m.getProduct().getName(), m.getProduct()
@@ -211,12 +215,10 @@ public class ClassifierTester {
 
         System.out.println();
         System.out.format("==== Overall accuracy: %.2f%%\n", ((double) correctProducts / (double)
-        totalProducts) * 100.0);
+                totalProducts) * 100.0);
         for (int i = 0; i < levelCorrectProducts.length; i++) {
-            System.out.format("%d level accuracy: %.2f%%\n",
-                     i+1, ((double) levelCorrectProducts[i] /
-            (double)
-                    levelTotalProducts[i]) * 100.0);
+            System.out.format("%d level accuracy: %.2f%%\n", i + 1, ((double)
+                    levelCorrectProducts[i] / (double) levelTotalProducts[i]) * 100.0);
         }
     }
 }
