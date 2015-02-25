@@ -92,6 +92,8 @@ public class NaiveBayesDbTrainer extends Trainer {
             updatedCategoryProductCount.put(category, 1);
         }
 
+        categoryProductCount = updatedCategoryProductCount;
+
         for (Feature feature : featuresFromProduct) {
             this.addSeenFeatureInSpecifiedCategory(feature, category);
         }
@@ -156,6 +158,8 @@ public class NaiveBayesDbTrainer extends Trainer {
             updatedCategoryFeatureCount.put(category, 1);
         }
 
+        categoryFeatureCount = updatedCategoryFeatureCount;
+
         //update count of times specific features is seen in given category:
         if (!categoryFeatureObservationMaps.containsKey(category)) {
             categoryFeatureObservationMaps.put(category,
@@ -182,5 +186,8 @@ public class NaiveBayesDbTrainer extends Trainer {
         }
         updatedCategoryFeatureObservationMaps.put(category,
                 updatedCategoryFeatureObservationMap);
+
+        categoryFeatureObservationMaps = updatedCategoryFeatureObservationMaps;
+
     }
 }

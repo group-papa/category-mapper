@@ -94,6 +94,7 @@ public class NaiveBayesDbClassifier extends Classifier {
 
         int categorySeen = 0;
         Set<Integer> nFeats = new HashSet<>();
+        Set<Integer> nProds = new HashSet<>();
         for (Category category : destinationCategories) {
             // P(f_i | C)
             double pProductGivenC = 0.0;
@@ -104,6 +105,7 @@ public class NaiveBayesDbClassifier extends Classifier {
             if (categoryFeatureCount.containsKey(category)) {
                 categorySeen++;
                 int productsInCategory = categoryProductCount.get(category);
+                nProds.add(productsInCategory);
                 int totalFeaturesInC = categoryFeatureCount.get(category);
                 nFeats.add(totalFeaturesInC);
 
