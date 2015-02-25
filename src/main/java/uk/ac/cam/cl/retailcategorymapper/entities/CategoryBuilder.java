@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 public class CategoryBuilder {
     private String id;
     private String[] parts;
+    private Taxonomy subTaxonomy = null;
 
     @JsonProperty("id")
     public CategoryBuilder setId(String id) {
@@ -23,7 +24,13 @@ public class CategoryBuilder {
         return this;
     }
 
+    @JsonProperty("subtaxonomy")
+    public CategoryBuilder setSubTaxonomy(Taxonomy subTaxonomy) {
+        this.subTaxonomy = subTaxonomy;
+        return this;
+    }
+
     public Category createCategory() {
-        return new Category(id, parts);
+        return new Category(id, parts, subTaxonomy);
     }
 }

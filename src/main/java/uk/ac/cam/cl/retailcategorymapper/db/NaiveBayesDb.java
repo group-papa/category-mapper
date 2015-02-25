@@ -86,6 +86,12 @@ public class NaiveBayesDb implements NaiveBayesStorage {
         return redisson.getMap(key);
     }
 
+    @Override
+    public Map<Category, Taxonomy> getCategorySubTaxonomyMap(Taxonomy taxonomy) {
+        // TODO FIXME
+        return null;
+    }
+
     /**
      * Get a category's feature to observation count map for a taxonomy.
      * @param taxonomy The taxonomy.

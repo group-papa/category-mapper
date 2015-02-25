@@ -13,14 +13,17 @@ import java.util.Arrays;
 public class Category {
     private String id;
     private String[] parts;
+    private Taxonomy subTaxonomy;
 
-    protected Category(String id, String[] parts) {
+    protected Category(String id, String[] parts, Taxonomy subTaxonomy) {
         this.id = id;
 
         if (parts.length == 0) {
             throw new IllegalArgumentException();
         }
         this.parts = Arrays.copyOf(parts, parts.length);
+
+        this.subTaxonomy = subTaxonomy;
     }
 
     public String getId() {
@@ -44,6 +47,10 @@ public class Category {
                 .CATEGORY_FILE_DELIMITER + " ");
     }
 
+    public Taxonomy getSubTaxonomy() {
+        return this.subTaxonomy;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -52,6 +59,16 @@ public class Category {
         Category category = (Category) o;
 
         if (!Arrays.equals(parts, category.parts)) return false;
+
+        if (this.getSubTaxonomy() == null) {
+            if (category.getSubTaxonomy() != null) {
+                return false;
+            }
+        } else {
+            if (!this.getSubTaxonomy().equals(category.getSubTaxonomy())) {
+                return false;
+            }
+        }
 
         return true;
     }

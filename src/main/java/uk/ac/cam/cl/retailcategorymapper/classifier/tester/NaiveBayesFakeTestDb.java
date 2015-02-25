@@ -22,12 +22,14 @@ public class NaiveBayesFakeTestDb implements NaiveBayesStorage {
     private Map<Taxonomy, Map<Category, Integer>> categoryFeatureCounts;
     private Map<Taxonomy, Map<Category, Map<Feature, Integer>>> categoryObservations;
     private Map<Taxonomy, Set<Feature>> featureSets;
+    private Map<Taxonomy, Map<Category, Taxonomy>> categorySubTaxonomyMap;
 
     private NaiveBayesFakeTestDb() {
         totalProductCounts = new HashMap<>();
         categoryProductCounts = new HashMap<>();
         categoryFeatureCounts = new HashMap<>();
         categoryObservations = new HashMap<>();
+        categorySubTaxonomyMap = new HashMap<>();
         featureSets = new HashMap<>();
     }
 
@@ -106,5 +108,12 @@ public class NaiveBayesFakeTestDb implements NaiveBayesStorage {
             featureSets.put(taxonomy, new HashSet<>());
         }
         return featureSets.get(taxonomy);
+    }
+
+    public Map<Category, Taxonomy> getCategorySubTaxonomyMap(Taxonomy taxonomy) {
+        if (!categorySubTaxonomyMap.containsKey(taxonomy)) {
+            categorySubTaxonomyMap.put(taxonomy, new HashMap<>());
+        }
+        return categorySubTaxonomyMap.get(taxonomy);
     }
 }

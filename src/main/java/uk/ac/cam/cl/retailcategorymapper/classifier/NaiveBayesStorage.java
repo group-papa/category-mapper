@@ -58,4 +58,6 @@ public interface NaiveBayesStorage {
      * @return The feature set.
      */
     public Set<Feature> getFeatureSet(Taxonomy taxonomy);
+
+    public Map<Category, Taxonomy> getCategorySubTaxonomyMap(Taxonomy taxonomy);
 }
