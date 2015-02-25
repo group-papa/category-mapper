@@ -4,6 +4,17 @@ import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbClassifier;
 import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbTrainer;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
+<<<<<<< HEAD
+import uk.ac.cam.cl.retailcategorymapper.entities.*;
+import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlProductUnmarshaller;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
+=======
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
@@ -17,6 +28,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+>>>>>>> master
 
 /**
  * Created by Charlie
@@ -96,39 +108,120 @@ public class ClassifierTester {
         return accuracyPerLevel;
     }
 
-    public static void main(String[] args) {
-        try {
-            //TODO connect input arguments to the filePath and taxonomy references
-            System.out.println("ClassifierTest Main Executed");
-            System.out.println(Arrays.toString(args));
+    public static void main(String[] args) throws IOException {
+        System.out.println("ClassifierTest Main Executed");
+        System.out.println("Files: " + Arrays.toString(args));
+        System.out.println();
 
-            Taxonomy taxonomy = null;
-            Classifier classifier = new NaiveBayesDbClassifier(taxonomy);
-            Trainer trainer = new NaiveBayesDbTrainer(taxonomy);
-            String filePath = "";
-            BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        NaiveBayesFakeTestDb storage = NaiveBayesFakeTestDb.getInstance();
+        List<Product> trainProducts = new ArrayList<Product>();
+        List<Product> testProducts = new ArrayList<Product>();
+        Random rand = new Random();
+        XmlProductUnmarshaller unmarshaller = new XmlProductUnmarshaller();
+        Taxonomy taxonomy = new TaxonomyBuilder().setId(UUID.randomUUID().toString()).setName("Test Taxonomy").createNonDbTaxonomy();
+        Set<Category> taxonomyCategories = taxonomy.getCategories();
 
-            StringBuilder inputData = new StringBuilder();
-            String s = reader.readLine();
-            while (s != null) {
-                inputData.append(s);
-                s = reader.readLine();
+        System.out.println("loading products from files...");
+
+        for (String filename : args) {
+            List<Product> inputProducts = unmarshaller.unmarshal(new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8));
+            //Collections.shuffle(inputProducts);
+            //inputProducts = inputProducts.subList(0, 500);
+            for (Product inputProduct : inputProducts) {
+                /*Product p = new ProductBuilder().setName(inputProduct.getName()).setDescription
+                        (inputProduct.getDescription()).setId(inputProduct.getId())
+                        .setOriginalCategory(inputProduct.getOriginalCategory())
+                        .setDestinationCategory(new CategoryBuilder().setId(UUID.randomUUID()
+                                .toString()).setParts(new String[] { inputProduct
+                                .getDestinationCategory().getPart(0) }).createCategory())
+                        .createProduct();*/
+                Product p = inputProduct;
+                // Split products 80/20 into train/test
+                if (rand.nextDouble() > 0.8) {
+                    testProducts.add(p);
+                } else {
+                    trainProducts.add(p);
+                }
+                taxonomyCategories.add(p.getDestinationCategory());
             }
-            String inputString = inputData.toString();
-            List<Mapping> inputMappings = new XmlMappingUnmarshaller().unmarshal(inputString);
+        }
 
-            ClassifierTester tester = new ClassifierTester(classifier,
-                    trainer, inputMappings, taxonomy);
+        /*Collections.shuffle(trainProducts);
+        Collections.shuffle(testProducts);
+        trainProducts = trainProducts.subList(0, 8000);
+        testProducts = testProducts.subList(0, 2000);*/
 
-            double[] results = tester.test(1);
+        Trainer trainer = new NaiveBayesDbTrainer(taxonomy, storage);
 
-            for (int i = 0; i < results.length; i++) {
-                System.out.println("Level " + i + " accuracy : " + results[i]);
+        int numProductsTrained = 0;
+
+        for (Product product : trainProducts) {
+            if (numProductsTrained % 1000 == 0) System.out.format("trained: %d of %d\n",
+                    numProductsTrained, trainProducts.size());
+            Mapping trainingMapping = new MappingBuilder().setMethod(Method.MANUAL).setCategory(product.getDestinationCategory()).setTaxonomy(taxonomy).setProduct(product).setConfidence(1.0).createMapping();
+            trainer.train(trainingMapping);
+            //System.out.println("trained on " + product.getName());
+            numProductsTrained++;
+        }
+
+        System.out.format("trained: %d of %d\n", numProductsTrained, trainProducts.size());
+
+        trainer.save();
+
+        Classifier classifier = new NaiveBayesDbClassifier(taxonomy, storage);
+
+        int totalProducts = 0;
+        int correctProducts = 0;
+
+
+        //int[] levelCorrectProducts = new int[taxonomyCategories.stream().mapToInt(category ->
+         //       category.getDepth()).max().getAsInt()];
+        int[] levelCorrectProducts = new int[10];
+        Arrays.fill(levelCorrectProducts, 0);
+        int[] levelTotalProducts = new int[levelCorrectProducts.length];
+        Arrays.fill(levelTotalProducts, 0);
+
+        for (Product p : testProducts) {
+            if (totalProducts % 1000 == 0) System.out.format("classified: %d of %d\n",
+                    totalProducts, testProducts.size());
+            Mapping m = classifier.classify(p).get(0);
+            /*System.out.format("Classified as %s: %s (originally, %s; manually, %s)\n", m
+                    .getCategory().toString(), m.getProduct().getName(), m.getProduct()
+                    .getOriginalCategory().toString(), m.getProduct().getDestinationCategory()
+                    .toString());*/
+            totalProducts++;
+            if (m.getCategory().equals(p.getDestinationCategory())) {
+                correctProducts++;
             }
-        } catch (FileNotFoundException e) {
-            System.err.println("Classifier test failed - file not found exception");
-        } catch (IOException e) {
-            System.err.println("Classifier test failed - IO exception");
+
+            for (int i = 0; i < p.getDestinationCategory().getDepth(); i++) {
+                levelTotalProducts[i]++;
+            }
+            int maxDepth = Math.max(m.getCategory().getDepth(), p.getDestinationCategory()
+                    .getDepth());
+            for (int i = 0; i < maxDepth; i++) {
+                try {
+                    if (m.getCategory().getPart(i).equals(p.getDestinationCategory().getPart(i))) {
+                        levelCorrectProducts[i]++;
+                    } else {
+                        break;
+                    }
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    continue;
+                }
+            }
+        }
+
+        System.out.format("classified: %d of %d\n", totalProducts, testProducts.size());
+
+        System.out.println();
+        System.out.format("==== Overall accuracy: %.2f%%\n", ((double) correctProducts / (double)
+        totalProducts) * 100.0);
+        for (int i = 0; i < levelCorrectProducts.length; i++) {
+            System.out.format("%d level accuracy: %.2f%%\n",
+                     i+1, ((double) levelCorrectProducts[i] /
+            (double)
+                    levelTotalProducts[i]) * 100.0);
         }
     }
 }

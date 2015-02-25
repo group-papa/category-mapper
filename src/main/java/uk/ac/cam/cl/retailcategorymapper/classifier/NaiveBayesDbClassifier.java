@@ -1,10 +1,13 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter1;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter2;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.NGramFeatureExtractor;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
+import uk.ac.cam.cl.retailcategorymapper.entities.FeatureSource;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Method;
@@ -14,10 +17,11 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
@@ -31,31 +35,55 @@ public class NaiveBayesDbClassifier extends Classifier {
     private Map<Category, Map<Feature, Integer>> categoryFeatureObservationMaps;
     private int totalProducts;
     private int destinationCategoriesSize;
+    private NaiveBayesStorage storage;
 
     /**
      * Construct a new classifier for a given taxonomy.
      *
      * @param taxonomy The taxonomy.
      */
-    public NaiveBayesDbClassifier(Taxonomy taxonomy) {
+    public NaiveBayesDbClassifier(Taxonomy taxonomy, NaiveBayesStorage storage) {
         super(taxonomy);
+        this.storage = storage;
         taxonomyFeatureSet = new HashSet<>(
-                NaiveBayesDb.getFeatureSet(taxonomy));
+                storage.getFeatureSet(taxonomy));
         categoryProductCount = new HashMap<>(
-                NaiveBayesDb.getCategoryProductMap(taxonomy));
+                storage.getCategoryProductMap(taxonomy));
         categoryFeatureCount = new HashMap<>(
-                NaiveBayesDb.getCategoryFeatureMap(taxonomy));
+                storage.getCategoryFeatureMap(taxonomy));
         destinationCategories = new HashSet<>(taxonomy.getCategories());
 
         categoryFeatureObservationMaps = new HashMap<>();
         for (Category category : destinationCategories) {
             categoryFeatureObservationMaps.put(category,
-                    new HashMap<>(NaiveBayesDb.getCategoryFeatureObservationMap(
+                    new HashMap<>(storage.getCategoryFeatureObservationMap(
                             getTaxonomy(), category)));
         }
 
-        totalProducts = NaiveBayesDb.getProductCount(getTaxonomy());
+        totalProducts = storage.getProductCount(getTaxonomy());
         destinationCategoriesSize = destinationCategories.size();
+    }
+
+    public NaiveBayesDbClassifier(Taxonomy taxonomy) {
+        this(taxonomy, NaiveBayesDb.getInstance());
+    }
+
+    class DoubleMBTuple {
+        private final Double x;
+        private final MappingBuilder y;
+
+        public DoubleMBTuple(Double x, MappingBuilder y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public Double getDouble() {
+            return this.x;
+        }
+
+        public MappingBuilder getMappingBuilder() {
+            return this.y;
+        }
     }
 
     /**
@@ -68,10 +96,11 @@ public class NaiveBayesDbClassifier extends Classifier {
      */
     @Override
     public List<Mapping> classify(Product product) {
-        List<Feature> features = FeatureConverter1.changeProductToFeature(product);
+        List<Feature> features = NGramFeatureExtractor.changeProductToFeature(product);
+        TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
 
-        SortedMap<Double, Mapping> matches = new TreeMap<>();
-
+        int categorySeen = 0;
+        Set<Integer> nFeats = new HashSet<>();
         for (Category category : destinationCategories) {
             // P(f_i | C)
             double pProductGivenC = 0.0;
@@ -80,11 +109,14 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             //category has been seen by classifier during training
             if (categoryFeatureCount.containsKey(category)) {
+                categorySeen++;
                 int productsInCategory = categoryProductCount.get(category);
                 int totalFeaturesInC = categoryFeatureCount.get(category);
+                nFeats.add(totalFeaturesInC);
 
                 Map<Feature, Integer> featureOccurrencesInCategory =
                         categoryFeatureObservationMaps.get(category);
+
 
                 for (Feature f : features) {
                     //assume f has NOT been seen in this category
@@ -100,28 +132,223 @@ public class NaiveBayesDbClassifier extends Classifier {
                 }
 
                 //Laplace smoothing
-                pC += Math.log(((double) (productsInCategory + 1)) /
-                      ((double) (totalProducts + destinationCategoriesSize)));
+                pC += Math.log10(((double) (productsInCategory + 1)) /
+                        ((double) (totalProducts + destinationCategoriesSize)));
             }
 
+            //category has not been seen by classifier in training
+            else {
+                pProductGivenC += features.size()
+                        * Math.log10(((double) 1) / ((double) taxonomyFeatureSet.size()));
+                pC += Math.log10(((double) (1)) /
+                        ((double) (destinationCategoriesSize)));
+
+            }
             double pCGivenF = pProductGivenC + pC;
 
-            matches.put(pCGivenF,
-                    new MappingBuilder().setProduct(product)
-                            .setTaxonomy(getTaxonomy())
-                            .setCategory(category)
-                            .setConfidence(pCGivenF)
-                            .setMethod(Method.CLASSIFIED).createMapping());
+            Set<MappingBuilder> prevValue = matches.get(pCGivenF);
+            if (prevValue == null) {
+                //System.out.println("is null");
+                prevValue = new HashSet<MappingBuilder>();
+                prevValue.add(new MappingBuilder()
+                        .setProduct(product)
+                        .setTaxonomy(getTaxonomy())
+                        .setCategory(category)
+                        .setMethod(Method.CLASSIFIED));
+            } else {
+                prevValue.add(new MappingBuilder()
+                        .setProduct(product)
+                        .setTaxonomy(getTaxonomy())
+                        .setCategory(category)
+                        .setMethod(Method.CLASSIFIED));
+            }
+            matches.put(pCGivenF, prevValue);
         }
 
-        List<Mapping> result = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
+
+        List<DoubleMBTuple> topThree = new ArrayList<>();
+        double topThreeProbSum = 0;
+        int countToThree = 0;
+        while (countToThree < 3) {
             if (matches.size() == 0) {
                 break;
             }
-            Mapping mapping = matches.remove(matches.lastKey());
-            result.add(mapping);
+            Entry<Double, Set<MappingBuilder>> mappingBuilderSetEntry = matches.pollLastEntry();
+            Double d = mappingBuilderSetEntry.getKey();
+            Set<MappingBuilder> mbSet = mappingBuilderSetEntry.getValue();
+            int setSize = mbSet.size();
+            //can safely add all
+            if ((countToThree + setSize) < 3) {
+                for (MappingBuilder mb : mbSet) {
+                    DoubleMBTuple probMBTuple = new DoubleMBTuple(d, mb);
+                    topThree.add(probMBTuple);
+                    topThreeProbSum += d;
+                }
+                countToThree += setSize;
+            }
+            //too many to add all
+            else {
+                int nAdded = 0;
+                Iterator iter = mbSet.iterator();
+                while ((countToThree + nAdded) < 3) {
+                    MappingBuilder mb = (MappingBuilder) iter.next();
+                    DoubleMBTuple probMBTuple = new DoubleMBTuple(d, mb);
+                    topThree.add(probMBTuple);
+                    topThreeProbSum += d;
+                    nAdded++;
+                }
+                countToThree += nAdded;
+            }
         }
+
+
+        List<Mapping> result = new ArrayList<>();
+        int maximum = Math.min(3, topThree.size());
+        for (int i = 0; i < maximum; i++) {
+            DoubleMBTuple mbTuple = topThree.get(i);
+            MappingBuilder mb = mbTuple.getMappingBuilder();
+            double confidence = mbTuple.getDouble().doubleValue() / topThreeProbSum;
+            mb.setConfidence(confidence);
+            result.add(mb.createMapping());
+        }
+
+        return result;
+    }
+
+    public List<Mapping> classifyWithWeights(Product product, double nameWeight,
+                                             double originalCategoryWeight) {
+
+        if (nameWeight + originalCategoryWeight != 1.0) {
+            throw new RuntimeException("the weights don't sum to 1");
+        }
+
+        List<Feature> features = NGramFeatureExtractor.changeProductToFeature(product);
+        TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
+
+
+        int categorySeen = 0;
+        Set<Integer> nFeats = new HashSet<>();
+        for (Category category : destinationCategories) {
+            // P(f_i | C)
+            double pProductGivenC = 0.0;
+            // P(C)
+            double pC = 0.0;
+
+            //category has been seen by classifier during training
+            if (categoryFeatureCount.containsKey(category)) {
+                categorySeen++;
+                int productsInCategory = categoryProductCount.get(category);
+                int totalFeaturesInC = categoryFeatureCount.get(category);
+                nFeats.add(totalFeaturesInC);
+
+                Map<Feature, Integer> featureOccurrencesInCategory =
+                        categoryFeatureObservationMaps.get(category);
+
+                for (Feature f : features) {
+                    double correctWeight = 1.0;
+                    if (f.getSource().equals(FeatureSource.NAME)) {
+                        correctWeight *= nameWeight;
+                    } else if (f.getSource().equals(FeatureSource.ORIGINAL_CATEGORY)) {
+                        correctWeight *= originalCategoryWeight;
+                    } else {
+                        throw new RuntimeException("source of feature doesn't " +
+                                "match expectation");
+                    }
+
+                    //assume f has NOT been seen in this category
+                    int count = 0;
+                    //update if actually has been seen in this category
+                    if (featureOccurrencesInCategory.containsKey(f)) {
+                        count = featureOccurrencesInCategory.get(f);
+                    }
+                    //Laplace smoothing
+                    double pFeatureGivenC = correctWeight * ((double) (count + 1)) /
+                            ((double) (totalFeaturesInC + taxonomyFeatureSet.size()));
+                    pProductGivenC += Math.log10(pFeatureGivenC);
+                }
+
+                //Laplace smoothing
+                pC += Math.log10(((double) (productsInCategory + 1)) /
+                        ((double) (totalProducts + destinationCategoriesSize)));
+            }
+
+            //category has not been seen by classifier in training
+            //no weights used in this section
+            else {
+                pProductGivenC += features.size()
+                        * Math.log10(((double) 1) / ((double) taxonomyFeatureSet.size()));
+                pC += Math.log10(((double) (1)) /
+                        ((double) (destinationCategoriesSize)));
+
+            }
+            double pCGivenF = pProductGivenC + pC;
+
+            Set<MappingBuilder> prevValue = matches.get(pCGivenF);
+            if (prevValue == null) {
+                //System.out.println("is null");
+                prevValue = new HashSet<MappingBuilder>();
+                prevValue.add(new MappingBuilder()
+                        .setProduct(product)
+                        .setTaxonomy(getTaxonomy())
+                        .setCategory(category)
+                        .setMethod(Method.CLASSIFIED));
+            } else {
+                prevValue.add(new MappingBuilder()
+                        .setProduct(product)
+                        .setTaxonomy(getTaxonomy())
+                        .setCategory(category)
+                        .setMethod(Method.CLASSIFIED));
+            }
+            matches.put(pCGivenF, prevValue);
+        }
+
+
+        List<DoubleMBTuple> topThree = new ArrayList<>();
+        double topThreeProbSum = 0;
+        int countToThree = 0;
+        while (countToThree < 3) {
+            if (matches.size() == 0) {
+                break;
+            }
+            Entry<Double, Set<MappingBuilder>> mappingBuilderSetEntry = matches.pollLastEntry();
+            Double d = mappingBuilderSetEntry.getKey();
+            Set<MappingBuilder> mbSet = mappingBuilderSetEntry.getValue();
+            int setSize = mbSet.size();
+            //can safely add all
+            if ((countToThree + setSize) < 3) {
+                for (MappingBuilder mb : mbSet) {
+                    DoubleMBTuple probMBTuple = new DoubleMBTuple(d, mb);
+                    topThree.add(probMBTuple);
+                    topThreeProbSum += d;
+                }
+                countToThree += setSize;
+            }
+            //too many to add all
+            else {
+                int nAdded = 0;
+                Iterator iter = mbSet.iterator();
+                while ((countToThree + nAdded) < 3) {
+                    MappingBuilder mb = (MappingBuilder) iter.next();
+                    DoubleMBTuple probMBTuple = new DoubleMBTuple(d, mb);
+                    topThree.add(probMBTuple);
+                    topThreeProbSum += d;
+                    nAdded++;
+                }
+                countToThree += nAdded;
+            }
+        }
+
+
+        List<Mapping> result = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            DoubleMBTuple mbTuple = topThree.get(i);
+            MappingBuilder mb = mbTuple.getMappingBuilder();
+            double confidence = mbTuple.getDouble().doubleValue() / topThreeProbSum;
+            mb.setConfidence(confidence);
+            result.add(mb.createMapping());
+        }
+
         return result;
     }
 }
+

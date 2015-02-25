@@ -2,6 +2,7 @@ package uk.ac.cam.cl.retailcategorymapper.db;
 
 import org.redisson.Redisson;
 import org.redisson.core.RBucket;
+import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesStorage;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
@@ -12,13 +13,25 @@ import java.util.Set;
 /**
  * Methods for persisting values required by the Naive Bayes Classifier.
  */
-public class NaiveBayesDb {
+public class NaiveBayesDb implements NaiveBayesStorage {
     /**
      * Get the count of total products seen in a taxonomy.
      * @param taxonomy The taxonomy.
      * @return The product count.
      */
-    public static int getProductCount(Taxonomy taxonomy) {
+
+    private NaiveBayesDb() {
+
+    }
+
+    private static NaiveBayesDb instance = null;
+
+    public static NaiveBayesDb getInstance() {
+        if (instance == null) instance = new NaiveBayesDb();
+        return instance;
+    }
+
+    public int getProductCount(Taxonomy taxonomy) {
         Redisson redisson = RedissonWrapper.getInstance();
 
         String key = KeyBuilder.naiveProductsCount(taxonomy.getId());
@@ -36,7 +49,7 @@ public class NaiveBayesDb {
      * @param taxonomy The taxonomy.
      * @param count The new count.
      */
-    public static void setProductCount(Taxonomy taxonomy, int count) {
+    public void setProductCount(Taxonomy taxonomy, int count) {
         Redisson redisson = RedissonWrapper.getInstance();
 
         String key = KeyBuilder.naiveProductsCount(taxonomy.getId());
@@ -50,7 +63,7 @@ public class NaiveBayesDb {
      * @param taxonomy The taxonomy.
      * @return The category product count map.
      */
-    public static Map<Category, Integer> getCategoryProductMap(
+    public Map<Category, Integer> getCategoryProductMap(
             Taxonomy taxonomy) {
         Redisson redisson = RedissonWrapper.getInstance();
 
@@ -64,7 +77,7 @@ public class NaiveBayesDb {
      * @param taxonomy The taxonomy.
      * @return The category feature count map.
      */
-    public static Map<Category, Integer> getCategoryFeatureMap(
+    public Map<Category, Integer> getCategoryFeatureMap(
             Taxonomy taxonomy) {
         Redisson redisson = RedissonWrapper.getInstance();
 
@@ -79,7 +92,7 @@ public class NaiveBayesDb {
      * @param category The category.
      * @return The category feature observation count map.
      */
-    public static Map<Feature, Integer> getCategoryFeatureObservationMap(
+    public Map<Feature, Integer> getCategoryFeatureObservationMap(
             Taxonomy taxonomy, Category category) {
         Redisson redisson = RedissonWrapper.getInstance();
 
@@ -94,7 +107,7 @@ public class NaiveBayesDb {
      * @param taxonomy The taxonomy.
      * @return The feature set.
      */
-    public static Set<Feature> getFeatureSet(Taxonomy taxonomy) {
+    public Set<Feature> getFeatureSet(Taxonomy taxonomy) {
         Redisson redisson = RedissonWrapper.getInstance();
 
         String key = KeyBuilder.naiveFeatureSet(taxonomy.getId());
