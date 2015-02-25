@@ -33,7 +33,7 @@ public class ProductNormalizer {
 		List<String> words = Arrays.asList(inputString.split("\\s+"));
 		words = words.stream()
 				.map(w -> normalizeWord(w))
-				.filter(w -> w.length() > 0 && !w.matches("^\\d+$"))
+				.filter(w -> w.length() > 1 && !w.matches("^\\d+$"))
 				.collect(Collectors.toList());
 		words = Arrays.asList(collapseSpaceRuns(String.join(" ", words)).split("\\s+"));
 		words = words.stream()
