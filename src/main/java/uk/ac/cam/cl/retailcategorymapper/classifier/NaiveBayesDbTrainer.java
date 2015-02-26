@@ -105,6 +105,25 @@ public class NaiveBayesDbTrainer extends Trainer {
         return true;
     }
 
+    public boolean addFeatureInCategory(Feature feature, Category category){
+
+        newProductsSeen += 1;
+        // Have seen category before
+        if (categoryProductCount.containsKey(category)) {
+            int prevCount = updatedCategoryProductCount.containsKey(category)
+                    ? updatedCategoryProductCount.get(category)
+                    : categoryProductCount.get(category);
+            updatedCategoryProductCount.put(category, prevCount + 1);
+        }
+        // Have not seen category before in training
+        else {
+            updatedCategoryProductCount.put(category, 1);
+        }
+        this.addSeenFeatureInSpecifiedCategory(feature, category);
+
+        return true;
+    }
+
     /**
      * Save the new training data.
      */

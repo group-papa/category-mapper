@@ -115,8 +115,6 @@ public class NaiveBayesDbClassifier extends Classifier {
                 Map<Feature, Integer> featureOccurrencesInCategory =
                         categoryFeatureObservationMaps.get(category);
 
-
-
                 for (Feature f : features) {
                     //assume f has NOT been seen in this category
                     int count = 0;
