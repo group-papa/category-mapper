@@ -72,7 +72,7 @@ public class ClassifierTester {
                                 .getDestinationCategory().getPart(0) }).createCategory())
                         .createProduct();*/
                 // Split products 80/20 into train/test
-                if (rand.nextDouble() > 0.8) {
+                if (rand.nextDouble() > 0.01) {
                     testMappings.add(inputMapping);
                 } else {
                     trainMappings.add(inputMapping);
