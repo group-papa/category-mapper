@@ -25,6 +25,10 @@ public class Feature {
         return this.source;
     }
 
+    public int getWords() {
+        return this.featureString.split(" ").length;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

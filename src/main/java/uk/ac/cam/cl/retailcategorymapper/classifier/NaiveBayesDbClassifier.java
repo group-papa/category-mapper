@@ -84,6 +84,7 @@ public class NaiveBayesDbClassifier extends Classifier {
         }
     }
 
+
     /**
      * Generate a list of top three mappings for a product given the destination taxonomy.
      * Use Laplace Smoothing to take into account any categories or features not seen
@@ -128,6 +129,8 @@ public class NaiveBayesDbClassifier extends Classifier {
                     if(f.getSource()==FeatureSource.NAME){
                         pFeatureGivenC+=0.005;
                     }
+
+                    pFeatureGivenC *= f.getWords();
 
                     pProductGivenC += Math.log10(pFeatureGivenC);
 

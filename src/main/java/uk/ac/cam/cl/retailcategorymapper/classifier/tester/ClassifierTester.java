@@ -6,6 +6,7 @@ import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
+import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import uk.ac.cam.cl.retailcategorymapper.entities.TaxonomyBuilder;
 import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlMappingUnmarshaller;
@@ -48,7 +49,7 @@ public class ClassifierTester {
 
         NaiveBayesFakeTestDb storage = NaiveBayesFakeTestDb.getInstance();
         List<Mapping> trainMappings = new ArrayList<>();
-        List<Mapping> testMappings = new ArrayList<>();
+        //List<Mapping> testMappings = new ArrayList<>();
         Random rand = new Random();
         XmlMappingUnmarshaller unmarshaller = new XmlMappingUnmarshaller();
         Taxonomy taxonomy = new TaxonomyBuilder().setId(UUID.randomUUID().toString()).setName
@@ -58,7 +59,7 @@ public class ClassifierTester {
         System.out.println("loading products from files...");
 
 
-        for (String filename : args) {
+        for (String filename : Arrays.copyOfRange(args, 1, args.length)) {
             List<Mapping> inputMappings = unmarshaller.unmarshal(new String(Files.readAllBytes
                     (Paths.get(filename)), StandardCharsets.UTF_8));
             //Collections.shuffle(inputProducts);
@@ -72,14 +73,19 @@ public class ClassifierTester {
                                 .getDestinationCategory().getPart(0) }).createCategory())
                         .createProduct();*/
                 // Split products 80/20 into train/test
-                if (rand.nextDouble() > 0.8) {
+                /*if (rand.nextDouble() > 0.8) {
                     testMappings.add(inputMapping);
                 } else {
                     trainMappings.add(inputMapping);
-                }
+                }*/
+                trainMappings.add(inputMapping);
                 taxonomyCategories.add(inputMapping.getCategory());
             }
         }
+
+        List<Mapping> testMappings = unmarshaller.unmarshal(new String(Files.readAllBytes(Paths
+                .get(args[0]))));
+
 
         /*Collections.shuffle(trainProducts);
         Collections.shuffle(testProducts);
@@ -119,10 +125,14 @@ public class ClassifierTester {
             if (totalProducts % 1000 == 0)
                 System.out.format("classified: %d of %d\n", totalProducts, testMappings.size());
             Mapping classifiedMapping = classifier.classify(testMapping.getProduct()).get(0);
+            Product p = classifiedMapping.getProduct();
             /*System.out.format("Classified as %s: %s (originally, %s; manually, %s)\n", m
                     .getCategory().toString(), m.getProduct().getName(), m.getProduct()
                     .getOriginalCategory().toString(), m.getProduct().M()
                     .toString());*/
+            System.out.format("%s: classified as %s (originally %s)\n", p.getName(),
+                    classifiedMapping.getCategory().toString(), testMapping.getCategory()
+                            .toString());
             totalProducts++;
             if (classifiedMapping.getCategory().equals(testMapping.getCategory())) {
                 correctProducts++;
