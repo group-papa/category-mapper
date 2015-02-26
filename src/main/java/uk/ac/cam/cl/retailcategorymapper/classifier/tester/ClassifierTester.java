@@ -11,7 +11,7 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import uk.ac.cam.cl.retailcategorymapper.entities.TaxonomyBuilder;
-import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlProductUnmarshaller;
+import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlMappingUnmarshaller;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -53,7 +53,7 @@ public class ClassifierTester {
         List<Product> trainProducts = new ArrayList<Product>();
         List<Product> testProducts = new ArrayList<Product>();
         Random rand = new Random();
-        XmlProductUnmarshaller unmarshaller = new XmlProductUnmarshaller();
+        XmlMappingUnmarshaller unmarshaller = new XmlMappingUnmarshaller();
         Taxonomy taxonomy = new TaxonomyBuilder().setId(UUID.randomUUID().toString()).setName
                 ("Test Taxonomy").createNonDbTaxonomy();
         Set<Category> taxonomyCategories = taxonomy.getCategories();
@@ -62,11 +62,11 @@ public class ClassifierTester {
 
 
         for (String filename : args) {
-            List<Product> inputProducts = unmarshaller.unmarshal(new String(Files.readAllBytes
+            List<Mapping> inputMappings = unmarshaller.unmarshal(new String(Files.readAllBytes
                     (Paths.get(filename)), StandardCharsets.UTF_8));
             //Collections.shuffle(inputProducts);
             //inputProducts = inputProducts.subList(0, 500);
-            for (Product inputProduct : inputProducts) {
+            for (Mapping inputMapping : inputMappings) {
                 /*Product p = new ProductBuilder().setName(inputProduct.getName()).setDescription
                         (inputProduct.getDescription()).setId(inputProduct.getId())
                         .setOriginalCategory(inputProduct.getOriginalCategory())
@@ -74,14 +74,15 @@ public class ClassifierTester {
                                 .toString()).setParts(new String[] { inputProduct
                                 .getDestinationCategory().getPart(0) }).createCategory())
                         .createProduct();*/
-                Product p = inputProduct;
+                Product p = inputMapping.getProduct();
+	            Category destCategory = inputMapping.getCategory();
                 // Split products 80/20 into train/test
                 if (rand.nextDouble() > 0.8) {
                     testProducts.add(p);
                 } else {
                     trainProducts.add(p);
                 }
-                taxonomyCategories.add(p.getDestinationCategory());
+                taxonomyCategories.add(destCategory);
             }
         }
 

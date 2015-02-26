@@ -15,18 +15,15 @@ public class Product {
     private String description;
     private Integer price;
     private Category originalCategory;
-    private Category destinationCategory = null;
     private Map<String, String> attributes;
 
     protected Product(String id, String name, String description, Integer price,
-                   Category originalCategory, Category destinationCategory, Map<String, String>
-            attributes) {
+                   Category originalCategory, Map<String, String> attributes) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.originalCategory = originalCategory;
-        this.destinationCategory = destinationCategory;
         this.attributes = attributes;
     }
 
@@ -49,8 +46,6 @@ public class Product {
     public Category getOriginalCategory() {
         return originalCategory;
     }
-
-    public Category getDestinationCategory() { return destinationCategory; }
 
     public Set<String> getAttributeNames() {
         return attributes.keySet();
