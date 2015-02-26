@@ -96,7 +96,7 @@ public class ClassifierTest {
     public void testTrainWithBagOfWordsSingleProductTwoProducts() {
         nbc3.trainWithBagOfWordsSingleProduct(p, c2);
         nbc3.trainWithBagOfWordsSingleProduct(p3, c2);
-        // These tests are no longer applicable because of ngrams.
+        // FIXME: These values are no longer applicable because of ngrams.
         //Assert.assertEquals(nbc3.getFeatures().size(), 11, 0);
         Assert.assertTrue(nbc3.getFeatures().contains(pCat1));
         Assert.assertTrue(nbc3.getCategories().contains(c2));
