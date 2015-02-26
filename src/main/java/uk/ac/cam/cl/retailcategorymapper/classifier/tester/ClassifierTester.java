@@ -6,9 +6,6 @@ import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
-import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
-import uk.ac.cam.cl.retailcategorymapper.entities.Method;
-import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import uk.ac.cam.cl.retailcategorymapper.entities.TaxonomyBuilder;
 import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlMappingUnmarshaller;
@@ -50,8 +47,8 @@ public class ClassifierTester {
         System.out.println();
 
         NaiveBayesFakeTestDb storage = NaiveBayesFakeTestDb.getInstance();
-        List<Product> trainProducts = new ArrayList<Product>();
-        List<Product> testProducts = new ArrayList<Product>();
+        List<Mapping> trainMappings = new ArrayList<>();
+        List<Mapping> testMappings = new ArrayList<>();
         Random rand = new Random();
         XmlMappingUnmarshaller unmarshaller = new XmlMappingUnmarshaller();
         Taxonomy taxonomy = new TaxonomyBuilder().setId(UUID.randomUUID().toString()).setName
@@ -74,15 +71,13 @@ public class ClassifierTester {
                                 .toString()).setParts(new String[] { inputProduct
                                 .getDestinationCategory().getPart(0) }).createCategory())
                         .createProduct();*/
-                Product p = inputMapping.getProduct();
-	            Category destCategory = inputMapping.getCategory();
                 // Split products 80/20 into train/test
                 if (rand.nextDouble() > 0.8) {
-                    testProducts.add(p);
+                    testMappings.add(inputMapping);
                 } else {
-                    trainProducts.add(p);
+                    trainMappings.add(inputMapping);
                 }
-                taxonomyCategories.add(destCategory);
+                taxonomyCategories.add(inputMapping.getCategory());
             }
         }
 
@@ -95,18 +90,15 @@ public class ClassifierTester {
 
          int numProductsTrained = 0;
 
-        for (Product product : trainProducts) {
+        for (Mapping mapping : trainMappings) {
             if (numProductsTrained % 1000 == 0)
-                System.out.format("trained: %d of %d\n", numProductsTrained, trainProducts.size());
-            Mapping trainingMapping = new MappingBuilder().setMethod(Method.MANUAL).setCategory
-                    (product.getDestinationCategory()).setTaxonomy(taxonomy).setProduct(product)
-                    .setConfidence(1.0).createMapping();
-            trainer.train(trainingMapping);
+                System.out.format("trained: %d of %d\n", numProductsTrained, trainMappings.size());
+            trainer.train(mapping);
             //System.out.println("trained on " + product.getName());
             numProductsTrained++;
         }
 
-        System.out.format("trained: %d of %d\n", numProductsTrained, trainProducts.size());
+        System.out.format("trained: %d of %d\n", numProductsTrained, trainMappings.size());
 
         trainer.save();
 
@@ -123,27 +115,28 @@ public class ClassifierTester {
         int[] levelTotalProducts = new int[levelCorrectProducts.length];
         Arrays.fill(levelTotalProducts, 0);
 
-        for (Product p : testProducts) {
+        for (Mapping testMapping : testMappings) {
             if (totalProducts % 1000 == 0)
-                System.out.format("classified: %d of %d\n", totalProducts, testProducts.size());
-            Mapping m = classifier.classify(p).get(0);
+                System.out.format("classified: %d of %d\n", totalProducts, testMappings.size());
+            Mapping classifiedMapping = classifier.classify(testMapping.getProduct()).get(0);
             /*System.out.format("Classified as %s: %s (originally, %s; manually, %s)\n", m
                     .getCategory().toString(), m.getProduct().getName(), m.getProduct()
-                    .getOriginalCategory().toString(), m.getProduct().getDestinationCategory()
+                    .getOriginalCategory().toString(), m.getProduct().M()
                     .toString());*/
             totalProducts++;
-            if (m.getCategory().equals(p.getDestinationCategory())) {
+            if (classifiedMapping.getCategory().equals(testMapping.getCategory())) {
                 correctProducts++;
             }
 
-            for (int i = 0; i < p.getDestinationCategory().getDepth(); i++) {
+            for (int i = 0; i < testMapping.getCategory().getDepth(); i++) {
                 levelTotalProducts[i]++;
             }
-            int maxDepth = Math.max(m.getCategory().getDepth(), p.getDestinationCategory()
+            int maxDepth = Math.max(classifiedMapping.getCategory().getDepth(), testMapping.getCategory()
                     .getDepth());
             for (int i = 0; i < maxDepth; i++) {
                 try {
-                    if (m.getCategory().getPart(i).equals(p.getDestinationCategory().getPart(i))) {
+                    if (classifiedMapping.getCategory().getPart(i).equals(testMapping.getCategory().getPart(i)
+		                    )) {
                         levelCorrectProducts[i]++;
                     } else {
                         break;
@@ -154,7 +147,7 @@ public class ClassifierTester {
             }
         }
 
-        System.out.format("classified: %d of %d\n", totalProducts, testProducts.size());
+        System.out.format("classified: %d of %d\n", totalProducts, testMappings.size());
 
         System.out.println();
         System.out.format("==== Overall accuracy: %.2f%%\n", ((double) correctProducts / (double)

@@ -12,6 +12,7 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import uk.ac.cam.cl.retailcategorymapper.entities.TaxonomyBuilder;
+import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlMappingUnmarshaller;
 import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlProductUnmarshaller;
 
 import java.io.IOException;
@@ -405,46 +406,39 @@ public class NaiveBayesClassifier {
     }
 
     public static void main(String[] args) throws IOException {
-        XmlProductUnmarshaller unmarshaller = new XmlProductUnmarshaller();
-        List<Product> inputProducts = unmarshaller.unmarshal(new String(Files.readAllBytes(Paths
+        XmlMappingUnmarshaller unmarshaller = new XmlMappingUnmarshaller();
+        List<Mapping> inputMappings = unmarshaller.unmarshal(new String(Files.readAllBytes(Paths
                 .get(args[0])), StandardCharsets.UTF_8));
-        List<Product> trainProducts = new ArrayList<Product>();
-        List<Product> testProducts = new ArrayList<Product>();
+        List<Mapping> trainMappings = new ArrayList<>();
+        List<Mapping> testMappings = new ArrayList<>();
         Random rand = new Random();
-        for (Product p : inputProducts) {
+        for (Mapping m : inputMappings) {
             // Split products 80/20 into train/test
             if (rand.nextDouble() > 0.8) {
-                testProducts.add(p);
+                testMappings.add(m);
             } else {
-                trainProducts.add(p);
+                trainMappings.add(m);
             }
         }
-        Category dummyCategory = new CategoryBuilder().setParts(new String[] { "!!!BUG!!!" })
-                .createCategory();
-        /*trainProducts.add(new ProductBuilder().setName("rhfgiotdhlhudglihxdg").setDescription
-                ("sdihgsdlohgsdlrhg").setOriginalCategory(dummyCategory).setDestinationCategory
-                (dummyCategory).setPrice(999999999).createProduct());*/
         NaiveBayesClassifier classifier = new NaiveBayesClassifier();
         TaxonomyBuilder taxonomyBuilder = new TaxonomyBuilder();
         taxonomyBuilder.setName("Test Taxonomy");
         Taxonomy t = taxonomyBuilder.createNonDbTaxonomy();
-        for (Product p : trainProducts) {
+        for (Mapping m : trainMappings) {
             //CategoryBuilder b = new CategoryBuilder();
             //b.setParts(new String[] { p.getDestinationCategory().getPart(0) });
             //Category topLevelOnly = b.createCategory();
-            Category topLevelOnly = p.getDestinationCategory();
-            classifier.trainWithBagOfWordsSingleProduct(p, topLevelOnly);
-            t.getCategories().add(topLevelOnly);
+            classifier.trainWithBagOfWordsSingleProduct(m.getProduct(), m.getCategory());
+            t.getCategories().add(m.getCategory());
         }
-        t.getCategories().add(dummyCategory);
         //List<Product> testProducts = unmarshaller.unmarshal(new String(Files.readAllBytes(Paths
           //      .get(args[1])), StandardCharsets.UTF_8));
-        for (Product p : testProducts) {
-            Mapping m = classifier.classifyWithBagOfWords(t, p);
-            System.out.format("Classified as %s: %s (originally, %s)\n", String.join(" > ", m
-                    .getCategory()
-                    .getAllParts()), m.getProduct().getName(), String.join(" > ", m.getProduct()
-                    .getOriginalCategory().getAllParts()));
+        for (Mapping testMapping : testMappings) {
+	        Product p = testMapping.getProduct();
+            Mapping classifiedMapping = classifier.classifyWithBagOfWords(t, p);
+            System.out.format("Classified as %s: %s (originally, %s)\n", classifiedMapping
+                            .getCategory().toString(), p.getName(), testMapping.getCategory()
+                    .toString());
         }
     }
 }
