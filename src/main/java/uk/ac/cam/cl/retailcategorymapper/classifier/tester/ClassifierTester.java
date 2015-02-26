@@ -41,7 +41,7 @@ public class ClassifierTester {
         this.testData = new LinkedList<>(mappings);
     }
 
-     public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {
         System.out.println("ClassifierTest Main Executed");
         System.out.println("Files: " + Arrays.toString(args));
         System.out.println();
@@ -88,7 +88,7 @@ public class ClassifierTester {
 
         NaiveBayesDbTrainer trainer = new NaiveBayesDbTrainer(taxonomy, storage);
 
-         int numProductsTrained = 0;
+        int numProductsTrained = 0;
 
         for (Mapping mapping : trainMappings) {
             if (numProductsTrained % 1000 == 0)
@@ -136,7 +136,7 @@ public class ClassifierTester {
             for (int i = 0; i < maxDepth; i++) {
                 try {
                     if (classifiedMapping.getCategory().getPart(i).equals(testMapping.getCategory().getPart(i)
-                            )) {
+                    )) {
                         levelCorrectProducts[i]++;
                     } else {
                         break;
