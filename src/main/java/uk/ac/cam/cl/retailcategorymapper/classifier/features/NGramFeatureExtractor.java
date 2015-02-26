@@ -15,9 +15,10 @@ public class NGramFeatureExtractor {
     static int MIN_NGRAM_LENGTH = 1;
     static int MAX_NGRAM_LENGTH = 3;
 
-    private static List<Feature> generateNGramFeatures(FeatureSource source, String words) {
-        ArrayList<Feature> features = new ArrayList<Feature>();
-        for (int ngramLength = MIN_NGRAM_LENGTH; ngramLength <= MAX_NGRAM_LENGTH; ngramLength++) {
+    private static List<Feature> generateNGramFeatures(FeatureSource source, String words, int maxNGramLength) {
+        ArrayList<Feature> features = new ArrayList<>();
+        words = Sanitizer1.sanitize(words);
+        for (int ngramLength = MIN_NGRAM_LENGTH; ngramLength <= maxNGramLength; ngramLength++) {
             for (String ngram : NGramExtractor.getNGrams(words, ngramLength)) {
                 features.add(new Feature(source, ngram));
             }
@@ -31,12 +32,12 @@ public class NGramFeatureExtractor {
 
         String name = normalizedProduct.getName();
         if (name != null && name.length() > 0) {
-            features.addAll(generateNGramFeatures(FeatureSource.NAME, name));
+            features.addAll(generateNGramFeatures(FeatureSource.NAME, name,MAX_NGRAM_LENGTH));
         }
 
         String description = normalizedProduct.getDescription();
         if (description != null && description.length() > 0) {
-            features.addAll(generateNGramFeatures(FeatureSource.DESCRIPTION, description));
+            features.addAll(generateNGramFeatures(FeatureSource.DESCRIPTION, description,MAX_NGRAM_LENGTH));
         }
 
         Integer priceInteger = normalizedProduct.getPrice();
