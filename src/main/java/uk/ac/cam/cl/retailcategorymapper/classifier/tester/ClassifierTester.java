@@ -136,7 +136,7 @@ public class ClassifierTester {
             for (int i = 0; i < maxDepth; i++) {
                 try {
                     if (classifiedMapping.getCategory().getPart(i).equals(testMapping.getCategory().getPart(i)
-		                    )) {
+                            )) {
                         levelCorrectProducts[i]++;
                     } else {
                         break;

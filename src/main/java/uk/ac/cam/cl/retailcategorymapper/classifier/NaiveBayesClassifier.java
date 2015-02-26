@@ -4,7 +4,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.NGramFeatureExtractor;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
-import uk.ac.cam.cl.retailcategorymapper.entities.CategoryBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
@@ -13,7 +12,6 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import uk.ac.cam.cl.retailcategorymapper.entities.TaxonomyBuilder;
 import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlMappingUnmarshaller;
-import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlProductUnmarshaller;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -385,8 +383,8 @@ public class NaiveBayesClassifier {
 
         //Category mostLikelyCategory = probabilityToAllPossibleCategories.lastEntry().getValue();
         Category mostLikelyCategory = Collections.max(outputProbabilities, (Pair<Double,
-		        Category> one, Pair<Double, Category> two) -> Double.compare(one.getLeft(), two
-		        .getLeft())).getRight();
+                Category> one, Pair<Double, Category> two) -> Double.compare(one.getLeft(), two
+                .getLeft())).getRight();
         Mapping m = (new MappingBuilder()).setCategory(mostLikelyCategory)
                 .setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
         return m;
@@ -434,7 +432,7 @@ public class NaiveBayesClassifier {
         //List<Product> testProducts = unmarshaller.unmarshal(new String(Files.readAllBytes(Paths
           //      .get(args[1])), StandardCharsets.UTF_8));
         for (Mapping testMapping : testMappings) {
-	        Product p = testMapping.getProduct();
+            Product p = testMapping.getProduct();
             Mapping classifiedMapping = classifier.classifyWithBagOfWords(t, p);
             System.out.format("Classified as %s: %s (originally, %s)\n", classifiedMapping
                             .getCategory().toString(), p.getName(), testMapping.getCategory()
