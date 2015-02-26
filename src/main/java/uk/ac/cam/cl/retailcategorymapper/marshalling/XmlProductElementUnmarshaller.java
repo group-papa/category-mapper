@@ -15,7 +15,6 @@ public class XmlProductElementUnmarshaller implements Unmarshaller<Element,
     private static final String DESCRIPTION_TAG = "productDescription";
     private static final String PRICE_TAG = "productPrice";
     private static final String CATEGORY_TAG = "productCategory";
-    private static final String DEST_CATEGORY_TAG = "productGoogleCategory";
 
     private CategoryUnmarshaller categoryUnmarshaller = new
             CategoryUnmarshaller();
@@ -31,18 +30,6 @@ public class XmlProductElementUnmarshaller implements Unmarshaller<Element,
         productBuilder.setDescription(element.getElementsByTagName(DESCRIPTION_TAG).item(0).getTextContent());
         String categoryString = element.getElementsByTagName(CATEGORY_TAG).item(0).getTextContent();
         productBuilder.setOriginalCategory(categoryUnmarshaller.unmarshal(categoryString));
-
-
-        NodeList categoryNodes = element.getElementsByTagName(DEST_CATEGORY_TAG);
-        if (categoryNodes.getLength() > 0) {
-            String destCategoryString = categoryNodes.item(0).getTextContent();
-            productBuilder.setDestinationCategory(categoryUnmarshaller.unmarshal
-                    (destCategoryString));
-
-        } else {
-            productBuilder.setDestinationCategory(null);
-        }
-
 
         return productBuilder.createProduct();
     }

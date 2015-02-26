@@ -16,7 +16,6 @@ public class ProductBuilder {
     private String description;
     private Integer price;
     private Category originalCategory;
-    private Category destinationCategory = null;
     private Map<String, String> attributes = new HashMap<>();
 
     @JsonProperty("id")
@@ -49,11 +48,6 @@ public class ProductBuilder {
         return this;
     }
 
-    @JsonProperty("destinationCategory")
-    public ProductBuilder setDestinationCategory(Category destinationCategory) {
-        this.destinationCategory = destinationCategory;
-        return this;
-    }
 
     public ProductBuilder addAttribute(String key, String value) {
         this.attributes.put(key, value);
@@ -61,7 +55,6 @@ public class ProductBuilder {
     }
 
     public Product createProduct() {
-        return new Product(id, name, description, price, originalCategory, destinationCategory,
-                           attributes);
+        return new Product(id, name, description, price, originalCategory,       attributes);
     }
 }

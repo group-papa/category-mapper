@@ -404,6 +404,7 @@ public class NaiveBayesClassifier {
         throw new UnsupportedOperationException();
     }
 
+    /*
     public static void main(String[] args) throws IOException {
         XmlProductUnmarshaller unmarshaller = new XmlProductUnmarshaller();
         List<Product> inputProducts = unmarshaller.unmarshal(new String(Files.readAllBytes(Paths
@@ -423,7 +424,7 @@ public class NaiveBayesClassifier {
                 .createCategory();
         /*trainProducts.add(new ProductBuilder().setName("rhfgiotdhlhudglihxdg").setDescription
                 ("sdihgsdlohgsdlrhg").setOriginalCategory(dummyCategory).setDestinationCategory
-                (dummyCategory).setPrice(999999999).createProduct());*/
+                (dummyCategory).setPrice(999999999).createProduct());
         NaiveBayesClassifier classifier = new NaiveBayesClassifier();
         TaxonomyBuilder taxonomyBuilder = new TaxonomyBuilder();
         taxonomyBuilder.setName("Test Taxonomy");
@@ -447,4 +448,5 @@ public class NaiveBayesClassifier {
                     .getOriginalCategory().getAllParts()));
         }
     }
+    */
 }
