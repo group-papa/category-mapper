@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.NGramFeatureExtractor;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
@@ -81,7 +82,7 @@ public class NaiveBayesDbTrainer extends Trainer {
             return false;
         }
 
-        List<Feature> featuresFromProduct = NGramFeatureExtractor.changeProductToFeature(product);
+        List<Feature> featuresFromProduct = FeatureConverter.changeProductToFeature(product);
 
         newProductsSeen += 1;
 

@@ -2,6 +2,8 @@ package uk.ac.cam.cl.retailcategorymapper.classifier.tester;
 
 import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbClassifier;
 import uk.ac.cam.cl.retailcategorymapper.classifier.NaiveBayesDbTrainer;
+import uk.ac.cam.cl.retailcategorymapper.classifier.RecursiveBayesClassifier;
+import uk.ac.cam.cl.retailcategorymapper.classifier.RecursiveBayesTrainer;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
@@ -92,7 +94,7 @@ public class ClassifierTester {
         trainProducts = trainProducts.subList(0, 8000);
         testProducts = testProducts.subList(0, 2000);*/
 
-        NaiveBayesDbTrainer trainer = new NaiveBayesDbTrainer(taxonomy, storage);
+        Trainer trainer = new RecursiveBayesTrainer(taxonomy, storage);
 
          int numProductsTrained = 0;
 
@@ -108,7 +110,7 @@ public class ClassifierTester {
 
         trainer.save();
 
-        Classifier classifier = new NaiveBayesDbClassifier(taxonomy, storage);
+        Classifier classifier = new RecursiveBayesClassifier(taxonomy, storage);
 
         int totalProducts = 0;
         int correctProducts = 0;
