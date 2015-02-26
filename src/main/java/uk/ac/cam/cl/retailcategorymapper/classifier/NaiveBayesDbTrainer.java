@@ -1,9 +1,9 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
-import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.NGramFeatureExtractor;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
 import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
+import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
@@ -35,6 +35,7 @@ public class NaiveBayesDbTrainer extends Trainer {
     private int newProductsSeen;
 
     private NaiveBayesStorage storage;
+
 
     /**
      * Construct a new classifier for a given taxonomy.
@@ -86,11 +87,10 @@ public class NaiveBayesDbTrainer extends Trainer {
         newProductsSeen += 1;
 
         // Have seen category before
-        if (updatedCategoryProductCount.containsKey(category)) {
-            int prevCount = updatedCategoryProductCount.get(category);
-            updatedCategoryProductCount.put(category, prevCount + 1);
-        } else if (categoryProductCount.containsKey(category)) {
-            int prevCount = categoryProductCount.get(category);
+        if (categoryProductCount.containsKey(category)) {
+            int prevCount = updatedCategoryProductCount.containsKey(category)
+                    ? updatedCategoryProductCount.get(category)
+                    : categoryProductCount.get(category);
             updatedCategoryProductCount.put(category, prevCount + 1);
         }
         // Have not seen category before in training
@@ -170,11 +170,10 @@ public class NaiveBayesDbTrainer extends Trainer {
 
         //update categoryCounts based on features:
         //have seen category before associated with a feature
-        if (updatedCategoryFeatureCount.containsKey(category)) {
-            int prevCount = updatedCategoryFeatureCount.get(category);
-            updatedCategoryFeatureCount.put(category, prevCount + 1);
-        } else if (categoryFeatureCount.containsKey(category)) {
-            int prevCount = categoryFeatureCount.get(category);
+        if (categoryFeatureCount.containsKey(category)) {
+            int prevCount = updatedCategoryFeatureCount.containsKey(category)
+                    ? updatedCategoryFeatureCount.get(category)
+                    : categoryFeatureCount.get(category);
             updatedCategoryFeatureCount.put(category, prevCount + 1);
         }
         //have NOT seen category before
@@ -194,13 +193,12 @@ public class NaiveBayesDbTrainer extends Trainer {
                 categoryFeatureObservationMaps.get(category);
         Map<Feature, Integer> updatedCategoryFeatureObservationMap =
                 updatedCategoryFeatureObservationMaps.containsKey(category)
-                ? updatedCategoryFeatureObservationMaps.get(category)
-                : new HashMap<>();
-        if (updatedCategoryFeatureObservationMap.containsKey(featureSeen)) {
-            int prevCount = updatedCategoryFeatureObservationMap.get(featureSeen);
-            updatedCategoryFeatureObservationMap.put(featureSeen, prevCount + 1);
-        } else if (categoryFeatureObservationMap.containsKey(featureSeen)) {
-            int prevCount = categoryFeatureObservationMap.get(featureSeen);
+                        ? updatedCategoryFeatureObservationMaps.get(category)
+                        : new HashMap<>();
+        if (categoryFeatureObservationMap.containsKey(featureSeen)) {
+            int prevCount = updatedCategoryFeatureObservationMap.containsKey(featureSeen)
+                    ? updatedCategoryFeatureObservationMap.get(featureSeen)
+                    : categoryFeatureObservationMap.get(featureSeen);
             updatedCategoryFeatureObservationMap.put(featureSeen, prevCount + 1);
         }
         //have NOT seen this features before in this category
