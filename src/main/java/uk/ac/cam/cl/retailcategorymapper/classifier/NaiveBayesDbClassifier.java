@@ -97,8 +97,6 @@ public class NaiveBayesDbClassifier extends Classifier {
         List<Feature> features = NGramFeatureExtractor.changeProductToFeature(product);
         TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
 
-        int categorySeen = 0;
-        Set<Integer> nFeats = new HashSet<>();
         for (Category category : destinationCategories) {
             // P(f_i | C)
             double pProductGivenC = 0.0;
@@ -107,10 +105,8 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             //category has been seen by classifier during training
             if (categoryFeatureCount.containsKey(category)) {
-                categorySeen++;
                 int productsInCategory = categoryProductCount.get(category);
                 int totalFeaturesInC = categoryFeatureCount.get(category);
-                nFeats.add(totalFeaturesInC);
 
                 Map<Feature, Integer> featureOccurrencesInCategory =
                         categoryFeatureObservationMaps.get(category);
@@ -144,18 +140,21 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             //category has not been seen by classifier in training
             else {
-                pProductGivenC += features.size()
-                        * Math.log10(((double) 1) / ((double) taxonomyFeatureSet.size()));
-                pC += Math.log10(((double) (1)) /
-                        ((double) (destinationCategoriesSize)));
-
+                if (taxonomyFeatureSet.size() > 0) {
+                    pProductGivenC += features.size()
+                            * Math.log10(((double) 1)
+                            /  ((double) taxonomyFeatureSet.size()));
+                }
+                if (destinationCategoriesSize > 0) {
+                    pC += Math.log10(((double) (1)) /
+                            ((double) (destinationCategoriesSize)));
+                }
             }
             double pCGivenF = pProductGivenC + pC;
 
             Set<MappingBuilder> prevValue = matches.get(pCGivenF);
             if (prevValue == null) {
-                //System.out.println("is null");
-                prevValue = new HashSet<MappingBuilder>();
+                prevValue = new HashSet<>();
                 prevValue.add(new MappingBuilder()
                         .setProduct(product)
                         .setTaxonomy(getTaxonomy())
@@ -170,7 +169,6 @@ public class NaiveBayesDbClassifier extends Classifier {
             }
             matches.put(pCGivenF, prevValue);
         }
-
 
         List<DoubleMBTuple> topThree = new ArrayList<>();
         double topThreeProbSum = 0;
@@ -207,13 +205,15 @@ public class NaiveBayesDbClassifier extends Classifier {
             }
         }
 
-
         List<Mapping> result = new ArrayList<>();
         int maximum = Math.min(3, topThree.size());
         for (int i = 0; i < maximum; i++) {
             DoubleMBTuple mbTuple = topThree.get(i);
             MappingBuilder mb = mbTuple.getMappingBuilder();
-            double confidence = mbTuple.getDouble().doubleValue() / topThreeProbSum;
+            double confidence = mbTuple.getDouble() / topThreeProbSum;
+            if (Double.isNaN(confidence)) {
+                confidence = mbTuple.getDouble();
+            }
             mb.setConfidence(confidence);
             result.add(mb.createMapping());
         }
@@ -223,7 +223,6 @@ public class NaiveBayesDbClassifier extends Classifier {
 
     public List<Mapping> classifyWithWeights(Product product, double nameWeight,
                                              double originalCategoryWeight) {
-
         if (nameWeight + originalCategoryWeight != 1.0) {
             throw new RuntimeException("the weights don't sum to 1");
         }
@@ -231,8 +230,6 @@ public class NaiveBayesDbClassifier extends Classifier {
         List<Feature> features = NGramFeatureExtractor.changeProductToFeature(product);
         TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
 
-
-        int categorySeen = 0;
         Set<Integer> nFeats = new HashSet<>();
         for (Category category : destinationCategories) {
             // P(f_i | C)
@@ -242,7 +239,6 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             //category has been seen by classifier during training
             if (categoryFeatureCount.containsKey(category)) {
-                categorySeen++;
                 int productsInCategory = categoryProductCount.get(category);
                 int totalFeaturesInC = categoryFeatureCount.get(category);
                 nFeats.add(totalFeaturesInC);
@@ -281,17 +277,20 @@ public class NaiveBayesDbClassifier extends Classifier {
             //category has not been seen by classifier in training
             //no weights used in this section
             else {
-                pProductGivenC += features.size()
-                        * Math.log10(((double) 1) / ((double) taxonomyFeatureSet.size()));
-                pC += Math.log10(((double) (1)) /
-                        ((double) (destinationCategoriesSize)));
-
+                if (taxonomyFeatureSet.size() > 0) {
+                    pProductGivenC += features.size()
+                            * Math.log10(((double) 1)
+                            /  ((double) taxonomyFeatureSet.size()));
+                }
+                if (destinationCategoriesSize > 0) {
+                    pC += Math.log10(((double) (1)) /
+                            ((double) (destinationCategoriesSize)));
+                }
             }
             double pCGivenF = pProductGivenC + pC;
 
             Set<MappingBuilder> prevValue = matches.get(pCGivenF);
             if (prevValue == null) {
-                //System.out.println("is null");
                 prevValue = new HashSet<MappingBuilder>();
                 prevValue.add(new MappingBuilder()
                         .setProduct(product)
@@ -344,12 +343,14 @@ public class NaiveBayesDbClassifier extends Classifier {
             }
         }
 
-
         List<Mapping> result = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             DoubleMBTuple mbTuple = topThree.get(i);
             MappingBuilder mb = mbTuple.getMappingBuilder();
-            double confidence = mbTuple.getDouble().doubleValue() / topThreeProbSum;
+            double confidence = mbTuple.getDouble();
+            if (topThreeProbSum != 0.0) {
+                confidence /= topThreeProbSum;
+            }
             mb.setConfidence(confidence);
             result.add(mb.createMapping());
         }

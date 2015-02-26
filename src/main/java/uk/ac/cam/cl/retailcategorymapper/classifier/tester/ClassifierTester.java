@@ -6,14 +6,9 @@ import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
-import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
-import uk.ac.cam.cl.retailcategorymapper.entities.Method;
-import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import uk.ac.cam.cl.retailcategorymapper.entities.TaxonomyBuilder;
-import uk.ac.cam.cl.retailcategorymapper.marshalling.Unmarshaller;
 import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlMappingUnmarshaller;
-import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlProductUnmarshaller;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -46,7 +41,7 @@ public class ClassifierTester {
         this.testData = new LinkedList<>(mappings);
     }
 
-     public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {
         System.out.println("ClassifierTest Main Executed");
         System.out.println("Files: " + Arrays.toString(args));
         System.out.println();
@@ -55,7 +50,7 @@ public class ClassifierTester {
         List<Mapping> trainMappings = new ArrayList<>();
         List<Mapping> testMappings = new ArrayList<>();
         Random rand = new Random();
-        XmlProductUnmarshaller unmarshaller = new XmlProductUnmarshaller();
+        XmlMappingUnmarshaller unmarshaller = new XmlMappingUnmarshaller();
         Taxonomy taxonomy = new TaxonomyBuilder().setId(UUID.randomUUID().toString()).setName
                 ("Test Taxonomy").createNonDbTaxonomy();
         Set<Category> taxonomyCategories = taxonomy.getCategories();
@@ -64,8 +59,7 @@ public class ClassifierTester {
 
 
         for (String filename : args) {
-            XmlMappingUnmarshaller unmarshaller1 = new XmlMappingUnmarshaller();
-            List<Mapping> inputMappings = unmarshaller1.unmarshal(new String(Files.readAllBytes
+            List<Mapping> inputMappings = unmarshaller.unmarshal(new String(Files.readAllBytes
                     (Paths.get(filename)), StandardCharsets.UTF_8));
             //Collections.shuffle(inputProducts);
             //inputProducts = inputProducts.subList(0, 500);
@@ -94,13 +88,13 @@ public class ClassifierTester {
 
         NaiveBayesDbTrainer trainer = new NaiveBayesDbTrainer(taxonomy, storage);
 
-         int numProductsTrained = 0;
+        int numProductsTrained = 0;
 
-        for (Mapping m : trainMappings) {
+        for (Mapping mapping : trainMappings) {
             if (numProductsTrained % 1000 == 0)
                 System.out.format("trained: %d of %d\n", numProductsTrained, trainMappings.size());
-
-            trainer.train(m);
+            trainer.train(mapping);
+            //System.out.println("trained on " + product.getName());
             numProductsTrained++;
         }
 
@@ -121,28 +115,28 @@ public class ClassifierTester {
         int[] levelTotalProducts = new int[levelCorrectProducts.length];
         Arrays.fill(levelTotalProducts, 0);
 
-        for (Mapping origm : testMappings) {
+        for (Mapping testMapping : testMappings) {
             if (totalProducts % 1000 == 0)
                 System.out.format("classified: %d of %d\n", totalProducts, testMappings.size());
-
-            Mapping m = classifier.classify(origm.getProduct()).get(0);
+            Mapping classifiedMapping = classifier.classify(testMapping.getProduct()).get(0);
             /*System.out.format("Classified as %s: %s (originally, %s; manually, %s)\n", m
                     .getCategory().toString(), m.getProduct().getName(), m.getProduct()
-                    .getOriginalCategory().toString(), m.getProduct().getDestinationCategory()
+                    .getOriginalCategory().toString(), m.getProduct().M()
                     .toString());*/
             totalProducts++;
-            if (m.getCategory().equals(origm.getCategory())) {
+            if (classifiedMapping.getCategory().equals(testMapping.getCategory())) {
                 correctProducts++;
             }
 
-            for (int i = 0; i < origm.getCategory().getDepth(); i++) {
+            for (int i = 0; i < testMapping.getCategory().getDepth(); i++) {
                 levelTotalProducts[i]++;
             }
-            int maxDepth = Math.max(m.getCategory().getDepth(), origm.getCategory()
+            int maxDepth = Math.max(classifiedMapping.getCategory().getDepth(), testMapping.getCategory()
                     .getDepth());
             for (int i = 0; i < maxDepth; i++) {
                 try {
-                    if (m.getCategory().getPart(i).equals(origm.getCategory().getPart(i))) {
+                    if (classifiedMapping.getCategory().getPart(i).equals(testMapping.getCategory().getPart(i)
+                    )) {
                         levelCorrectProducts[i]++;
                     } else {
                         break;

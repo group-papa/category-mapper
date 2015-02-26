@@ -17,6 +17,7 @@ public class NGramFeatureExtractor {
 
     private static List<Feature> generateNGramFeatures(FeatureSource source, String words, int maxNGramLength) {
         ArrayList<Feature> features = new ArrayList<>();
+        //words = ProductNormalizer.normalizeString(words);
         words = Sanitizer1.sanitize(words);
         for (int ngramLength = MIN_NGRAM_LENGTH; ngramLength <= maxNGramLength; ngramLength++) {
             for (String ngram : NGramExtractor.getNGrams(words, ngramLength)) {
