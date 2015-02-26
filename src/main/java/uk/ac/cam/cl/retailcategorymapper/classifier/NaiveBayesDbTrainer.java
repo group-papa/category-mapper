@@ -1,9 +1,9 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
-import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter;
+import uk.ac.cam.cl.retailcategorymapper.entities.Category;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.NGramFeatureExtractor;
 import uk.ac.cam.cl.retailcategorymapper.controller.Trainer;
 import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
-import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
@@ -34,21 +34,24 @@ public class NaiveBayesDbTrainer extends Trainer {
 
     private int newProductsSeen;
 
+    private NaiveBayesStorage storage;
+
     /**
      * Construct a new classifier for a given taxonomy.
      *
      * @param taxonomy The taxonomy.
      */
-    public NaiveBayesDbTrainer(Taxonomy taxonomy) {
+    public NaiveBayesDbTrainer(Taxonomy taxonomy, NaiveBayesStorage storage) {
         super(taxonomy);
+        this.storage = storage;
         newTaxonomyFeatureSet = new HashSet<>();
 
         categoryProductCount = new HashMap<>(
-                NaiveBayesDb.getCategoryProductMap(taxonomy));
+                storage.getCategoryProductMap(taxonomy));
         updatedCategoryProductCount = new HashMap<>();
 
         categoryFeatureCount = new HashMap<>(
-                NaiveBayesDb.getCategoryFeatureMap(taxonomy));
+                storage.getCategoryFeatureMap(taxonomy));
         updatedCategoryFeatureCount = new HashMap<>();
 
         destinationCategories = new HashSet<>(taxonomy.getCategories());
@@ -57,6 +60,10 @@ public class NaiveBayesDbTrainer extends Trainer {
         updatedCategoryFeatureObservationMaps = new HashMap<>();
 
         newProductsSeen = 0;
+    }
+
+    public NaiveBayesDbTrainer(Taxonomy taxonomy) {
+        this(taxonomy, NaiveBayesDb.getInstance());
     }
 
     /**
@@ -74,7 +81,7 @@ public class NaiveBayesDbTrainer extends Trainer {
             return false;
         }
 
-        List<Feature> featuresFromProduct = FeatureConverter.changeProductToFeature(product);
+        List<Feature> featuresFromProduct = NGramFeatureExtractor.changeProductToFeature(product);
 
         newProductsSeen += 1;
 
@@ -98,34 +105,53 @@ public class NaiveBayesDbTrainer extends Trainer {
         return true;
     }
 
+    public boolean addFeatureInCategory(Feature feature, Category category){
+
+        newProductsSeen += 1;
+        // Have seen category before
+        if (categoryProductCount.containsKey(category)) {
+            int prevCount = updatedCategoryProductCount.containsKey(category)
+                    ? updatedCategoryProductCount.get(category)
+                    : categoryProductCount.get(category);
+            updatedCategoryProductCount.put(category, prevCount + 1);
+        }
+        // Have not seen category before in training
+        else {
+            updatedCategoryProductCount.put(category, 1);
+        }
+        this.addSeenFeatureInSpecifiedCategory(feature, category);
+
+        return true;
+    }
+
     /**
      * Save the new training data.
      */
     @Override
     public void save() {
-        NaiveBayesDb.getFeatureSet(getTaxonomy()).addAll(newTaxonomyFeatureSet);
+        storage.getFeatureSet(getTaxonomy()).addAll(newTaxonomyFeatureSet);
         newTaxonomyFeatureSet.clear();
 
-        NaiveBayesDb.getCategoryProductMap(getTaxonomy())
+        storage.getCategoryProductMap(getTaxonomy())
                 .putAll(updatedCategoryProductCount);
         categoryProductCount.putAll(updatedCategoryProductCount);
         updatedCategoryProductCount.clear();
 
-        NaiveBayesDb.getCategoryFeatureMap(getTaxonomy())
+        storage.getCategoryFeatureMap(getTaxonomy())
                 .putAll(updatedCategoryFeatureCount);
         categoryFeatureCount.putAll(updatedCategoryFeatureCount);
         updatedCategoryFeatureCount.clear();
 
         for (Map.Entry<Category, Map<Feature, Integer>> categoryMapEntry :
                 updatedCategoryFeatureObservationMaps.entrySet()) {
-            NaiveBayesDb.getCategoryFeatureObservationMap(getTaxonomy(),
+            storage.getCategoryFeatureObservationMap(getTaxonomy(),
                     categoryMapEntry.getKey()).putAll(categoryMapEntry.getValue());
         }
         categoryFeatureObservationMaps.clear();
         updatedCategoryFeatureObservationMaps.clear();
 
-        NaiveBayesDb.setProductCount(getTaxonomy(),
-                NaiveBayesDb.getProductCount(getTaxonomy()) +
+        storage.setProductCount(getTaxonomy(),
+                storage.getProductCount(getTaxonomy()) +
                         newProductsSeen);
         newProductsSeen = 0;
     }
@@ -159,7 +185,7 @@ public class NaiveBayesDbTrainer extends Trainer {
         //update count of times specific features is seen in given category:
         if (!categoryFeatureObservationMaps.containsKey(category)) {
             categoryFeatureObservationMaps.put(category,
-                    new HashMap<>(NaiveBayesDb.getCategoryFeatureObservationMap(
+                    new HashMap<>(storage.getCategoryFeatureObservationMap(
                             getTaxonomy(), category)));
         }
 

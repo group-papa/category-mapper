@@ -1,22 +1,32 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
-import uk.ac.cam.cl.retailcategorymapper.classifier.features.BasicFeatureConverter;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.NGramFeatureExtractor;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
+import uk.ac.cam.cl.retailcategorymapper.entities.CategoryBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Feature;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.MappingBuilder;
 import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
+import uk.ac.cam.cl.retailcategorymapper.entities.TaxonomyBuilder;
+import uk.ac.cam.cl.retailcategorymapper.marshalling.XmlProductUnmarshaller;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.Set;
-import java.util.TreeMap;
+import java.util.Random;
 
 /**
  * Old Naive Bayes classifier implementation which does not integrate with
@@ -26,8 +36,11 @@ public class NaiveBayesClassifier {
     private Set<Feature> featureSet;
     private Set<Category> categorySet;
 
-    private Map<Feature, Integer> totalFeatureCounts; //count is across all categories
-    private Map<Category, Integer> categoryCounts; // how many times has classifier encountered a category
+    //count is across all categories
+    private Map<Feature, Integer> totalFeatureCounts;
+    // how many times has classifier encountered a
+    // category
+    private Map<Category, Integer> categoryCounts;
     private Map<Category, Map<Feature, Integer>> featureCountPerCategory;
 
     public NaiveBayesClassifier() {
@@ -66,7 +79,8 @@ public class NaiveBayesClassifier {
     }
 
     /**
-     * Getter method for map of categories to count of number of times a category was seen in training.
+     * Getter method for map of categories to count of number of times a category was seen in
+     * training.
      *
      * @return map of categories to number of times a category was seen in training
      */
@@ -88,7 +102,8 @@ public class NaiveBayesClassifier {
      * Return the number of times a features is seen in a category.
      *
      * @param feature  Feature we want to find the number of occurrences for
-     * @param category Category containing products that potentially produced the features that we are
+     * @param category Category containing products that potentially produced the features that
+     *                 we are
      *                 interested in
      * @return count of how many times a features occurs in a given category from potentially
      * multiple products inside the category
@@ -134,7 +149,8 @@ public class NaiveBayesClassifier {
 
     /**
      * Return the total number of times the classifier has seen any category. This number will only
-     * include the categories that the classifier has seen through a product/features from within the
+     * include the categories that the classifier has seen through a product/features from within
+     * the
      * category. Any empty categories will not be counted here.
      *
      * @return total number of times that the classifier has encountered a category
@@ -192,7 +208,8 @@ public class NaiveBayesClassifier {
      * call this method to add to the maps and sets of Naive Bayes Classifier.
      *
      * @param featureSeen Feature from product in training set
-     * @param category    Destination category that the product which features is derived from is put into
+     * @param category    Destination category that the product which features is derived from is
+     *                    put into
      */
     public void addSeenFeatureInSpecifiedCategory(Feature featureSeen, Category category) {
         this.featureSet.add(featureSeen);
@@ -223,7 +240,8 @@ public class NaiveBayesClassifier {
         //update Category -> (Feature -> Integer) Map
         //have previously seen this category associated with a features
         if (this.featureCountPerCategory.containsKey(category)) {
-            Map<Feature, Integer> fCountInSpecifiedCategory = this.featureCountPerCategory.get(category);
+            Map<Feature, Integer> fCountInSpecifiedCategory = this.featureCountPerCategory.get
+                    (category);
             //update count of times features is seen in given category (inner map)
             //have seen features before in this category
             if (fCountInSpecifiedCategory.containsKey(featureSeen)) {
@@ -279,7 +297,7 @@ public class NaiveBayesClassifier {
      * @param category Destination category that product has been mapped to
      */
     public void trainWithBagOfWordsSingleProduct(Product product, Category category) {
-        List<Feature> featuresFromProduct = BasicFeatureConverter.changeProductToFeature(product);
+        List<Feature> featuresFromProduct = NGramFeatureExtractor.changeProductToFeature(product);
 
         for (Feature f : featuresFromProduct) {
             this.addSeenFeatureInSpecifiedCategory(f, category);
@@ -298,9 +316,11 @@ public class NaiveBayesClassifier {
      */
     public Mapping classifyWithBagOfWords(Taxonomy taxonomy, Product product) {
         //treemap sorts in increasing order
-        NavigableMap<Double, Category> probabilityToAllPossibleCategories = new TreeMap<Double, Category>();
+        //NavigableMap<Double, Category> probabilityToAllPossibleCategories = new TreeMap<Double,
+          //      Category>();
+        List<Pair<Double, Category>> outputProbabilities = new ArrayList<>();
 
-        List<Feature> features = BasicFeatureConverter.changeProductToFeature(product);
+        List<Feature> features = NGramFeatureExtractor.changeProductToFeature(product);
         Set<Category> allDestinationCategories = taxonomy.getCategories();
 
         //take a single category
@@ -310,25 +330,37 @@ public class NaiveBayesClassifier {
             double pProductGivenC = 1.0;
             //category has been seen by classifier during training
             if (this.categorySet.contains(category)) {
-                Map<Feature, Integer> featureOccurrencesInCategory = this.featureCountPerCategory.get(category);
+                Map<Feature, Integer> featureOccurrencesInCategory = this.featureCountPerCategory
+                        .get(category);
                 for (Feature f : features) {
-                    //assume f has NOT been seen in this category
-                    int count = 0;
-                    //update if it has been seen in this category
-                    if (featureOccurrencesInCategory.containsKey(f)) {
-                        count = featureOccurrencesInCategory.get(f);
+                    if (this.totalFeatureCounts.containsKey(f)) {
+                        // Skip features which have only been seen once in training
+                        if (this.totalFeatureCounts.get(f) < 2) continue;
+                        //assume f has NOT been seen in this category
+                        int count = 0;
+                        //update if it has been seen in this category
+                        if (featureOccurrencesInCategory.containsKey(f)) {
+                            count = featureOccurrencesInCategory.get(f);
+                        }
+                        //Laplace smoothing
+                        double pFeatureGivenC = ((double) (1 + count)) / ((double)
+                                (featureOccurrencesInCategory.size() + this.featureSet.size()));
+
+                        pProductGivenC *= pFeatureGivenC;
+                    } else {
+                        // Skip features which have never been seen in training
+                        System.out.format("skipping feature %s, not seen in training\n", f
+                                .toString());
                     }
-                    //Laplace smoothing
-                    double pFeatureGivenC = ((double) (1 + count)) /
-                            ((double) (featureOccurrencesInCategory.size() + this.featureSet.size()));
-                    pProductGivenC *= pFeatureGivenC;
                 }
             }
             //category has not been seen by the classifier during training ?!?!
             else {
-                System.err.println("category has not been seen by the classifier during training");
-            }
+                continue;
+                //System.err.println("category has not been seen by the classifier during
+                // training (1)");
 
+            }
             //calculate P(C)
             double pC = 1.0;
             //category seen by classifier during training
@@ -337,17 +369,23 @@ public class NaiveBayesClassifier {
                 int totalSeenCategoryCount = this.getTotalCategoriesSeen();
                 int numberAllCategories = allDestinationCategories.size();
                 //Laplace smoothing
-                pC *= ((double) (catCount + 1)) / ((double) (totalSeenCategoryCount + numberAllCategories));
+                pC *= ((double) (catCount + 1)) / ((double) (totalSeenCategoryCount +
+                        numberAllCategories));
             }
             //category NOT seen by classifier during training
             else {
-                System.err.println("category has not been seen by the classifier during training");
+
+                
             }
             double pCGivenF = pProductGivenC * pC;
-            probabilityToAllPossibleCategories.put(pCGivenF, category);
+            //probabilityToAllPossibleCategories.put(pCGivenF, category);
+            outputProbabilities.add(new ImmutablePair<>(pCGivenF, category));
         }
 
-        Category mostLikelyCategory = probabilityToAllPossibleCategories.lastEntry().getValue();
+        //Category mostLikelyCategory = probabilityToAllPossibleCategories.lastEntry().getValue();
+        Category mostLikelyCategory = Collections.max(outputProbabilities, (Pair<Double,
+		        Category> one, Pair<Double, Category> two) -> Double.compare(one.getLeft(), two
+		        .getLeft())).getRight();
         Mapping m = (new MappingBuilder()).setCategory(mostLikelyCategory)
                 .setProduct(product).setMethod(Method.CLASSIFIED).createMapping();
         return m;
@@ -360,8 +398,53 @@ public class NaiveBayesClassifier {
         throw new UnsupportedOperationException();
     }
 
-    public Mapping classifyWithWeights(Taxonomy taxonomy, Product product, double originalCategoryWeight,
-                                       double nameWeight, double descriptionWeight, double priceWeight) {
+    public Mapping classifyWithWeights(Taxonomy taxonomy, Product product, double
+            originalCategoryWeight, double nameWeight, double descriptionWeight, double
+            priceWeight) {
         throw new UnsupportedOperationException();
+    }
+
+    public static void main(String[] args) throws IOException {
+        XmlProductUnmarshaller unmarshaller = new XmlProductUnmarshaller();
+        List<Product> inputProducts = unmarshaller.unmarshal(new String(Files.readAllBytes(Paths
+                .get(args[0])), StandardCharsets.UTF_8));
+        List<Product> trainProducts = new ArrayList<Product>();
+        List<Product> testProducts = new ArrayList<Product>();
+        Random rand = new Random();
+        for (Product p : inputProducts) {
+            // Split products 80/20 into train/test
+            if (rand.nextDouble() > 0.8) {
+                testProducts.add(p);
+            } else {
+                trainProducts.add(p);
+            }
+        }
+        Category dummyCategory = new CategoryBuilder().setParts(new String[] { "!!!BUG!!!" })
+                .createCategory();
+        /*trainProducts.add(new ProductBuilder().setName("rhfgiotdhlhudglihxdg").setDescription
+                ("sdihgsdlohgsdlrhg").setOriginalCategory(dummyCategory).setDestinationCategory
+                (dummyCategory).setPrice(999999999).createProduct());*/
+        NaiveBayesClassifier classifier = new NaiveBayesClassifier();
+        TaxonomyBuilder taxonomyBuilder = new TaxonomyBuilder();
+        taxonomyBuilder.setName("Test Taxonomy");
+        Taxonomy t = taxonomyBuilder.createNonDbTaxonomy();
+        for (Product p : trainProducts) {
+            //CategoryBuilder b = new CategoryBuilder();
+            //b.setParts(new String[] { p.getDestinationCategory().getPart(0) });
+            //Category topLevelOnly = b.createCategory();
+            Category topLevelOnly = p.getDestinationCategory();
+            classifier.trainWithBagOfWordsSingleProduct(p, topLevelOnly);
+            t.getCategories().add(topLevelOnly);
+        }
+        t.getCategories().add(dummyCategory);
+        //List<Product> testProducts = unmarshaller.unmarshal(new String(Files.readAllBytes(Paths
+          //      .get(args[1])), StandardCharsets.UTF_8));
+        for (Product p : testProducts) {
+            Mapping m = classifier.classifyWithBagOfWords(t, p);
+            System.out.format("Classified as %s: %s (originally, %s)\n", String.join(" > ", m
+                    .getCategory()
+                    .getAllParts()), m.getProduct().getName(), String.join(" > ", m.getProduct()
+                    .getOriginalCategory().getAllParts()));
+        }
     }
 }

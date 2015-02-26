@@ -1,6 +1,6 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
-import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter;
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.NGramFeatureExtractor;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
@@ -33,31 +33,37 @@ public class NaiveBayesDbClassifier extends Classifier {
     private Map<Category, Map<Feature, Integer>> categoryFeatureObservationMaps;
     private int totalProducts;
     private int destinationCategoriesSize;
+    private NaiveBayesStorage storage;
 
     /**
      * Construct a new classifier for a given taxonomy.
      *
      * @param taxonomy The taxonomy.
      */
-    public NaiveBayesDbClassifier(Taxonomy taxonomy) {
+    public NaiveBayesDbClassifier(Taxonomy taxonomy, NaiveBayesStorage storage) {
         super(taxonomy);
+        this.storage = storage;
         taxonomyFeatureSet = new HashSet<>(
-                NaiveBayesDb.getFeatureSet(taxonomy));
+                storage.getFeatureSet(taxonomy));
         categoryProductCount = new HashMap<>(
-                NaiveBayesDb.getCategoryProductMap(taxonomy));
+                storage.getCategoryProductMap(taxonomy));
         categoryFeatureCount = new HashMap<>(
-                NaiveBayesDb.getCategoryFeatureMap(taxonomy));
+                storage.getCategoryFeatureMap(taxonomy));
         destinationCategories = new HashSet<>(taxonomy.getCategories());
 
         categoryFeatureObservationMaps = new HashMap<>();
         for (Category category : destinationCategories) {
             categoryFeatureObservationMaps.put(category,
-                    new HashMap<>(NaiveBayesDb.getCategoryFeatureObservationMap(
+                    new HashMap<>(storage.getCategoryFeatureObservationMap(
                             getTaxonomy(), category)));
         }
 
-        totalProducts = NaiveBayesDb.getProductCount(getTaxonomy());
+        totalProducts = storage.getProductCount(getTaxonomy());
         destinationCategoriesSize = destinationCategories.size();
+    }
+
+    public NaiveBayesDbClassifier(Taxonomy taxonomy) {
+        this(taxonomy, NaiveBayesDb.getInstance());
     }
 
     class DoubleMBTuple {
@@ -88,7 +94,7 @@ public class NaiveBayesDbClassifier extends Classifier {
      */
     @Override
     public List<Mapping> classify(Product product) {
-        List<Feature> features = FeatureConverter.changeProductToFeature(product);
+        List<Feature> features = NGramFeatureExtractor.changeProductToFeature(product);
         TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
 
         for (Category category : destinationCategories) {
@@ -115,7 +121,16 @@ public class NaiveBayesDbClassifier extends Classifier {
                     //Laplace smoothing
                     double pFeatureGivenC = ((double) (count + 1)) /
                             ((double) (totalFeaturesInC + taxonomyFeatureSet.size()));
+
+                    if(f.getSource()==FeatureSource.DESCRIPTION){
+                        pFeatureGivenC+=0.01;
+                    }
+                    if(f.getSource()==FeatureSource.NAME){
+                        pFeatureGivenC+=0.005;
+                    }
+
                     pProductGivenC += Math.log10(pFeatureGivenC);
+
                 }
 
                 //Laplace smoothing
@@ -191,7 +206,8 @@ public class NaiveBayesDbClassifier extends Classifier {
         }
 
         List<Mapping> result = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
+        int maximum = Math.min(3, topThree.size());
+        for (int i = 0; i < maximum; i++) {
             DoubleMBTuple mbTuple = topThree.get(i);
             MappingBuilder mb = mbTuple.getMappingBuilder();
             double confidence = mbTuple.getDouble() / topThreeProbSum;
@@ -211,7 +227,7 @@ public class NaiveBayesDbClassifier extends Classifier {
             throw new RuntimeException("the weights don't sum to 1");
         }
 
-        List<Feature> features = FeatureConverter.changeProductToFeature(product);
+        List<Feature> features = NGramFeatureExtractor.changeProductToFeature(product);
         TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
 
         Set<Integer> nFeats = new HashSet<>();
