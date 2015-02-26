@@ -6,6 +6,7 @@ import uk.ac.cam.cl.retailcategorymapper.entities.ProductBuilder;
 import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ProductNormalizer {
@@ -39,16 +40,19 @@ public class ProductNormalizer {
         return String.join(" ", words);
     }
 
+    static int SINGLE_QUOTE_CODE_POINT = Character.codePointAt("'", 0);
+    static int SPACE_CODE_POINT = Character.codePointAt(" ", 0);
+
     private static int filterSpaces(int codePoint) {
         if (Character.isWhitespace(codePoint)) {
-            return Character.codePointAt(" ", 0);
-        } else if (codePoint == Character.codePointAt("'", 0)) {
+            return SPACE_CODE_POINT;
+        } else if (codePoint == SINGLE_QUOTE_CODE_POINT) {
             return codePoint;
         } else {
             switch (Character.getType(codePoint)) {
                 case Character.INITIAL_QUOTE_PUNCTUATION:
                 case Character.FINAL_QUOTE_PUNCTUATION:
-                    return Character.codePointAt("'", 0);
+                    return SINGLE_QUOTE_CODE_POINT;
                 case Character.CONTROL:
                 case Character.FORMAT:
                 case Character.LINE_SEPARATOR:
@@ -63,7 +67,7 @@ public class ProductNormalizer {
                 case Character.MATH_SYMBOL:
                 case Character.MODIFIER_SYMBOL:
                 case Character.OTHER_SYMBOL:
-                    return Character.codePointAt(" ", 0);
+                    return SPACE_CODE_POINT;
                 default:
                     return codePoint;
             }
@@ -92,16 +96,22 @@ public class ProductNormalizer {
         }
     }
 
+    static final Pattern SPACE_RUN_PATTERN = Pattern.compile("\\s+");
 
     private static String collapseSpaceRuns(String word) {
-        return word.replaceAll("\\s+", " ");
+        return SPACE_RUN_PATTERN.matcher(word).replaceAll(" ");
     }
 
+    static final Pattern CAMEL_CASE_PATTERN =
+            Pattern.compile("(((?<=[a-z])[A-Z])|([A-Z](?![A-Z]|$)))");
+
     private static String unCamelCaseIfy(String word) {
-        return word.replaceAll("(((?<=[a-z])[A-Z])|([A-Z](?![A-Z]|$)))", " $1")
+        return CAMEL_CASE_PATTERN.matcher(word).replaceAll(" $1")
                 .trim()
                 .toLowerCase();
     }
+
+    static final Pattern LONE_QUOTE_PATTERN = Pattern.compile("( '|' )");
 
     private static String normalizeWord(String inputWord) {
         /*
@@ -116,7 +126,7 @@ public class ProductNormalizer {
         .filter(codePoint -> !isUnwantedCodePoint(codePoint))
         .map(codePoint -> filterSpaces(codePoint))
         .forEach(codePoint -> b.appendCodePoint(codePoint));
-        word = b.toString().replaceAll("( '|' )", "");
+        word = LONE_QUOTE_PATTERN.matcher(b.toString()).replaceAll("");
         return Normalizer.normalize(collapseSpaceRuns(word), Normalizer.Form.NFC);
     }
 

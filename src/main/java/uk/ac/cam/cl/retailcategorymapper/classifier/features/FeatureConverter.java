@@ -46,17 +46,25 @@ public class FeatureConverter {
     public static List<Feature> changeProductToFeature(Product product) {
         List<Feature> createdFeatures = new ArrayList<>();
 
-        String name = product.getName();
-        name = Sanitizer.sanitize(name);
-        String[] nameWords = name.split(" ");
-
-        for (String s : nameWords) {
+        for (String s : Sanitizer.sanitize(product.getName()).split(" ")) {
             s = s.trim();
             if (s.length() == 0 || blackList.contains(s)) {
                 continue;
             }
             createdFeatures.add(new Feature(FeatureSource.NAME, s));
         }
+
+        /*
+         * FIXME: Using description *decreases* accuracy?!
+         *
+        for (String s : Sanitizer.sanitize(product.getDescription()).split(" ")) {
+            s = s.trim();
+            if (s.length() == 0 || blackList.contains(s)) {
+                continue;
+            }
+            createdFeatures.add(new Feature(FeatureSource.DESCRIPTION, s));
+        }
+        */
 
         Category originalCategory = product.getOriginalCategory();
         String[] partsArray = originalCategory.getAllParts();

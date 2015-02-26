@@ -35,10 +35,14 @@ public class NGramFeatureExtractor {
             features.addAll(generateNGramFeatures(FeatureSource.NAME, name,MAX_NGRAM_LENGTH));
         }
 
+        /*
+         * FIXME: using description *decreases* accuracy?!
+         *
         String description = normalizedProduct.getDescription();
         if (description != null && description.length() > 0) {
             features.addAll(generateNGramFeatures(FeatureSource.DESCRIPTION, description,MAX_NGRAM_LENGTH));
         }
+        */
 
         Integer priceInteger = normalizedProduct.getPrice();
         if ((priceInteger != null) && (priceInteger != -1)) {
