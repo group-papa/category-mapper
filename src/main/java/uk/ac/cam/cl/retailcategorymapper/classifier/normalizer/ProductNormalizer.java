@@ -26,7 +26,7 @@ public class ProductNormalizer {
         return builder.createProduct();
     }
 
-    private static String normalizeString(String inputString) {
+    public static String normalizeString(String inputString) {
         List<String> words = Arrays.asList(inputString.split("\\s+"));
         words = words.stream()
                 .map(w -> normalizeWord(w))
