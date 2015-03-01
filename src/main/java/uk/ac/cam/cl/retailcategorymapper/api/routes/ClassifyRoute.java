@@ -14,14 +14,15 @@ import uk.ac.cam.cl.retailcategorymapper.db.UploadDb;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.ClassifyRequest;
 import uk.ac.cam.cl.retailcategorymapper.entities.ClassifyResponse;
+import uk.ac.cam.cl.retailcategorymapper.entities.Download;
 import uk.ac.cam.cl.retailcategorymapper.entities.Mapping;
 import uk.ac.cam.cl.retailcategorymapper.entities.Method;
 import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import uk.ac.cam.cl.retailcategorymapper.entities.Upload;
-import uk.ac.cam.cl.retailcategorymapper.marshalling.MappingXmlMarshaller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -75,7 +76,7 @@ public class ClassifyRoute extends BaseApiRoute {
         ClassifyResponse classifyResponse = controller.classify(classifyRequest);
 
         List<MappingResult> results = new ArrayList<>();
-        List<Mapping> primaryMappings = new ArrayList<>();
+        Map<String, Mapping> primaryMappings = new HashMap<>();
         for (Map.Entry<Product, List<Mapping>> mapping : classifyResponse
                 .getMappings().entrySet()) {
             Product product = mapping.getKey();
@@ -95,15 +96,15 @@ public class ClassifyRoute extends BaseApiRoute {
             ));
 
             if (mapping.getValue().size() > 0) {
-                primaryMappings.add(mapping.getValue().get(0));
+                primaryMappings.put(mapping.getKey().getId(),
+                        mapping.getValue().get(0));
             }
         }
 
-        MappingXmlMarshaller marshaller = new MappingXmlMarshaller();
-        String xml = marshaller.marshal(primaryMappings);
-        String downloadId = DownloadDb.setDownload(xml);
+        Download download = new Download(primaryMappings);
+        DownloadDb.setDownload(download);
 
-        return new ClassifyReply(results, downloadId);
+        return new ClassifyReply(results, download.getId());
     }
 
     static class InputJson {
