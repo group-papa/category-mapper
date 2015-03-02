@@ -22,6 +22,7 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 import uk.ac.cam.cl.retailcategorymapper.entities.Upload;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +88,13 @@ public class ClassifyRoute extends BaseApiRoute {
                             m.getCategory().toString(),
                             m.getMethod(),
                             m.getConfidence())).collect(Collectors.toList());
+
+            mappings.sort(new Comparator<MappingEntry>() {
+                @Override
+                public int compare(MappingEntry o1, MappingEntry o2) {
+                    return Double.compare(-o1.confidence, -o2.confidence);
+                }
+            });
 
             results.add(new MappingResult(
                     product.getId(),

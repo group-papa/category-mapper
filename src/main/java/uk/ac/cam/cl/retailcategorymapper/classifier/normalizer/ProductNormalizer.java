@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class ProductNormalizer {
     private static List<String> STOP_WORDS = Arrays.asList("a", "an", "and", "are", "as", "at",
             "be", "by", "do", "don't", "for", "from", "has", "in", "is", "it", "its", "of", "on",
-            "that", "the", "this", "to", "was", "were", "will", "with");
+            "that", "the", "this", "to", "was", "were", "will", "with", "lfc", "john", "lewis", "liverpool");
 
     public static Product normalizeProduct(Product inputProduct) {
         ProductBuilder builder = new ProductBuilder();
@@ -98,9 +98,7 @@ public class ProductNormalizer {
     }
 
     private static String unCamelCaseIfy(String word) {
-        return word.replaceAll("(((?<=[a-z])[A-Z])|([A-Z](?![A-Z]|$)))", " $1")
-                .trim()
-                .toLowerCase();
+        return word.toLowerCase().trim();
     }
 
     private static String normalizeWord(String inputWord) {

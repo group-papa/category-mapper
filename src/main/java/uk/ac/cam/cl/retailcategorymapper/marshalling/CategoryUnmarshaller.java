@@ -5,6 +5,9 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.CategoryBuilder;
 import uk.ac.cam.cl.retailcategorymapper.utils.Uuid;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,8 +34,18 @@ public class CategoryUnmarshaller implements Unmarshaller<String, Category> {
             return null;
         }
 
+        MessageDigest md5 = null;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
+        md5.update(parts.toString().getBytes(), 0, parts.toString().length());
+        String id = new BigInteger(1, md5.digest()).toString(16);
+
         return new CategoryBuilder()
-                .setId(Uuid.generateUUID())
+                .setId(id)
                 .setParts(parts.toArray(new String[] {}))
                 .createCategory();
     }

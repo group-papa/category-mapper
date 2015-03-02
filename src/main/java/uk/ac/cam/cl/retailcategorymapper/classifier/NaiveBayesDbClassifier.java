@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.retailcategorymapper.classifier;
 
+import uk.ac.cam.cl.retailcategorymapper.classifier.features.FeatureConverter;
 import uk.ac.cam.cl.retailcategorymapper.classifier.features.NGramFeatureExtractor;
 import uk.ac.cam.cl.retailcategorymapper.controller.Classifier;
 import uk.ac.cam.cl.retailcategorymapper.db.NaiveBayesDb;
@@ -13,6 +14,7 @@ import uk.ac.cam.cl.retailcategorymapper.entities.Product;
 import uk.ac.cam.cl.retailcategorymapper.entities.Taxonomy;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -94,6 +96,7 @@ public class NaiveBayesDbClassifier extends Classifier {
      */
     @Override
     public List<Mapping> classify(Product product) {
+        //List<Feature> features = FeatureConverter.changeProductToFeature(product);
         List<Feature> features = NGramFeatureExtractor.changeProductToFeature(product);
         TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
 
@@ -218,6 +221,13 @@ public class NaiveBayesDbClassifier extends Classifier {
             result.add(mb.createMapping());
         }
 
+        result.sort(new Comparator<Mapping>() {
+            @Override
+            public int compare(Mapping o1, Mapping o2) {
+                return Double.compare(-o1.getConfidence(), -o2.getConfidence());
+            }
+        });
+
         return result;
     }
 
@@ -227,6 +237,7 @@ public class NaiveBayesDbClassifier extends Classifier {
             throw new RuntimeException("the weights don't sum to 1");
         }
 
+        //List<Feature> features = FeatureConverter.changeProductToFeature(product);
         List<Feature> features = NGramFeatureExtractor.changeProductToFeature(product);
         TreeMap<Double, Set<MappingBuilder>> matches = new TreeMap<>();
 
@@ -291,7 +302,7 @@ public class NaiveBayesDbClassifier extends Classifier {
 
             Set<MappingBuilder> prevValue = matches.get(pCGivenF);
             if (prevValue == null) {
-                prevValue = new HashSet<MappingBuilder>();
+                prevValue = new HashSet<>();
                 prevValue.add(new MappingBuilder()
                         .setProduct(product)
                         .setTaxonomy(getTaxonomy())
@@ -354,6 +365,13 @@ public class NaiveBayesDbClassifier extends Classifier {
             mb.setConfidence(confidence);
             result.add(mb.createMapping());
         }
+
+        result.sort(new Comparator<Mapping>() {
+            @Override
+            public int compare(Mapping o1, Mapping o2) {
+                return Double.compare(-o1.getConfidence(), -o2.getConfidence());
+            }
+        });
 
         return result;
     }
