@@ -3,7 +3,6 @@ package uk.ac.cam.cl.retailcategorymapper.marshalling;
 import uk.ac.cam.cl.retailcategorymapper.config.ParsingConfig;
 import uk.ac.cam.cl.retailcategorymapper.entities.Category;
 import uk.ac.cam.cl.retailcategorymapper.entities.CategoryBuilder;
-import uk.ac.cam.cl.retailcategorymapper.utils.Uuid;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
