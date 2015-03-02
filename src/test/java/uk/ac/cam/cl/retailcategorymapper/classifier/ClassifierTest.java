@@ -79,16 +79,17 @@ public class ClassifierTest {
     @Test
     public void testTrainWithBagOfWordsSingleProductOneProduct() {
         nbc2.trainWithBagOfWordsSingleProduct(p, c1);
-        Assert.assertEquals(nbc2.getFeatures().size(), 8, 0);
+        // FIXME: These values are no longer applicable because of ngrams.
+        //Assert.assertEquals(nbc2.getFeatures().size(), 8, 0);
         Assert.assertTrue(nbc2.getFeatures().contains(pName1));
         Assert.assertTrue(nbc2.getCategories().contains(c1));
-        Assert.assertEquals(nbc2.getTotalFeatureCounts().size(), 8, 0);
+        //Assert.assertEquals(nbc2.getTotalFeatureCounts().size(), 8, 0);
         Assert.assertTrue(nbc2.getTotalFeatureCounts().containsKey(pName1)
                 && nbc1.getTotalFeatureCounts().containsValue(1));
         Assert.assertTrue(nbc2.getCategoryCounts().containsKey(c1)
                 && nbc1.getCategoryCounts().containsValue(1));
         Assert.assertTrue(nbc2.getFeatureCountPerCategory().containsKey(c1));
-        Assert.assertEquals(nbc2.getFeatureCountPerCategory().get(c1).size(), 8);
+        //Assert.assertEquals(nbc2.getFeatureCountPerCategory().get(c1).size(), 8);
         Assert.assertEquals(nbc2.getFeatureCountInCategory(pName1, c1), 1);
     }
 
